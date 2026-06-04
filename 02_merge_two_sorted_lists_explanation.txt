@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 21: MERGE TWO SORTED LISTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given the heads of two sorted linked lists, list1 and list2.
+Merge the two lists into one sorted list by splicing together the 
+nodes of the first two lists, and return the head of the merged list.
+
+-------------------------------------------------------------------
+[METHODOLOGY: RECURSIVE SPLICING]
+-------------------------------------------------------------------
+
+The problem naturally lends itself to a recursive approach because merging 
+two sorted lists is made up of identical subproblems: at any given step, 
+we compare the front nodes of both lists, choose the smaller one, and then 
+repeat the exact same process for the remaining nodes.
+
+1. BASE CASES:
+   - If 'list1' is empty (NULL), there is nothing to merge; we simply return 
+     the remainder of 'list2'.
+   - If 'list2' is empty (NULL), we similarly return the remainder of 'list1'.
+
+2. RECURSIVE STEP:
+   - We compare the values at the current heads: list1->val and list2->val.
+   
+   - Case A (list1->val <= list2->val):
+     The current node of list1 should come first in our merged list. 
+     We recursively call 'mergeTwoLists' with the next node of list1 (list1->next) 
+     and the entirety of list2. The result of this recursive call is then linked 
+     to list1->next. Finally, we return 'list1' as the new head of this sub-segment.
+
+   - Case B (list1->val > list2->val):
+     The current node of list2 is smaller. We recursively call 'mergeTwoLists' 
+     passing all of list1 and the next node of list2 (list2->next). We hook 
+     the result to list2->next and return 'list2'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: list1 = [1, 4], list2 = [2, 3]
+
+Call 1: mergeTwoLists([1, 4], [2, 3])
+  - 1 <= 2 is TRUE.
+  - list1->next = mergeTwoLists([4], [2, 3])  <-- Waiting for Call 2
+
+Call 2: mergeTwoLists([4], [2, 3])
+  - 4 <= 2 is FALSE.
+  - list2->next = mergeTwoLists([4], [3])     <-- Waiting for Call 3
+
+Call 3: mergeTwoLists([4], [3])
+  - 4 <= 3 is FALSE.
+  - list2->next = mergeTwoLists([4], NULL)    <-- Waiting for Call 4
+
+Call 4: mergeTwoLists([4], NULL)
+  - list2 is NULL! Base case hit. Returns [4].
+
+Unwinding the Call Stack:
+  - Call 3 receives [4]. Connects node(3)->next = [4]. Returns [3, 4].
+  - Call 2 receives [3, 4]. Connects node(2)->next = [3, 4]. Returns [2, 3, 4].
+  - Call 1 receives [2, 3, 4]. Connects node(1)->next = [2, 3, 4]. Returns [1, 2, 3, 4].
+
+Final Output Head: [1, 2, 3, 4]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n + m)
+- Explanation: Where 'n' and 'm' are the number of nodes in list1 and list2 
+  respectively. Each recursive step processes exactly one node from either 
+  list1 or list2. Therefore, the total number of recursive calls is bounded 
+  linearly by the total number of nodes across both lists.
+
+Space Complexity: O(n + m)
+- Explanation: Unlike an iterative pointer manipulation method which runs in O(1) 
+  space, the recursive strategy utilizes the system call stack. In the worst-case 
+  scenario (e.g., iterating through all elements before hitting a base case), 
+  the maximum depth of the call stack will be equal to the total number of 
+  nodes (n + m).
+===================================================================

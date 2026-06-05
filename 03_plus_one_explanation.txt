@@ -1,0 +1,84 @@
+===================================================================
+LEETCODE 66: PLUS ONE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a large integer represented as an integer array 'digits', 
+where each digits[i] is the i-th digit of the integer. The digits are 
+ordered from most significant to least significant in left-to-right order. 
+The large integer does not contain any leading 0's.
+
+Increment the large integer by one and return the resulting array of digits.
+
+-------------------------------------------------------------------
+[METHODOLOGY: REVERSE LINEAR SCAN WITH EARLY RETURN]
+-------------------------------------------------------------------
+
+When adding 1 to a number manually, we always start from the rightmost digit 
+(the least significant digit). There are two core scenarios to consider:
+
+1. THE DIGIT IS LESS THAN 9 (No Carry Over):
+   - If the current digit is between 0 and 8, adding 1 to it will not generate 
+     a carry. For example, 3 becomes 4. 
+   - Since no carry is propagated further left, the rest of the array remains 
+     unchanged. We can immediately return the modified 'digits' array.
+
+2. THE DIGIT IS EXACTLY 9 (Carry Over Generated):
+   - If the current digit is 9, adding 1 makes it 10. The digit turns into 0, 
+     and a carry of 1 is passed to the next digit on the left.
+   - The loop handles this by setting digits[i] = 0 and continuing to the 
+     next iteration (i--).
+
+3. THE EDGE CASE: ALL DIGITS ARE 9 (e.g., 999 -> 1000):
+   - If the loop finishes completely without hitting an early return, it means 
+     every single digit in the array was a 9.
+   - At this stage, all elements in the vector have been turned to 0 (e.g., [0, 0, 0]).
+   - To account for the final trailing carry, we insert a '1' at the very 
+     beginning of the vector using digits.insert(digits.begin(), 1).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLES]
+-------------------------------------------------------------------
+
+Scenario A: Standard Case (No extreme carries)
+Input: digits = [1, 2, 9] | n = 3
+
+- i = 2: digits[2] is 9. 
+         Condition (digits[i] < 9) fails. 
+         digits[2] is set to 0. Array is now [1, 2, 0].
+- i = 1: digits[1] is 2. 
+         Condition (digits[1] < 9) matches! 
+         digits[1]++ makes it 3. Array is now [1, 3, 0].
+         Early return triggers.
+Output: [1, 3, 0]
+
+-------------------------------------------------------------------
+
+Scenario B: Cascading Edge Case (All nines)
+Input: digits = [9, 9] | n = 2
+
+- i = 1: digits[1] is 9 -> fails check -> digits[1] = 0. Array: [9, 0]
+- i = 0: digits[0] is 9 -> fails check -> digits[0] = 0. Array: [0, 0]
+- Loop finishes.
+- Statement outside loop executes: digits.insert(digits.begin(), 1)
+  Array becomes: [1, 0, 0]
+Output: [1, 0, 0]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: In the worst-case scenario (like [9, 9, 9]), the loop will 
+  traverse the entire array of size 'n' from right to left. Additionally, 
+  inserting an element at the beginning of a vector takes O(n) time because 
+  all subsequent elements must be shifted right in memory. Thus, overall 
+  worst-case time complexity remains linear, O(n).
+- Best-case Time Complexity: O(1) when the last digit is less than 9.
+
+Space Complexity: O(1)
+- Explanation: The operations are performed in-place on the input vector. 
+  No auxiliary data structures or dynamic memory elements are scaled with 
+  input size. (Note: In the all-nines edge case, the vector dynamically 
+  grows by 1 element, which still holds an O(1) auxiliary space rating).
+===================================================================

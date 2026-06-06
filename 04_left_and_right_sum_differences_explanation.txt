@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 2574: LEFT AND RIGHT SUM DIFFERENCES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a 0-indexed integer array 'nums', calculate two values for each 
+index 'i':
+1. leftSum[i]: The sum of elements to the left of index i (0 if none).
+2. rightSum[i]: The sum of elements to the right of index i (0 if none).
+
+Return an array 'answer' where answer[i] = |leftSum[i] - rightSum[i]|.
+
+-------------------------------------------------------------------
+[METHODOLOGY: PREFIX AND SUFFIX ACCUMULATION (THREE-PASS)]
+-------------------------------------------------------------------
+
+The problem requires knowing global information about what lies before and 
+after each element. We can solve this linearly by calculating running sums 
+from both directions.
+
+1. LEFT RUNNING SUM (Prefix):
+   - We initialize a 'left' vector of size 'n' with zeros and a tracker 
+     'currLeftSum = 0'.
+   - We traverse the array from left to right (i = 0 to n-1). At each index, 
+     the sum of elements to its left is the current value of 'currLeftSum'.
+   - We assign left[i] = currLeftSum, then add the current element 
+     nums[i] to our running tracker for the next iteration.
+
+2. RIGHT RUNNING SUM (Suffix):
+   - We initialize a 'right' vector of size 'n' with zeros and a tracker 
+     'currRightSum = 0'.
+   - We traverse the array backwards from right to left (i = n-1 down to 0).
+   - We assign right[i] = currRightSum, then add the current element 
+     nums[i] to our right tracker.
+
+3. DIFFERENCE CALCULATION:
+   - Finally, we loop through the indices from 0 to n-1, calculate the 
+     absolute difference using 'abs(left[i] - right[i])', store it in an 
+     'ans' vector, and return it.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [10, 4, 8, 3] | n = 4
+
+Pass 1 (Left Sum Tracking):
+  - i = 0: left[0] = 0  | currLeftSum becomes 0 + 10 = 10
+  - i = 1: left[1] = 10 | currLeftSum becomes 10 + 4 = 14
+  - i = 2: left[2] = 14 | currLeftSum becomes 14 + 8 = 22
+  - i = 3: left[3] = 22 | currLeftSum becomes 22 + 3 = 25
+  Resulting 'left' array = [0, 10, 14, 22]
+
+Pass 2 (Right Sum Tracking):
+  - i = 3: right[3] = 0  | currRightSum becomes 0 + 3 = 3
+  - i = 2: right[2] = 3  | currRightSum becomes 3 + 8 = 11
+  - i = 1: right[1] = 11 | currRightSum becomes 11 + 4 = 15
+  - i = 0: right[0] = 15 | currRightSum becomes 15 + 10 = 25
+  Resulting 'right' array = [15, 11, 3, 0]
+
+Pass 3 (Abs Difference Calculation):
+  - i = 0: ans[0] = |0 - 15| = 15
+  - i = 1: ans[1] = |10 - 11| = 1
+  - i = 2: ans[2] = |14 - 3| = 11
+  - i = 3: ans[3] = |22 - 0| = 22
+
+Final Output Vector: [15, 1, 11, 22]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: We perform exactly three distinct linear loops over the input 
+  array of size 'n'. This results in a time complexity of O(3n), which simplifies 
+  asymptotically to O(n).
+
+Space Complexity: O(n)
+- Explanation: We explicitly allocate two auxiliary vectors ('left' and 'right') 
+  of size 'n' to store the intermediate prefix and suffix computations, scaling 
+  linearly with input size.
+===================================================================

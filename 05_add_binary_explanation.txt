@@ -1,0 +1,93 @@
+===================================================================
+LEETCODE 67: ADD BINARY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two binary strings 'a' and 'b', return their sum as a binary string. 
+The input strings do not contain leading zeros except for the number 0 itself, 
+and consist purely of '0' and '1' characters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: REVERSE TWO-POINTER SIMULATION WITH CARRY]
+-------------------------------------------------------------------
+
+Binary addition follows the exact same basic arithmetic rules as decimal 
+addition, but with base 2 (where 1 + 1 = 0 with a carry of 1, and 1 + 1 + 1 = 1 
+with a carry of 1). 
+
+We can simulate this bit-by-bit from right to left using a two-pointer approach:
+
+1. INITIALIZATION:
+   - We set two pointers, 'i' and 'j', to point to the last characters (least 
+     significant bits) of strings 'a' and 'b' respectively.
+   - We initialize a tracker variable 'carry = 0' and an empty string 'res' 
+     to accumulate our results.
+
+2. COMBINED LOOP CONDITION:
+   - The loop runs as long as there is at least one valid bit left to process 
+     in either string ('i >= 0' or 'j >= 0') OR there is a leftover 'carry' 
+     that needs to be appended. Including 'carry' in the loop conditions prevents 
+     us from needing an extra 'if' statement after the loop terminates.
+
+3. BIT EXTRACTION & MATH:
+   - In each iteration, 'sum' starts with the value of the 'carry' from the 
+     previous step.
+   - If pointer 'i' is valid, we convert the character to an integer using 
+     'a[i] - '0'', add it to 'sum', and decrement 'i'.
+   - We do the same for pointer 'j'.
+   - The new carry bit is determined by 'sum / 2'.
+   - The bit to append to our result string is determined by 'sum % 2'.
+
+4. FINAL REVERSAL:
+   - Because we append bits to the end of 'res' as we calculate them from 
+     right to left, the resulting string is backwards. We use C++'s 
+     'reverse(res.begin(), res.end())' to correct the alignment before returning.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: a = "11", b = "1"
+Initial State: i = 1, j = 0, carry = 0, res = ""
+
+Iteration 1:
+  - sum = carry = 0
+  - i >= 0: sum += (a[1] - '0') -> 0 + 1 = 1 | i becomes 0
+  - j >= 0: sum += (b[0] - '0') -> 1 + 1 = 2 | j becomes -1
+  - carry = 2 / 2 = 1
+  - res += to_string(2 % 2) -> res becomes "0"
+
+Iteration 2:
+  - sum = carry = 1
+  - i >= 0: sum += (a[0] - '0') -> 1 + 1 = 2 | i becomes -1
+  - j is -1 (loops skipped)
+  - carry = 2 / 2 = 1
+  - res += to_string(2 % 2) -> res becomes "00"
+
+Iteration 3:
+  - sum = carry = 1
+  - Both i and j are out of bounds (< 0), skips string checks
+  - carry = 1 / 2 = 0
+  - res += to_string(1 % 2) -> res becomes "001"
+
+Loop terminates (i = -1, j = -1, carry = 0).
+
+Reversal Phase:
+  - reverse("001") -> "100"
+
+Final Output String: "100"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(max(N, M))
+- Explanation: Where 'N' and 'M' are the lengths of strings 'a' and 'b'. The 
+  while loop runs exactly as many times as the longest string (plus potentially 
+  one extra step for a final carry). The string reversal step also scales 
+  linearly with the size of the final string, keeping the overall runtime linear.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Aside from the output string 'res' required to return the answer, 
+  we only allocate memory for a few primitive integer state variables ('i', 'j', 
+  'carry', 'sum'). No complex scaling structures or duplicate strings are used.
+===================================================================

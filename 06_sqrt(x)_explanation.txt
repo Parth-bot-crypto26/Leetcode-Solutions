@@ -1,0 +1,80 @@
+===================================================================
+LEETCODE 69: SQRT(X)
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a non-negative integer x, return the square root of x rounded down 
+to the nearest integer. The returned integer must be non-negative as well. 
+You must not use any built-in exponent functions or operators (like pow()).
+
+-------------------------------------------------------------------
+[METHODOLOGY: BINARY SEARCH ON AN INTEGER RANGE]
+-------------------------------------------------------------------
+
+The search space for the square root of a non-negative integer 'x' is completely 
+sorted: it lies between 1 and 'x'. Whenever a search space is sorted and we 
+need to locate a specific threshold, Binary Search is the optimal choice.
+
+1. EDGE CASE HANDLING:
+   - If x is 0, its square root is 0. We can return it immediately.
+
+2. RANGE INITIALIZATION:
+   - We set 'low = 1' and 'high = x'. 
+   - We maintain a variable 'ans' to store the closest integer square root 
+     found so far that satisfies (mid * mid <= x).
+
+3. THE OVERFLOW TRICK:
+   - Ordinarily, we check if a number is a valid square root using: mid * mid <= x.
+   - However, if 'mid' is large, 'mid * mid' will instantly overflow the maximum 
+     capacity of a 32-bit signed integer.
+   - To bypass this safely, we rearrange the inequality mathematically:
+     Instead of checking: mid * mid <= x
+     We check:           mid <= x / mid
+   - This eliminates any risk of numerical overflow.
+
+4. SEARCH ADJUSTMENT:
+   - Calculate 'mid = low + (high - low) / 2' to avoid boundary addition overflow.
+   - If (mid <= x / mid): This means 'mid' is a valid candidate for the truncated 
+     square root. We record it in 'ans' and shift our window right (low = mid + 1) 
+     to see if a larger valid integer exists.
+   - Else (mid > x / mid): The value is too large. We shift our window left (high = mid - 1).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: x = 8
+Initial State: low = 1, high = 8, ans = 0
+
+Iteration 1:
+  - mid = 1 + (8 - 1) / 2 = 4
+  - Check: Is 4 <= 8 / 4 ? -> 4 <= 2 is FALSE.
+  - Action: Value too large. high = mid - 1 = 3.
+
+Iteration 2:
+  - mid = 1 + (3 - 1) / 2 = 2
+  - Check: Is 2 <= 8 / 2 ? -> 2 <= 4 is TRUE.
+  - Action: Valid candidate! ans = 2. Shift right: low = mid + 1 = 3.
+
+Iteration 3:
+  - mid = 3 + (3 - 3) / 2 = 3
+  - Check: Is 3 <= 8 / 3 ? -> 3 <= 2 is FALSE.
+  - Action: Value too large. high = mid - 1 = 2.
+
+Loop terminates because low (3) > high (2).
+Returns ans = 2.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log x)
+- Explanation: The search range [1, x] is divided in half during every single 
+  iteration of the binary search loop. The maximum number of steps required to 
+  shrink the range down to a single element scales logarithmically with the value 
+  of 'x'.
+
+Space Complexity: O(1)
+- Explanation: The search is executed entirely in-place. Memory is only allocated 
+  for a few local, fixed-size primitive integer trackers ('low', 'high', 'mid', 
+  'ans'), maintaining absolute constant space.
+===================================================================

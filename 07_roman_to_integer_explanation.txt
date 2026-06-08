@@ -1,0 +1,82 @@
+===================================================================
+LEETCODE 13: ROMAN TO INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a roman numeral string 's', convert it to an integer.
+Roman numerals are represented by seven different symbols:
+I (1), V (5), X (10), L (50), C (100), D (500), M (1000).
+
+Normally, symbols are written largest to smallest from left to right. 
+However, if a smaller symbol appears before a larger symbol, it indicates 
+subtraction (e.g., IV = 4, IX = 9).
+
+-------------------------------------------------------------------
+[METHODOLOGY: LINEAR SCAN WITH LOOK-AHEAD SUBTRACTION]
+-------------------------------------------------------------------
+
+The solution maps each Roman character to its corresponding integer value 
+and processes the string from left to right.
+
+1. SYMBOL MAPPING:
+   - We utilize an 'unordered_map<char, int>' named 'grid' to map each individual 
+     character ('I', 'V', 'X', etc.) to its numerical integer value. This provides 
+     O(1) constant-time value lookups.
+
+2. SUBTRACTION RULE DETECTION (LOOK-AHEAD):
+   - As we loop through the string at index 'i', we check the value of the 
+     *current* character against the value of the *next* character (at index 'i + 1').
+   
+   - Case A (grid[s[i]] < grid[s[i + 1]]):
+     A smaller value precedes a larger value. This means a subtractive pattern 
+     is occurring (like the 'I' before 'V' in "IV"). Instead of adding, we subtract 
+     the current value from our total tracker ('count -= grid[s[i]]').
+     
+   - Case B (Standard Order):
+     The current value is greater than or equal to the next value. We follow 
+     standard addition ('count += grid[s[i]]').
+
+3. BOUNDARY GUARD:
+   - The condition 'i + 1 < s.length()' ensures that when we are processing the 
+     very last character of the string, we do not perform an out-of-bounds read.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "MCMXCIV" (Expected Output: 1994)
+Initial State: count = 0
+
+- i = 0: s[0] = 'M' (1000), s[1] = 'C' (100). 
+         1000 < 100 is FALSE -> count += 1000 (count = 1000)
+- i = 1: s[1] = 'C' (100), s[2] = 'M' (1000). 
+         100 < 1000 is TRUE -> count -= 100 (count = 900)
+- i = 2: s[2] = 'M' (1000), s[3] = 'X' (10). 
+         1000 < 10 is FALSE -> count += 1000 (count = 1900)
+- i = 3: s[3] = 'X' (10), s[4] = 'C' (100). 
+         10 < 100 is TRUE -> count -= 10 (count = 1890)
+- i = 4: s[4] = 'C' (100), s[5] = 'I' (1). 
+         100 < 1 is FALSE -> count += 100 (count = 1990)
+- i = 5: s[5] = 'I' (1), s[6] = 'V' (5). 
+         1 < 5 is TRUE -> count -= 1 (count = 1989)
+- i = 6: s[6] = 'V' (5), Next index out of bounds. 
+         Condition fails -> count += 5 (count = 1994)
+
+Loop terminates.
+Returns count = 1994.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: We loop through the string 's' exactly once from left to right, 
+  where 'n' is the length of the string. In each step, we perform constant-time 
+  O(1) hash map lookups. Since the problem constraints specify that the length 
+  of 's' is highly bounded (max length 15), the runtime can also technically 
+  be viewed as O(1) in practical application.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: The 'unordered_map' stores a fixed set of exactly 7 key-value pairs 
+  regardless of the input size. No auxiliary data structures scale up with the size 
+  of the input string, giving us absolute constant space usage.
+===================================================================

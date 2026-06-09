@@ -1,0 +1,84 @@
+===================================================================
+LEETCODE 168: EXCEL SHEET COLUMN TITLE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer columnNumber, return its corresponding column title 
+as it appears in an Excel sheet.
+For example:
+A -> 1, B -> 2, C -> 3 ... Z -> 26
+AA -> 27, AB -> 28 ... ZY -> 701
+
+-------------------------------------------------------------------
+[METHODOLOGY: MODIFIED BASE-26 CONVERSION (1-BASED INDEX SHIFT)]
+-------------------------------------------------------------------
+
+Converting an integer to an Excel column title is similar to converting a 
+decimal number to another base (like binary or hexadecimal), using base 26.
+However, standard base systems use 0-based indexing (e.g., 0-9 for decimal). 
+Excel uses 1-based indexing ('A' represents 1, and 'Z' represents 26). 
+
+If we directly compute (columnNumber % 26), an input of 26 ('Z') would give a 
+remainder of 0, which doesn't directly map to 'Z' if we just add it to 'A'.
+
+1. THE SHIFT TRICK (columnNumber--):
+   - By subtracting 1 from 'columnNumber' at the beginning of each loop iteration, 
+     we successfully shift the range from [1, 26] down to [0, 25].
+   - This mapping aligns perfectly with standard 0-based indexing:
+     0 -> 'A', 1 -> 'B', ..., 25 -> 'Z'.
+
+2. CHARACTER CONVERSION:
+   - We extract the zero-indexed remainder using: columnNumber % 26.
+   - We convert this remainder to its ASCII character representation by 
+     adding it to the character 'A': char curr = (columnNumber % 26) + 'A'.
+   - Append the character 'curr' to our running 'result' string.
+
+3. DIVISION AND REVERSAL:
+   - We divide 'columnNumber' by 26 to move to the next positional digit place.
+   - Since we extract letters from the rightmost position (least significant) 
+     to the leftmost position (most significant), the string is built backwards. 
+   - We reverse the string using 'reverse(result.begin(), result.end())' 
+     before returning.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: columnNumber = 28 (Expected Output: "AB")
+Initial State: result = ""
+
+Iteration 1:
+  - Decrement: columnNumber = 28 - 1 = 27
+  - Remainder: 27 % 26 = 1
+  - Character: 1 + 'A' = 'B'
+  - Append: result becomes "B"
+  - Divide: columnNumber = 27 / 26 = 1
+
+Iteration 2:
+  - Decrement: columnNumber = 1 - 1 = 0
+  - Remainder: 0 % 26 = 0
+  - Character: 0 + 'A' = 'A'
+  - Append: result becomes "BA"
+  - Divide: columnNumber = 0 / 26 = 0
+
+Loop terminates because columnNumber is now 0.
+
+Reversal Phase:
+  - reverse("BA") -> "AB"
+
+Final Output String: "AB"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log26(columnNumber))
+- Explanation: In each iteration of the while loop, 'columnNumber' is divided 
+  by 26. Therefore, the total number of operations is proportional to the number 
+  of characters in the output column title, which grows logarithmically in base 26 
+  relative to the input magnitude.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory allocated for the final string 'result' 
+  required to return the answer, no auxiliary data structures or dynamic collections 
+  are scaled with the input size. Memory is restricted to a few primitive values.
+===================================================================

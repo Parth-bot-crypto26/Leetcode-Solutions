@@ -1,0 +1,74 @@
+===================================================================
+LEETCODE 171: EXCEL SHEET COLUMN NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string columnTitle that represents the column title as it appears 
+in an Excel sheet, return its corresponding column number.
+For example:
+A -> 1, B -> 2, C -> 3 ... Z -> 26
+AA -> 27, AB -> 28 ... ZY -> 701
+
+-------------------------------------------------------------------
+[METHODOLOGY: BASE-26 POSITIONAL NUMBER SYSTEM DECODING]
+-------------------------------------------------------------------
+
+This problem is the exact inverse of LeetCode 168. It requires us to convert 
+a string representing a base-26 number (where digits are 'A'-'Z' instead of 
+0-9) into a standard base-10 integer.
+
+1. UNDERSTANDING THE MATH:
+   - In a standard decimal system (base-10), a number like 324 is processed 
+     left-to-right as:
+     ((0 * 10 + 3) * 10 + 2) * 10 + 4 = 324
+   - In Excel's base-26 system, we process characters left-to-right in the 
+     exact same way, but we multiply our running total by 26 instead of 10.
+
+2. MAPPING CHARACTERS TO VALUES:
+   - Instead of initializing an explicit map, we can compute a character's 
+     1-indexed value on the fly using ASCII math: 'c - 'A' + 1'.
+   - For example:
+     'A' - 'A' + 1 -> 0 + 1 = 1
+     'Z' - 'A' + 1 -> 25 + 1 = 26
+
+3. THE ITERATIVE ACCUMULATION:
+   - Initialize 'result = 0'.
+   - For each character 'c' in the string:
+     * Shift the existing result to the next positional digit place: result *= 26.
+     * Add the 1-indexed value of the current character to 'result'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: columnTitle = "AB" (Expected Output: 28)
+Initial State: result = 0
+
+Iteration 1 (c = 'A'):
+  - Shift existing total: result = 0 * 26 = 0
+  - Extract character value: ('A' - 'A' + 1) = 1
+  - Accumulate: result = 0 + 1 = 1
+
+Iteration 2 (c = 'B'):
+  - Shift existing total: result = 1 * 26 = 26
+  - Extract character value: ('B' - 'A' + 1) = 2
+  - Accumulate: result = 26 + 2 = 28
+
+Loop terminates.
+Returns result = 28.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of the string 'columnTitle'. We perform 
+  a single linear pass across the string from left to right. Inside the loop, 
+  all mathematical operations and character value extractions run in constant 
+  O(1) time. Given the problem constraints (max length 7), this runs almost 
+  instantaneously.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: The execution happens entirely in-place. Memory allocation is 
+  restricted to a single 'result' tracking variable, which does not scale with 
+  the size of the input string.
+===================================================================

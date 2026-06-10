@@ -1,0 +1,89 @@
+===================================================================
+LEETCODE 202: HAPPY NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Determine if a number 'n' is a happy number.
+A happy number is defined by a process where you repeatedly replace the 
+number with the sum of the squares of its digits. The process either:
+1. Reaches 1, where it stays indefinitely (Happy Number).
+2. Loops endlessly in a cycle that does not include 1 (Not a Happy Number).
+
+-------------------------------------------------------------------
+[METHODOLOGY: CYCLE DETECTION USING A HASH SET]
+-------------------------------------------------------------------
+
+The core challenge of this problem is recognizing when a number enters an 
+infinite loop. If we don't track numbers we have already seen, our code will 
+run forever on unhappy numbers.
+
+1. DIGIT SUMMATION HELPER (sumSquares):
+   - We extract individual digits using the modulo operator (n % 10), square them, 
+     and add them to a running 'sum'. 
+   - We then drop the last digit using integer division (n /= 10) and repeat until 
+     no digits remain.
+
+2. CYCLE DETECTION MECHANISM:
+   - We initialize an 'unordered_set<int>' named 'seen'. A hash set gives us 
+     constant O(1) average time complexity for insertions and lookups.
+   - We enter a while loop with two terminating conditions:
+     * Condition A (n == 1): We found a happy number! Loop terminates.
+     * Condition B (seen.find(n) != seen.end()): The current number 'n' already 
+       exists in our set. This implies we have entered a closed loop cycle, meaning 
+       the sequence will repeat infinitely without ever hitting 1.
+
+3. FINAL EVALUATION:
+   - Once the loop breaks, we check if 'n == 1'. If it does, we return true; 
+     otherwise, we return false.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 19 (Expected Output: true)
+Initial State: seen = {}
+
+Iteration 1:
+  - Is 19 != 1 and not in seen? Yes.
+  - Insert 19 into seen -> seen = {19}
+  - Compute: sumSquares(19) -> 1^2 + 9^2 = 1 + 81 = 82
+  - n becomes 82
+
+Iteration 2:
+  - Is 82 != 1 and not in seen? Yes.
+  - Insert 82 into seen -> seen = {19, 82}
+  - Compute: sumSquares(82) -> 8^2 + 2^2 = 64 + 4 = 68
+  - n becomes 68
+
+Iteration 3:
+  - Is 68 != 1 and not in seen? Yes.
+  - Insert 68 into seen -> seen = {19, 68, 82}
+  - Compute: sumSquares(68) -> 6^2 + 8^2 = 36 + 64 = 100
+  - n becomes 100
+
+Iteration 4:
+  - Is 100 != 1 and not in seen? Yes.
+  - Insert 100 into seen -> seen = {19, 68, 82, 100}
+  - Compute: sumSquares(100) -> 1^2 + 0^2 + 0^2 = 1
+  - n becomes 1
+
+Loop terminates because n == 1.
+Returns (1 == 1) -> TRUE.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: Finding the sum of squared digits takes O(log n) time because the 
+  number of digits in an integer 'n' is given by floor(log10(n)) + 1. For unhappy numbers, 
+  mathematical analysis proves that they all eventually collapse into a small, well-known 
+  cycle containing the number 4 (specifically: 4 -> 16 -> 37 -> 58 -> 89 -> 145 -> 42 -> 20 -> 4). 
+  Because numbers larger than 3 digits rapidly shrink down to smaller values, the number of 
+  steps remains bounded logarithmically relative to the maximum possible value of 'n'.
+
+Space Complexity: O(log n)
+- Explanation: The maximum amount of memory we use scales with the number of unique 
+  numbers stored in our 'seen' hash set before a cycle is detected or 1 is reached. 
+  Because the length of the chain stays small and drops off logarithmically for large inputs, 
+  our auxiliary space footprint behaves logarithmically.
+===================================================================

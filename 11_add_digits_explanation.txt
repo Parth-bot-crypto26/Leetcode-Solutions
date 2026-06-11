@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 258: ADD DIGITS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'num', repeatedly add all its digits until the result 
+has only one digit, and return it.
+
+Follow up: Could you do it without any loop/recursion in O(1) runtime?
+
+-------------------------------------------------------------------
+[METHODOLOGY: THE DIGITAL ROOT CONGRUENCE (O(1) OPTIMIZATION)]
+-------------------------------------------------------------------
+
+Your initial solution uses a nested loop to simulate the process: the inner 
+loop extracts and sums digits, while the outer loop continues until 'num' drops 
+below 10. While this works beautifully, mathematics allows us to solve this in 
+a single step.
+
+In number theory, this process calculates the Digital Root of a number. 
+A fundamental property of numbers in base-10 is that a number is congruent to 
+the sum of its digits modulo 9. For example:
+  38 % 9 = 2  |  3 + 8 = 11 -> 1 + 1 = 2
+
+This reveals a clean mathematical pattern for all non-negative integers:
+
+1. IF THE NUMBER IS 0:
+   - The digital root of 0 is naturally 0.
+
+2. IF THE NUMBER IS A MULTIPLE OF 9 (num % 9 == 0):
+   - Any multiple of 9 (like 9, 18, 27, 36) will eventually sum up to exactly 9. 
+     For instance: 18 -> 1 + 8 = 9. 
+   - A standard modulo operator ('num % 9') would return 0 instead of 9 for these numbers. 
+     Therefore, if 'num % 9 == 0', we must explicitly return 9.
+
+3. FOR ALL OTHER NUMBERS:
+   - The final single digit will match the remainder of the number when divided by 9 
+     ('num % 9').
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLES]
+-------------------------------------------------------------------
+
+Scenario A: Standard Input
+Input: num = 38
+- Check condition 1: Is num == 0? No.
+- Check condition 2: Is 38 % 9 == 0? No (38 = 9 * 4 + 2).
+- Return: 38 % 9 -> 2.
+Output: 2
+
+Scenario B: Multiple of 9
+Input: num = 18
+- Check condition 1: Is num == 0? No.
+- Check condition 2: Is 18 % 9 == 0? Yes!
+- Return: 9.
+Output: 9
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The mathematical lookup requires no loops, branches, or recursive 
+  calls. It performs a single arithmetic conditional evaluation, executing in absolute 
+  constant time regardless of how large 'num' is.
+
+Space Complexity: O(1)
+- Explanation: The solution operates strictly in-place with no auxiliary space or 
+  variable stacks required.
+===================================================================

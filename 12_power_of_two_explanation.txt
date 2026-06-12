@@ -1,0 +1,48 @@
+===================================================================
+LEETCODE 231: POWER OF TWO
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'n', return true if it is a power of two. Otherwise, 
+return false. An integer n is a power of two if there exists an integer 
+x such that n == 2^x.
+
+Follow up: Could you solve it without loops/recursion?
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE AND-PROPERTY (O(1) OPTIMIZATION)]
+-------------------------------------------------------------------
+
+Your iterative solution divides 'n' by 2 as long as it's even, checking if we 
+eventually land on 1. This runs in O(log n) time. To optimize this to O(1) without 
+loops or recursion, we can look at the binary representation of powers of two.
+
+1. THE BINARY PROPERTY OF POWERS OF TWO:
+   In binary, any number that is a power of two has exactly ONE set bit (a bit 
+   with a value of 1) followed entirely by zeros.
+   -  4 in binary:  00000100
+   -  8 in binary:  00001000
+   - 16 in binary:  00010000
+
+2. THE EFFECT OF SUBTRACTING ONE (n - 1):
+   If we subtract 1 from a power of two, its single set bit becomes 0, and all 
+   the trailing zeros to its right flip to 1s.
+   -  3 in binary (4 - 1):  00000011
+   -  7 in binary (8 - 1):  00000111
+   - 15 in binary (16 - 1): 00001111
+
+3. THE BITWISE AND OPERATION (n & (n - 1)):
+   If we perform a bitwise AND between 'n' and 'n - 1', the overlapping bits will 
+   cancel each other out perfectly, resulting in exactly 0.
+   - 8 & 7:
+     00001000  (8)
+   & 00000111  (7)
+   -----------
+     00000000  (0)
+
+   For any number that is NOT a power of two, it contains more than one set bit. 
+   Subtracting 1 will only flip bits up to the lowest set bit, meaning the higher 
+   set bits remain intact, and (n & (n - 1)) will evaluate to something greater than 0.
+
+4. EDGE CASE HANDLING:
+   - Powers of two must be strictly positive integers (n > 0). Negative numbers

@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 263: UGLY NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+An ugly number is a positive integer whose prime factors are limited 
+strictly to 2, 3, and 5. Given an integer 'n', return true if 'n' is 
+an ugly number, and false otherwise.
+
+Note: 1 is typically treated as an ugly number because it has no prime factors.
+
+-------------------------------------------------------------------
+[METHODOLOGY: ITERATIVE PRIME FACTOR ELIMINATION]
+-------------------------------------------------------------------
+
+The fundamental theorem of arithmetic states that every integer greater than 1 
+has a unique prime factorization. If a number is "ugly", its factorization 
+can only look like: n = (2^a) * (3^b) * (5^c), where a, b, and c are non-negative integers.
+
+To check if a number satisfies this condition, we can reverse-engineer it 
+by repeatedly stripping away these allowed factors:
+
+1. SIGN & ZERO GUARD:
+   - Ugly numbers are strictly *positive* integers according to the problem statement. 
+     If n <= 0, we immediately return false.
+
+2. FACTOR STRIPPING LOOPS:
+   - We run three consecutive 'while' loops, one for each allowed prime factor:
+     * While 'n' is divisible by 2 (n % 2 == 0), divide 'n' by 2.
+     * While 'n' is divisible by 3 (n % 3 == 0), divide 'n' by 3.
+     * While 'n' is divisible by 5 (n % 5 == 0), divide 'n' by 5.
+
+3. FINAL EVALUATION:
+   - If 'n' was composed exclusively of 2s, 3s, and 5s, dividing them out completely 
+     will reduce 'n' down to exactly 1.
+   - If any other prime factor was present (like 7, 11, 13, etc.), the division loops 
+     will skip it, and 'n' will terminate at a value greater than 1.
+   - Thus, we simply return 'n == 1'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLES]
+-------------------------------------------------------------------
+
+Scenario A: Valid Ugly Number
+Input: n = 6
+- Check condition: Is 6 <= 0? No.
+- Loop 2: 6 % 2 == 0 is TRUE -> n becomes 6 / 2 = 3.
+          3 % 2 == 0 is FALSE -> Loop 2 terminates.
+- Loop 3: 3 % 3 == 0 is TRUE -> n becomes 3 / 3 = 1.
+          1 % 3 == 0 is FALSE -> Loop 3 terminates.
+- Loop 5: 1 % 5 == 0 is FALSE -> Loop 5 terminates.
+- Return: (1 == 1) -> TRUE.
+Output: true
+
+-------------------------------------------------------------------
+
+Scenario B: Invalid Ugly Number
+Input: n = 14
+- Check condition: Is 14 <= 0? No.
+- Loop 2: 14 % 2 == 0 is TRUE -> n becomes 14 / 2 = 7.
+          7 % 2 == 0 is FALSE -> Loop 2 terminates.
+- Loop 3: 7 % 3 == 0 is FALSE -> Loop 3 terminates.
+- Loop 5: 7 % 5 == 0 is FALSE -> Loop 5 terminates.
+- Return: (7 == 1) -> FALSE.
+Output: false
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: In the worst-case scenario, the value of 'n' is repeatedly halved, 
+  divided by 3, or divided by 5. The total number of divisions is bounded 
+  logarithmically by the magnitude of 'n' (specifically, bounded by log2(n) + log3(n) + log5(n)), 
+  ensuring an incredibly fast runtime even for maximum integer boundaries.
+
+Space Complexity: O(1)
+- Explanation: The reduction algorithm operates directly on the input variable 'n' 
+  without allocating any extra data structures, arrays, or recursive call frames, 
+  maintaining absolute constant auxiliary space.
+===================================================================

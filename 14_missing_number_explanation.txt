@@ -1,0 +1,66 @@
+===================================================================
+LEETCODE 268: MISSING NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array 'nums' containing 'n' distinct numbers in the range [0, n], 
+return the only number in the range that is missing from the array.
+
+Follow up: Could you implement a solution using only O(1) extra space 
+complexity and O(n) runtime complexity?
+
+-------------------------------------------------------------------
+[METHODOLOGY: GAUSS'S SUMMATION METHOD (MATH PATTERN)]
+-------------------------------------------------------------------
+
+The problem states that we have 'n' distinct numbers that *should* cover the 
+complete mathematical range from 0 to 'n'. Because exactly one number is missing, 
+the array size is exactly 'n'. 
+
+We can solve this problem in optimal linear time and constant space by leveraging 
+the arithmetic series sum formula (Gauss's Formula):
+
+1. CALCULATE THE EXPECTED SUM:
+   - The sum of all consecutive integers from 0 up to 'n' can be computed 
+     instantly using the formula: Expected Sum = n * (n + 1) / 2.
+
+2. CALCULATE THE ACTUAL SUM:
+   - We traverse the given array exactly once using a simple linear scan 
+     and add up all the elements present inside 'nums' into 'actual_sum'.
+
+3. FIND THE MISSING ELEMENT:
+   - The difference between what the sum *should* be and what the sum *actually* is will reveal the exact identity of the missing number:
+     Missing Number = Expected Sum - Actual Sum.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 0, 1] | n = 3 (Range should be [0, 1, 2, 3])
+
+Step 1: Expected Sum
+  - expected_sum = 3 * (3 + 1) / 2 = 12 / 2 = 6
+
+Step 2: Actual Sum Traversal
+  - num = 3 -> actual_sum = 0 + 3 = 3
+  - num = 0 -> actual_sum = 3 + 0 = 3
+  - num = 1 -> actual_sum = 3 + 1 = 4
+
+Step 3: Calculate Difference
+  - missing = expected_sum - actual_sum -> 6 - 4 = 2
+
+Returns 2.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: We perform a single loop that iterates over the input array of 
+  size 'n' to compute the actual sum. The math calculation for the expected sum 
+  takes constant time O(1). Thus, the total time complexity scales linearly, O(n).
+
+Space Complexity: O(1)
+- Explanation: The algorithm executes fully in-place. Memory allocation is 
+  restricted to three primitive local scalar tracking variables ('n', 'expected_sum', 
+  'actual_sum'), satisfying absolute constant space.
+===================================================================

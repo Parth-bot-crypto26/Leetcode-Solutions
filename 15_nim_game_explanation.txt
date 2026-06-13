@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 292: NIM GAME
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are playing a game with a friend where you alternate turns taking 1 to 3 
+stones from a heap. You always go first. The person who takes the very last 
+stone wins the game. 
+
+Given 'n' stones, return true if you can win the game assuming both you and 
+your friend play optimally. Otherwise, return false.
+
+-------------------------------------------------------------------
+[METHODOLOGY: GAME THEORY & L-STATES VS. W-STATES (O(1) MATH)]
+-------------------------------------------------------------------
+
+This problem can be cracked by analyzing small values of 'n' to find a 
+repeating strategic pattern. In game theory, positions are categorized as:
+- W-state (Winning State): The current player can force a win if they play optimally.
+- L-state (Losing State): The current player will lose no matter what they do, 
+  assuming the opponent plays optimally.
+
+Let's break down the positions sequentially:
+
+1. BASE CASES (n = 1, 2, 3):
+   - If there are 1, 2, or 3 stones, you can take all of them on your very 
+     first turn and win immediately. (W-states)
+
+2. THE TRAP POSITION (n = 4):
+   - If there are 4 stones, no matter what you do, you lose:
+     * You take 1 -> 3 left -> Friend takes 3 and wins.
+     * You take 2 -> 2 left -> Friend takes 2 and wins.
+     * You take 3 -> 1 left -> Friend takes 1 and wins.
+   - Therefore, n = 4 is an absolute Losing State (L-state).
+
+3. STRATEGIC INVERSION (n = 5, 6, 7):
+   - If n = 5, you can take 1 stone, leaving exactly 4 stones for your friend. 
+     Since 4 is a losing position, your friend is now trapped, meaning YOU win.
+   - If n = 6, you take 2 stones, leaving 4 for your friend. You win.
+   - If n = 7, you take 3 stones, leaving 4 for your friend. You win.
+   - Thus, 5, 6, and 7 are W-states because you can always force your opponent 
+     into the n = 4 trap.
+
+4. THE PATTERN ACCUMULATION (n = 8):
+   - If n = 8, no matter if you take 1, 2, or 3 stones, you will leave your friend 
+     with either 7, 6, or 5 stones. Since those are all winning positions for the 
+     person whose turn it is, your friend will easily force a win. 
+   - Thus, n = 8 becomes the next L-state.
+
+THE CORE CONCLUSION:
+You will lose the game if and only if the starting number of stones is a perfect 
+multiple of 4. For any other number, you can always take the exact remainder 
+(n % 4) to leave your opponent stuck on a multiple of 4, forcing them to lose.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLES]
+-------------------------------------------------------------------
+
+Scenario A: Multiple of 4
+Input: n = 4
+- Evaluation: 4 % 4 == 0 -> Condition (n % 4 != 0) evaluates to FALSE.
+Output: false
+
+Scenario B: Non-multiple of 4
+Input: n = 6
+- Evaluation: 6 % 4 = 2 -> 2 != 0 -> Condition (n % 4 != 0) evaluates to TRUE.
+Output: true
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The solution performs a single fundamental arithmetic modulo 
+  operation and a comparative check. It runs in a single CPU instruction cycle 
+  and takes absolute constant time regardless of how massive 'n' is.
+
+Space Complexity: O(1)
+- Explanation: The operation is executed purely in-place on the input parameter 
+  without allocating any extra memory trackers or stack spaces.
+===================================================================

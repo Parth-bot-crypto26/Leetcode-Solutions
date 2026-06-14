@@ -1,0 +1,76 @@
+===================================================================
+LEETCODE 326: POWER OF THREE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'n', return true if it is a power of three. Otherwise, 
+return false. An integer n is a power of three if there exists an integer 
+x such that n == 3^x.
+
+Follow up: Could you solve it without loops/recursion?
+
+-------------------------------------------------------------------
+[METHODOLOGY: LIMIT BOUNDARY DIVISIBILITY (O(1) OPTIMIZATION)]
+-------------------------------------------------------------------
+
+Your iterative solution repeatedly divides 'n' by 3 as long as the remainder 
+is 0, verifying if we eventually reduce it down to 1. This takes O(log3 n) time. 
+To achieve O(1) time complexity without loops or recursion, we can leverage 
+the constraints of a 32-bit signed integer.
+
+1. THE PRIME DIVISIBILITY PROPERTY:
+   The number 3 is a prime number. This means that the prime factorization of 
+   any power of three contains *only* 3s (e.g., 27 = 3 * 3 * 3). Consequently, 
+   any power of three can only be evenly divided by a smaller power of three.
+
+2. FINDING THE UPPER BOUND:
+   The maximum value a 32-bit signed integer can hold is 2^31 - 1 (2,147,483,647). 
+   We can find the largest power of three that fits inside this limit by evaluating 
+   powers of 3:
+   - 3^19 = 1,162,261,467  (Fits within bounds)
+   - 3^20 = 3,486,784,401  (Overflows standard 32-bit integer limit)
+
+   Therefore, the maximum possible power of three in this environment is 1,162,261,467.
+
+3. THE CONSTANT-TIME CHECK:
+   Because 3 is prime, the maximum power of three (3^19) contains all possible 
+   allowable factors of 3. Any valid input 'n' that is a power of three must be 
+   able to divide 3^19 perfectly with a remainder of exactly 0.
+
+4. EDGE CASES:
+   - Powers of three must be strictly positive (n > 0). Zero and negative integers 
+     must be filtered out immediately.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLES]
+-------------------------------------------------------------------
+
+Scenario A: Valid Power of Three
+Input: n = 27
+- Check condition 1: Is 27 > 0? Yes.
+- Compute modulo check: 1162261467 % 27
+  1,162,261,467 / 27 = 43,046,721 with a remainder of 0.
+- Evaluate: (0 == 0) -> TRUE.
+Output: true
+
+Scenario B: Not a Power of Three
+Input: n = 12
+- Check condition 1: Is 12 > 0? Yes.
+- Compute modulo check: 1162261467 % 12
+  1,162,261,467 / 12 = 96,855,122 with a remainder of 3.
+- Evaluate: (3 == 0) -> FALSE.
+Output: false
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The solution performs a single comparison check and a single arithmetic 
+  modulo operation against a hardcoded constant value. There are no loops or iterative 
+  scaling pathways, allowing it to execute in constant time.
+
+Space Complexity: O(1)
+- Explanation: The evaluation runs completely in-place. No extra helper containers 
+  or variable frames are allocated.
+===================================================================

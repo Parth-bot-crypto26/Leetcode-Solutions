@@ -1,0 +1,74 @@
+===================================================================
+LEETCODE 367: VALID PERFECT SQUARE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a positive integer 'num', return true if 'num' is a perfect square, 
+and false otherwise. A perfect square is an integer that is the product 
+of some integer with itself. 
+
+You must not use any built-in library functions (like sqrt()).
+
+-------------------------------------------------------------------
+[METHODOLOGY: BINARY SEARCH ON AN INTEGRAL RANGE]
+-------------------------------------------------------------------
+
+The search space for finding the square root of a number is monotonically 
+sorted (e.g., 1, 2, 3, 4...). Whenever we need to look for a target value 
+within a sorted range, Binary Search allows us to find it efficiently.
+
+1. RANGE OPTIMIZATION:
+   - For num = 1, the square root is 1. We handle this as an immediate edge case.
+   - For any integer num > 1, its square root is guaranteed to be less than or 
+     equal to num / 2. By setting 'right = num / 2', we instantly eliminate 
+     half of the unnecessary search space.
+
+2. OVERFLOW MITIGATION:
+   - If 'mid' is large, calculating 'mid * mid' can easily exceed the capacity 
+     of a standard 32-bit signed integer. 
+   - To safely prevent a buffer overflow, we declare our 'left', 'right', 'mid', 
+     and 'squared' variables using the 64-bit 'long long' data type.
+
+3. WINDOW ADJUSTMENT:
+   - Compute the midpoint safely: mid = left + (right - left) / 2.
+   - Calculate squared = mid * mid.
+   - Case A (squared == num): We found an integer that multiplies by itself 
+     to equal 'num'. Return true.
+   - Case B (squared < num): The current guess is too small. We shift our 
+     search window to the right half by setting left = mid + 1.
+   - Case C (squared > num): The current guess is too large. We shift our 
+     search window to the left half by setting right = mid - 1.
+
+4. TERMINATION:
+   - If 'left' crosses 'right' without finding a match, it means 'num' is 
+     not a perfect square. Return false.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = 16
+Initial State: left = 1, right = 16 / 2 = 8
+
+Iteration 1:
+  - mid = 1 + (8 - 1) / 2 = 4
+  - squared = 4 * 4 = 16
+  - Check: Is 16 == 16? Yes! 
+  - Match found! Returns TRUE.
+
+Output: true
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: The search space from 1 to num/2 is divided in half during 
+  every single iteration of the while loop. Shrinking the range down logarithmically 
+  ensures that the maximum number of operations stays incredibly low, even for 
+  the largest possible integer inputs.
+
+Space Complexity: O(1)
+- Explanation: The calculation is processed entirely in-place. Auxiliary memory 
+  allocations are strictly confined to a few local tracking primitives ('left', 
+  'right', 'mid', 'squared'), resulting in constant space complexity.
+===================================================================

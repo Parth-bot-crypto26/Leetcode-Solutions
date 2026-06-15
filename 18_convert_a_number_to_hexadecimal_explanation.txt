@@ -1,0 +1,84 @@
+===================================================================
+LEETCODE 405: CONVERT A NUMBER TO HEXADECIMAL
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a 32-bit signed integer 'num', return a string representing its 
+hexadecimal representation. For negative integers, the two’s complement 
+method must be used. 
+
+The output must contain lowercase characters, no leading zeros (except for 
+the number 0 itself), and you are not allowed to use built-in library conversion tools.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE MASKING & LOGICAL SHIFTING]
+-------------------------------------------------------------------
+
+A hexadecimal digit represents exactly 4 bits of a binary number (since 2^4 = 16). 
+Therefore, a 32-bit integer will translate into a maximum of 8 hexadecimal characters. 
+Instead of utilizing heavy mathematical division or modulo operations, we can 
+interrogate the underlying bits directly.
+
+1. TWO'S COMPLEMENT AUTOMATION (unsigned int):
+   - Handling negative numbers manually in base conversion is prone to errors. 
+     By casting 'num' to an 'unsigned int n', C++ retains the exact same underlying 
+     binary bit pattern (the two's complement form) but treats the sign bit as 
+     a normal value bit. This unifies our processing loop for both positive and 
+     negative numbers.
+
+2. BITWISE MASKING (n & 15):
+   - The decimal number 15 is represented in binary as '1111'. 
+   - Performing a bitwise AND operation ('n & 15') acts as a mask that zeroes out 
+     everything except the lowest 4 bits of the number. These 4 bits yield a value 
+     between 0 and 15, matching our hex characters perfectly.
+
+3. LOOKUP MAP & EVAPORATION (n >> 4):
+   - We map the masked value directly to a character using a hardcoded index string: 
+     "0123456789abcdef".
+   - After appending the mapped character, we shift 'n' to the right by 4 bits 
+     ('n >>= 4') to discard the bits we just processed and bring the next 4 bits into 
+     the lowest position.
+
+4. REVERSAL:
+   - Because we slice off the lowest bits first, our hex string is built from right 
+     to left (least significant to most significant). We use 'reverse()' before returning 
+     the final answer.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = 26 | Binary: 0001 1010
+Initial State: n = 26, result = ""
+
+Iteration 1:
+  - Mask: last_4_bits = 26 & 15 (00011010 & 00001111) -> 1010 (Decimal 10)
+  - Lookup: hex_map[10] = 'a' -> result becomes "a"
+  - Shift: n = 26 >> 4 -> n becomes 1 (Binary: 0001)
+
+Iteration 2:
+  - Mask: last_4_bits = 1 & 15 (00000001 & 00001111) -> 0001 (Decimal 1)
+  - Lookup: hex_map[1] = '1' -> result becomes "a1"
+  - Shift: n = 1 >> 4 -> n becomes 0
+
+Loop terminates because n == 0.
+
+Reversal Phase:
+  - reverse("a1") -> "1a"
+
+Final Output String: "1a"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: A 32-bit integer has a fixed maximum size of 32 bits. Because 
+  we process exactly 4 bits per loop iteration, the while loop will run a maximum 
+  of 8 times regardless of how large the input number is. Since the operation sequence 
+  is rigidly bounded by a small constant limit, the runtime complexity is O(1).
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: The memory allocation does not scale with input sizes. We only 
+  allocate space for a fixed map string, a string 'result' capped at 8 characters, 
+  and a few local scalar variables, maintaining constant space.
+===================================================================

@@ -1,0 +1,99 @@
+===================================================================
+LEETCODE 415: ADD STRINGS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two non-negative integers, num1 and num2 represented as strings, 
+return the sum of num1 and num2 as a string.
+
+You must solve the problem without using any built-in library for handling 
+large integers (such as BigInteger) and you must not convert the string 
+inputs to integers directly.
+
+-------------------------------------------------------------------
+[METHODOLOGY: REVERSE TWO-POINTER ARITHMETIC SIMULATION]
+-------------------------------------------------------------------
+
+Since the inputs can be up to 10,4 digits long, converting them directly 
+to standard primitive integer types ('int' or 'long long') will instantly 
+cause a critical numerical overflow. We must simulate elementary school 
+addition column-by-column from right to left.
+
+1. INITIALIZATION:
+   - We place two pointers, 'i' and 'j', at the very end of 'num1' and 'num2' 
+     respectively to target the least significant digits.
+   - We maintain a 'carry' variable initialized to 0 and an empty 'result' string.
+
+2. ASYMMETRIC DIGIT EXTRACTION:
+   - Within the combined while loop, we evaluate if our pointers are inside bounds.
+   - If a string has run out of digits (e.g., adding a 2-digit number to a 5-digit 
+     number), we extract '0' as its positional value instead.
+   - We safely convert raw characters to integers using ASCII math: 'num1[i] - '0''.
+
+3. MATRIX ARITHMETIC:
+   - sum = digit1 + digit2 + carry.
+   - The new carry to propagate to the left column is computed using integer 
+     division: carry = sum / 10.
+   - The digit to append to our tracking string is computed via remainder math 
+     and cast back to a char: (sum % 10) + '0'.
+
+4. TERMINATION AND POST-PROCESSING:
+   - Including 'carry > 0' in the main loop condition automatically handles instances 
+     where a final leading carry is generated at the most significant digit 
+     (e.g., 99 + 1 = 100) without requiring an extra 'if' check outside the loop.
+   - Because columns are appended from right to left, the string is built backwards. 
+     We execute 'reverse(result.begin(), result.end())' before returning the final string.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num1 = "456", num2 = "77"
+Initial State: i = 2, j = 1, carry = 0, result = ""
+
+Iteration 1:
+  - digit1 = num1[2] -> '6' - 'A' = 6
+  - digit2 = num2[1] -> '7' - 'A' = 7
+  - sum = 6 + 7 + 0 = 13
+  - carry = 13 / 10 = 1
+  - result += (13 % 10) + '0' -> result becomes "3"
+  - Pointers decrement: i = 1, j = 0
+
+Iteration 2:
+  - digit1 = num1[1] -> '5' - 'A' = 5
+  - digit2 = num2[0] -> '7' - 'A' = 7
+  - sum = 5 + 7 + 1 = 13
+  - carry = 13 / 10 = 1
+  - result += (13 % 10) + '0' -> result becomes "33"
+  - Pointers decrement: i = 0, j = -1
+
+Iteration 3:
+  - digit1 = num1[0] -> '4' - 'A' = 4
+  - digit2 = (j < 0) -> 0
+  - sum = 4 + 0 + 1 = 5
+  - carry = 5 / 10 = 0
+  - result += (5 % 10) + '0' -> result becomes "335"
+  - Pointers decrement: i = -1, j = -2
+
+Loop terminates because i = -1, j = -2, and carry = 0.
+
+Reversal Phase:
+  - reverse("335") -> "533"
+
+Final Output String: "533"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(max(N, M))
+- Explanation: Where 'N' and 'M' are the lengths of strings 'num1' and 'num2'. 
+  The loop runs exactly equal to the length of the larger string. Character conversion, 
+  addition, and vector appending occur in O(1) time per column. The final reversal 
+  also runs linearly with respect to the output length, maintaining a linear runtime.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory allocated for the 'result' string interface 
+  required to return the solution value, all calculations execute strictly in-place. 
+  Variables are limited to local primitive tracking markers ('i', 'j', 'carry', 
+  'digit1', 'digit2', 'sum'), giving us absolute constant auxiliary space.
+===================================================================

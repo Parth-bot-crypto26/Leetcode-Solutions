@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 492: CONSTRUCT THE RECTANGLE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a specific rectangular web page’s area, design a rectangle whose 
+length L and width W satisfy the following requirements:
+1. The area must equal the target area (L * W = area).
+2. The width W should not be larger than the length L (L >= W).
+3. The difference between length L and width W should be as small as possible.
+
+Return an array [L, W] satisfying these conditions.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SQUARE ROOT O(sqrt(N)) DOWNWARD SEARCH]
+-------------------------------------------------------------------
+
+The problem asks us to find two factors of 'area' that are as close to each 
+other as possible. Mathematically, the closest two factors of any number can 
+ever get is when the number is a perfect square, where Length = Width = sqrt(area).
+
+If the area is not a perfect square, the optimal width must be strictly less 
+than 'sqrt(area)', and the optimal length must be strictly greater than 'sqrt(area)'.
+
+1. INITIALIZING AT THE OPTIMAL BOUNDARY:
+   - We initialize our 'width' tracker at exactly 'sqrt(area)'. This satisfies 
+     our $L \ge W$ condition right out of the gate.
+
+2. DOWNWARD GREEDY SEARCH:
+   - We run a 'while' loop that checks if the current 'width' divides the target 
+     area perfectly: 'area % width != 0'.
+   - If it doesn't divide evenly, we decrement 'width--'.
+   - Because we start at the square root and walk backwards, the **very first** integer factor we encounter is mathematically guaranteed to be the one 
+     closest to the square root. This satisfies the requirement that the 
+     difference between L and W is minimized.
+
+3. DIMENSION COMPLIANCE:
+   - Once a valid factor is found, the loop breaks. We calculate the length 
+     linearly using integer division: length = area / width.
+   - We return the values in the requested sequence: {length, width}.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: area = 12 (Expected Output: [4, 3])
+Initial State: width = sqrt(12) -> Truncated integer value is 3.
+
+Iteration 1:
+  - Check condition: Is 12 % 3 != 0?
+  - 12 % 3 is 0, so the condition (0 != 0) is FALSE.
+  - The loop terminates immediately!
+
+Calculate Length:
+  - length = 12 / 3 = 4
+
+Returns {4, 3}. (Difference is 1, which is smaller than [6, 2] or [12, 1]).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(sqrt(area))
+- Explanation: In the absolute worst-case scenario (such as when 'area' is a prime 
+  number like 37), the loop will decrement all the way down from sqrt(area) to 1. 
+  Therefore, the total number of operations is strictly bounded by the square root 
+  of the input magnitude, running well within optimal limits for area = 10^7.
+
+Space Complexity: O(1)
+- Explanation: The algorithm operates strictly in-place. Auxiliary memory allocations 
+  are limited to two local integer tracking variables ('width' and 'length'), 
+  maintaining absolute constant space.
+===================================================================

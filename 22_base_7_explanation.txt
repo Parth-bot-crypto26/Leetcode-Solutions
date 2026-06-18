@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 504: BASE 7
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'num', return a string of its base 7 representation.
+Negative integers must retain their negative sign prefix, and the number 0 
+should return "0" directly.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SUCCESSIVE DIVISION AND REMAINDER EXTRACTION]
+-------------------------------------------------------------------
+
+Converting a number from base-10 (decimal) to any other base (like base-7) 
+relies on successive integer division and tracking the remainders from the 
+least significant digit up to the most significant digit.
+
+1. ZERO EDGE CASE:
+   - If 'num' is 0, the base-7 value is simply "0". We return it immediately.
+
+2. SIGN EXTRACTOR FLAG:
+   - Modulo arithmetic behavior can vary slightly with negative values in different 
+     compiled languages. To keep the logic completely standardized, we capture the sign 
+     of the input using a boolean flag ('negative = num < 0') and immediately 
+     force the integer to its absolute magnitude using 'abs(num)'.
+
+3. THE CORE BASE-7 LOOP:
+   - While 'num > 0', we isolate the base-7 positional digit using remainder 
+     math: 'digit = num % 7'.
+   - We append this digit to our 'result' string using 'to_string(digit)'.
+   - We scale the remaining value down by dividing out the current digit column 
+     place using integer division: 'num /= 7'.
+
+4. SIGN RECONCILIATION AND REVERSAL:
+   - If our 'negative' flag evaluates to true, we append a '-' character to the 
+     end of our working string.
+   - Because our extraction naturally slices off the rightmost columns first, 
+     the string is built completely backwards. We use 'reverse(result.begin(), result.end())' 
+     to correct the ordering before returning.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = -7 (Expected Output: "-10")
+Initial State: negative = true, num = abs(-7) = 7, result = ""
+
+Iteration 1:
+  - Remainder: digit = 7 % 7 = 0
+  - Append: result becomes "0"
+  - Divide: num = 7 / 7 = 1
+
+Iteration 2:
+  - Remainder: digit = 1 % 7 = 1
+  - Append: result becomes "01"
+  - Divide: num = 1 / 7 = 0
+
+Loop terminates because num == 0.
+
+Sign Injection Phase:
+  - negative is true -> result += "-" -> result becomes "01-"
+
+Reversal Phase:
+  - reverse("01-") -> "-10"
+
+Final Output String: "-10"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log7(num))
+- Explanation: In each step of our extraction loop, 'num' is divided by 7. 
+  Therefore, the total number of operations is directly proportional to the number 
+  of digits in the resulting base-7 string. This scales logarithmically in base 7 
+  relative to the size of the input, making it incredibly fast.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Aside from the 'result' string itself, which is strictly needed 
+  to return the final value, all variables are restricted to basic, fixed-size 
+  primitive scalar allocations ('negative', 'digit'), ensuring constant space.
+===================================================================

@@ -1,0 +1,78 @@
+===================================================================
+LEETCODE 507: PERFECT NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A perfect number is a positive integer that is equal to the sum of its 
+positive divisors, excluding the number itself. Given an integer 'num', 
+return true if it is a perfect number, and false otherwise.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SQUARE ROOT FACTOR PAIRING (O(sqrt(N)) OPTIMIZATION)]
+-------------------------------------------------------------------
+
+A brute-force loop from 1 to num-1 runs in O(num) time, which fails under 
+large constraints (num = 10^8). We can optimize this by recognizing that 
+divisors always come in pairs. If an integer 'i' divides 'num' evenly, 
+then its complementary divisor 'num / i' is also guaranteed to divide 'num' evenly.
+
+The turning point where these pairs begin to repeat is the square root of the number. 
+Therefore, we only need to scan integers up to sqrt(num).
+
+1. EDGE CASE GUARDS:
+   - Perfect numbers must be equal to the sum of their *proper* divisors (divisors 
+     strictly less than the number). 
+   - If num <= 1, it has no proper divisors less than itself. We return false immediately.
+
+2. PAIR SEEDING:
+   - We initialize 'sum = 1'. Since 1 divides every number, and we must exclude the 
+     number itself, starting 'sum' at 1 allows us to completely bypass checking 'num' 
+     at the end of our loop.
+
+3. OPTIMIZED SEARCH LOOP:
+   - We loop from 'i = 2' up to 'i * i <= num'.
+   - If 'num % i == 0', we have discovered a divisor pair:
+     * We add 'i' to our running 'sum'.
+     * As long as 'i' is not equal to its perfect square reflection ('i != num / i'), 
+       we also add its complementary pair 'num / i' to our running 'sum'.
+
+4. EVALUATION:
+   - Once the loop terminates, we simply evaluate and return 'sum == num'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = 28 (Expected Output: true)
+Initial State: sum = 1
+
+Loop Execution (i = 2 up to i*i <= 28):
+  - i = 2: 28 % 2 == 0 (TRUE)
+           Add i: sum = 1 + 2 = 3
+           Add pair (28 / 2 = 14): sum = 3 + 14 = 17
+  - i = 3: 28 % 3 == 0 (FALSE)
+  - i = 4: 28 % 4 == 0 (TRUE)
+           Add i: sum = 17 + 4 = 21
+           Add pair (28 / 4 = 7): sum = 21 + 7 = 28
+  - i = 5: 5 * 5 = 25 <= 28 (TRUE) | 28 % 5 == 0 (FALSE)
+  - i = 6: 6 * 6 = 36 <= 28 (FALSE) | Loop terminates.
+
+Final Evaluation:
+  - Check: Is sum (28) == num (28)? TRUE.
+
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(sqrt(num))
+- Explanation: The loop boundary condition 'i * i <= num' restricts our traversal 
+  range strictly to the square root of 'num'. For the maximum input size of 10^8, 
+  the loop executes a maximum of only 10,000 times instead of 100,000,000 times, 
+  passing comfortably within execution boundaries.
+
+Space Complexity: O(1)
+- Explanation: The memory footprints are entirely static. Calculations run 
+  completely in-place using local scalar primitives ('sum', 'i'), ensuring 
+  absolute constant space.
+===================================================================

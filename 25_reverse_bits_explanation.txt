@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 190: REVERSE BITS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Reverse the bits of a given 32-bit unsigned integer.
+
+Follow up: If this function is called many times, how would you optimize it?
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE EXTRACTION AND ACCUMULATION]
+-------------------------------------------------------------------
+
+Your current solution operates via a bit-by-bit simulation loop. It runs 
+exactly 32 times, pulling the rightmost bit of 'n' out and shifting it into 
+the accumulation variable 'ans'.
+
+1. ACCUMULATION BIT SHIFT (ans << 1):
+   - In each iteration, we shift the bits inside 'ans' to the left by 1 place. 
+     This makes room at the lowest position (the least significant bit) to hold 
+     the incoming bit from 'n'.
+
+2. BIT MASK EXTRACTION (n & 1):
+   - Performing a bitwise AND operation ('n & 1') masks out everything except the 
+     lowest bit of 'n'. If this bit is 1, we increment 'ans' (or perform 'ans | 1') 
+     to plant a 1 in the empty space we just created.
+
+3. DRAINAGE SHIFT (n >> 1):
+   - We execute a logical right shift on 'n' to discard the bit we just processed 
+     and position the next bit for evaluation in the following iteration.
+
+-------------------------------------------------------------------
+[FOLLOW-UP OPTIMIZATION: CACHE LOOKUP TABLE (FOR REPEATED CALLS)]
+-------------------------------------------------------------------
+If this function is called frequently across heavy streams of data, running a 
+32-iteration loop every single time introduces significant runtime latency.
+
+We can optimize this to O(1) time using a Lookup Table (Memoization):
+1. A byte consists of 8 bits, meaning there are only 2^8 = 256 possible unique 
+   byte configurations (0 to 255).
+2. We can precompute the reversed bit configurations for all 256 variations and 
+   store them inside a static array cache.
+3. For any incoming 32-bit number, we split it into 4 individual bytes using 
+   bitwise masking, instantly retrieve their reversed variants from our cache table, 
+   and realign them into their inverse positions using bitwise shifts.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE (SIMPLE 4-BIT EXTENSION PROCESS)]
+-------------------------------------------------------------------
+Input: n = 43261596 | Target: Read bits from right to left, insert left to right.
+- i = 0:  Extract rightmost bit of n. Shift ans. Accumulate bit. Right shift n.
+- ... Repeats exactly 32 times until all bits are transposed mirror-style.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The loop is bounded strictly to 32 iterations because the problem 
+  specifies a fixed 32-bit input structure. Since the number of steps does not 
+  scale with the magnitude of the number, the runtime is constant. (Using the 
+  lookup table optimization reduces the concrete instruction step count from 
+  32 down to 4 operations).
+
+Space Complexity: O(1)
+- Explanation: The calculation executes entirely in-place. Auxiliary space is 
+  restricted to a single 'ans' variable container. Even if the 256-size static lookup table 
+  is implemented for the follow-up, it occupies a minor, fixed block of memory 
+  unaffected by input size.
+===================================================================

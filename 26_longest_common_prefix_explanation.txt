@@ -1,0 +1,79 @@
+===================================================================
+LEETCODE 14: LONGEST COMMON PREFIX
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a function to find the longest common prefix string amongst an array 
+of strings. If there is no common prefix, return an empty string "".
+
+-------------------------------------------------------------------
+[METHODOLOGY: VERTICAL SCANNING (COLUMN-BY-COLUMN COMPARISON)]
+-------------------------------------------------------------------
+
+Instead of comparing the first string entirely with the second, then the result 
+with the third (Horizontal Scanning), we scan vertically. We look at the first 
+character of every string, then the second character of every string, and so on.
+
+This is highly efficient because if a mismatch occurs early on (e.g., the very 
+first character doesn't match), we can exit immediately without scanning the 
+rest of the characters in any string.
+
+1. BOUNDARY GUARD:
+   - If the input vector 'strs' is empty, there can be no prefix. We return "" 
+     immediately.
+
+2. VERTICAL ITERATION:
+   - The outer loop runs through the characters of the first string ('strs[0]') 
+     at index 'i'. We pick 'c = strs[0][i]' as our target character benchmark.
+   - The inner loop iterates through all the remaining strings in the array 
+     from index 'j = 1' to 'strs.size() - 1'.
+
+3. MISMATCH OR LENGTH TRIGGER:
+   - Inside the inner loop, we evaluate two breaking conditions:
+     * Condition A (i == strs[j].length()): The current string 'strs[j]' has run 
+       out of characters. The common prefix cannot be longer than the shortest string.
+     * Condition B (strs[j][i] != c): The character at the current vertical column 
+       position does not match our benchmark character 'c'.
+   - If either condition triggers, we extract and return the valid common prefix 
+     found up to this point using string slicing: 'strs[0].substr(0, i)'.
+
+4. BULLETPROOF RETURN:
+   - If both loops finish completely without returning early, it implies that the 
+     entirety of the first string 'strs[0]' matches all other strings perfectly. 
+     Thus, we return 'strs[0]'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: strs = ["flower", "flow", "flight"]
+Outer Loop (i matches character indices of "flower"):
+
+- i = 0 | c = 'f'
+  * j = 1 ("flow"):   strs[1][0] == 'f' (Match)
+  * j = 2 ("flight"): strs[2][0] == 'f' (Match)
+- i = 1 | c = 'l'
+  * j = 1 ("flow"):   strs[1][1] == 'l' (Match)
+  * j = 2 ("flight"): strs[2][1] == 'l' (Match)
+- i = 2 | c = 'o'
+  * j = 1 ("flow"):   strs[1][2] == 'o' (Match)
+  * j = 2 ("flight"): strs[2][2] == 'i' (MISMATCH! 'o' != 'i')
+
+Trigger: Return strs[0].substr(0, 2) -> Slices "flower" from index 0 up to 2.
+Returns "fl".
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(S)
+- Explanation: Where 'S' is the sum of all characters across all strings in the 
+  input array. In the absolute worst-case scenario (where all strings are identical), 
+  the algorithm will check 'N' strings over 'M' characters, leading to an O(N * M) 
+  runtime boundary. However, in average cases with early mismatches, the runtime 
+  is significantly lower than 'S'.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: The scanning process happens fully in-place. Aside from the output 
+  substring generated at the end, no auxiliary vectors, copies, or tracking structures 
+  are allocated in memory, preserving absolute constant space.
+===================================================================

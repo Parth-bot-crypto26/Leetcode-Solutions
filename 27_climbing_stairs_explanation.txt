@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 70: CLIMBING STAIRS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are climbing a staircase that takes 'n' steps to reach the top.
+Each time you can either climb 1 or 2 steps. In how many distinct ways 
+can you climb to the top?
+
+-------------------------------------------------------------------
+[METHODOLOGY: OPTIMIZED LINEAR DYNAMIC PROGRAMMING (FIBONACCI CORE)]
+-------------------------------------------------------------------
+
+This problem can be modeled as a classic dynamic programming subproblem puzzle. 
+To reach the i-th step, you can only arrive from one of two places:
+1. Taking a 1-step stride from the (i - 1)-th step.
+2. Taking a 2-step stride from the (i - 2)-th step.
+
+Therefore, the total distinct ways to reach step 'i' is simply the sum of the 
+ways to reach step 'i - 1' and step 'i - 2'. 
+Formally: Ways(i) = Ways(i - 1) + Ways(i - 2)
+
+This matches the exact mathematical definition of the Fibonacci sequence.
+
+1. RECONCILING THE BASE CLAUSES:
+   - If n == 1: There is only 1 way (take exactly 1 step).
+   - If n == 2: There are 2 ways (1+1 step, or a single 2-step jump).
+
+2. STATE-SLIDING INDICES:
+   - Instead of allocating a full DP array table of size 'n + 1', we only preserve 
+     the last two states to achieve optimal space footprint:
+     * 'prev2 = 1' (represents ways to reach step 1)
+     * 'prev1 = 2' (represents ways to reach step 2)
+
+3. TRANSITION ITERATION:
+   - We loop from step 'i = 3' up to 'n'.
+   - At each step, we compute 'current = prev1 + prev2'.
+   - We then slide our historic state windows forward: 'prev2' shifts to 'prev1', 
+     and 'prev1' slides to 'current'.
+
+4. EXTRACTION:
+   - Once the loop reaches 'n', 'prev1' holds the final consolidated combinations 
+     to reach the top step, which we return.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 4 (Expected Output: 5)
+Initial State: prev2 = 1, prev1 = 2
+
+- i = 3: current = prev1 + prev2 -> 2 + 1 = 3
+         Slide windows: prev2 becomes 2, prev1 becomes 3
+- i = 4: current = prev1 + prev2 -> 3 + 2 = 5
+         Slide windows: prev2 becomes 3, prev1 becomes 5
+
+Loop terminates because i exceeds n.
+Returns prev1 -> 5.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: The state transition logic is calculated using a single linear 
+  loop running from 3 up to 'n'. Each iteration processes basic arithmetic addition 
+  and scalar assignments in constant O(1) time, matching linear complexity constraints.
+
+Space Complexity: O(1)
+- Explanation: The compilation functions fully in-place. The state memory replaces 
+  reusable primitive scalars ('prev2', 'prev1', 'current') inside the stack 
+  without scaling dynamically with 'n', securing constant space.
+===================================================================

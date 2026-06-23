@@ -1,0 +1,77 @@
+===================================================================
+LEETCODE 401: BINARY WATCH
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A binary watch displays time using LEDs representing bits: 4 LEDs for hours 
+(0-11) and 6 LEDs for minutes (0-59). Given an integer 'turnedOn' representing 
+the total number of LEDs currently lit up, return all possible valid times 
+the watch could display. 
+
+Formatting constraints:
+- Hours must not have leading zeros (e.g., "1:00", not "01:00").
+- Minutes must be exactly two digits, using a leading zero if needed (e.g., "10:02").
+
+-------------------------------------------------------------------
+[METHODOLOGY: BRUTE FORCE LOOKUP WITH HARDWARE POPCOUNT]
+-------------------------------------------------------------------
+
+While it is possible to solve this using backtracking or bit-generation, the 
+total search space for a standard clock is incredibly small and completely 
+fixed: there are only 12 hours (0 to 11) and 60 minutes (0 to 59). 
+
+Instead of generating valid combinations from the bit-count backwards, we can 
+scan every single possible time configuration on a standard clock and filter 
+for the ones that match our target bit count.
+
+1. TWIN POSITIONAL SCAN:
+   - We run a nested loop: the outer loop runs through hours 'h' from 0 to 11, 
+     and the inner loop runs through minutes 'm' from 0 to 59. 
+   - Total iterations per call: 12 * 60 = 720 steps. This is a small, constant limit.
+
+2. HARDWARE BIT COUNTING (__builtin_popcount):
+   - C++ provides a built-in compiler intrinsic named '__builtin_popcount(x)'. 
+     This function counts the total number of set bits (1s) in the binary 
+     representation of an integer. On modern CPUs, this maps directly to a 
+     hardware register instruction, executing near-instantaneously.
+   - We check if: __builtin_popcount(h) + __builtin_popcount(m) == turnedOn.
+
+3. STRING FORMATTING COMPLIANCE:
+   - If the bit counts match, we format the time string. 
+   - For minutes, if 'm < 10', we manually inject a leading "0" prefix before 
+     converting to a string. Hours are cast directly to ensure no leading zeros.
+   - Append to our 'result' vector.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: turnedOn = 1
+Processing loop encounters coordinates (h = 1, m = 2):
+  - h = 1 -> Binary: 0001 -> __builtin_popcount(1) = 1
+  - m = 2 -> Binary: 000010 -> __builtin_popcount(2) = 1
+  - Total bits = 1 + 1 = 2.
+  - Evaluation: 2 == 1 is FALSE (skipped).
+
+Processing loop encounters coordinates (h = 0, m = 4):
+  - h = 0 -> Binary: 0000 -> __builtin_popcount(0) = 0
+  - m = 4 -> Binary: 000100 -> __builtin_popcount(4) = 1
+  - Total bits = 0 + 1 = 1.
+  - Evaluation: 1 == 1 is TRUE!
+  - Formatting: h = "0", m = "04" (since 4 < 10, prepends "0").
+  - Pushed to result: "0:04"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The loops are completely bounded by fixed global constraints 
+  (12 hours and 60 minutes). The number of iterations is always exactly 720, 
+  independent of the value of 'turnedOn'. Inside the loop, '__builtin_popcount' 
+  runs in constant time. Thus, execution complexity is completely O(1).
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory allocated for the final output string vector, 
+  the algorithm operates completely in-place. No extra data structures scale with 
+  the input magnitude, preserving absolute constant space.
+===================================================================

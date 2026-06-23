@@ -1,0 +1,77 @@
+===================================================================
+LEETCODE 598: RANGE ADDITION II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an m x n matrix M initialized with all 0's and an array of 
+operations ops, where ops[i] = [ai, bi] means M[x][y] should be incremented 
+by one for all 0 <= x < ai and 0 <= y < bi.
+
+Count and return the number of maximum integers in the matrix after 
+performing all the operations.
+
+-------------------------------------------------------------------
+[METHODOLOGY: OVERLAPPING INTERSECTION MATRIX GEOMETRY]
+-------------------------------------------------------------------
+
+A brute-force simulation that instantiates a 2D vector and iterates through the 
+ranges will catastrophically fail because the matrix constraints go up to 
+4 * 10^4 by 4 * 10^4 (1.6 billion cells). 
+
+Instead of simulating the matrix modifications, we can solve this problem by 
+analyzing the geometric boundaries of the grid operations:
+
+1. THE TOP-LEFT ANCHOR PROPERTY:
+   - Notice that every single operation ops[i] = [ai, bi] always increments cells 
+     starting from the top-left index row 0 and column 0 up to ai-1 and bi-1. 
+   - Because every modification shares the exact same starting point (0, 0), 
+     the operations are guaranteed to stack directly on top of each other.
+
+2. THE MINIMUM BOUNDARY PRINCIPLE:
+   - The cell that receives the absolute highest number of increments will be the 
+     one covered by *every single operation*.
+   - The region that is universally covered by all operations is limited by the 
+     smallest 'ai' value and the smallest 'bi' value encountered across the 
+     entire execution list.
+
+3. AREA EQUIVALENCE:
+   - We initialize 'min_a = m' and 'min_b = n' to represent the original matrix size.
+   - We iterate through 'ops' and continuously minimize our boundaries:
+     min_a = min(min_a, op[0])
+     min_b = min(min_b, op[1])
+   - The final count of cells holding the maximum value forms a smaller 
+     sub-rectangle at the top-left corner. The count of these cells is simply the 
+     area of this sub-rectangle: min_a * min_b.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: m = 3, n = 3, ops = [[2, 2], [3, 3]]
+Initial State: min_a = 3, min_b = 3
+
+Iteration 1 (op = [2, 2]):
+  - min_a = min(3, 2) -> 2
+  - min_b = min(3, 2) -> 2
+
+Iteration 2 (op = [3, 3]):
+  - min_a = min(2, 3) -> 2
+  - min_b = min(2, 3) -> 2
+
+Loop terminates.
+Returns min_a * min_b -> 2 * 2 = 4.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(k)
+- Explanation: Where 'k' is the number of operations inside the 'ops' array. 
+  We execute a single linear scan over the operations to evaluate basic scalar 
+  minimum comparison gates, which run in O(1) constant time per step. If 'ops' 
+  is empty, the loop skips entirely and calculates 'm * n' instantly in O(1) time.
+
+Space Complexity: O(1)
+- Explanation: The calculation operates completely in-place. Auxiliary memory 
+  allocations are restricted to a couple of local tracking primitives ('min_a', 
+  'min_b'), maintaining absolute constant space.
+===================================================================

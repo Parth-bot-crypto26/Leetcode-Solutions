@@ -1,0 +1,76 @@
+===================================================================
+LEETCODE 693: BINARY NUMBER WITH ALTERNATING BITS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a positive integer 'n', check whether it has alternating bits. 
+Namely, verify if any two adjacent bits always have completely different values 
+(e.g., 5 in binary is 101, which returns true).
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE ALIGNMENT SHIFT & ALL-ONES VALIDATION (O(1))]
+-------------------------------------------------------------------
+
+Your initial solution uses a bitset to scan adjacent bit blocks sequentially. 
+While correct, we can use an industry-standard bitwise alignment trick to solve 
+this in a single calculation sequence without any loops:
+
+1. THE BITWISE SHIFT SHADOW (n >> 1):
+   - Suppose 'n' has alternating bits, such as n = 10 (which is 1010 in binary).
+   - If we shift 'n' right by 1 position ('n >> 1'), the bit pattern shifts over:
+     n        = 1010
+     n >> 1   = 0101
+
+2. THE BITWISE XOR GATEWAY (n ^ (n >> 1)):
+   - We perform a bitwise XOR ('^') between the original number and its shifted shadow. 
+     Because the bits alternate, every 1 in 'n' will align with a 0 in 'n >> 1', 
+     and every 0 will align with a 1.
+   - Since XOR outputs 1 when bits differ, the result 'x' will become an 
+     unbroken sequence of all 1s:
+     x = n ^ (n >> 1) -> 1010 ^ 0101 = 1111
+
+3. THE ALL-ONES VALIDATION METHOD (x & (x + 1)):
+   - To prove that a number 'x' consists strictly of all 1s (like 1111), we add 1 to it. 
+     Adding 1 to a number filled with 1s triggers a carry cascade that turns it into 
+     a leading 1 followed entirely by zeros (e.g., 1111 + 1 = 10000).
+   - If we perform a bitwise AND between 'x' and 'x + 1', they will have absolutely 
+     no overlapping 1-bits, yielding exactly 0:
+       1111  (x)
+     & 10000 (x + 1)
+     -------
+       00000 (0)
+   - If 'n' did *not* have alternating bits, 'x' would contain an internal 0, 
+     preventing 'x & (x + 1)' from clearing out to 0.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 5 (Binary: 101)
+
+Step 1: Shift right by 1
+  - n >> 1 = 5 >> 1 -> 2 (Binary: 010)
+
+Step 2: XOR combination
+  - x = 5 ^ 2 (101 ^ 010) -> 7 (Binary: 111)
+
+Step 3: All-Ones Verification check
+  - Calculate: x & (x + 1) -> 7 & 8
+  - Binary: 0111 & 1000 = 0000 (0)
+  - Evaluation: 0 == 0 is TRUE!
+
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The process runs through exactly three bitwise logic operations 
+  (a right shift, an XOR, and an arithmetic bitwise AND check). These run directly 
+  on hardware components inside single clock instruction cycles. There are no iterative 
+  traversals or loop systems, achieving fixed constant time execution.
+
+Space Complexity: O(1)
+- Explanation: The process computes the valuation entirely in-place on the registers, 
+  allocating no auxiliary collections or dynamic tracking structures.
+===================================================================

@@ -1,0 +1,65 @@
+===================================================================
+LEETCODE 628: MAXIMUM PRODUCT OF THREE NUMBERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', find three numbers whose product is maximum 
+and return the maximum product.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SORTING VS. SINGLE-PASS SCAN (MATH PATTERN)]
+-------------------------------------------------------------------
+
+The maximum product of three numbers in an array can only come from two 
+distinct structural scenarios due to the laws of signs (negative * negative = positive):
+
+Scenario A: The 3 Largest Positive Numbers
+  - If the array contains mostly positive numbers, the maximum product is 
+    unambiguously the product of the three largest elements.
+
+Scenario B: The 2 Smallest (Most Negative) Numbers * The Single Largest Positive Number
+  - If the array contains highly negative numbers, multiplying the two smallest 
+    numbers yields a large positive result. Multiplying that by the absolute 
+    maximum element can easily exceed the positive-only product.
+
+Your current sorting method surfaces these boundaries instantly:
+  - ans1 = Product of the 3 largest elements at the tail end.
+  - ans2 = Product of the 2 smallest elements at the front and the max element at the tail.
+
+-------------------------------------------------------------------
+[LINEAR O(N) OPTIMIZATION STRATEGY]
+-------------------------------------------------------------------
+Sorting takes O(n log n) time. To optimize this to O(n) time, we don't need to sort 
+the entire array. We can run a single loop to find the 5 critical numbers dynamically:
+  - max1, max2, max3 (initialized to INT_MIN)
+  - min1, min2 (initialized to INT_MAX)
+
+As we scan each number, we update these 5 slots. This drops the runtime complexity 
+to pure linear time.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE (SORTING MATHEMATICS)]
+-------------------------------------------------------------------
+Input: nums = [-10, -10, 1, 3, 4] | n = 5
+Sorted State: [-10, -10, 1, 3, 4]
+
+- ans1 = nums[4] * nums[3] * nums[2] -> 4 * 3 * 1 = 12
+- ans2 = nums[0] * nums[1] * nums[4] -> (-10) * (-10) * 4 = 400
+
+Evaluation: max(12, 400) -> 400.
+Returns 400.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+Time Complexity: O(n log n) -> Optimized to O(n)
+- Explanation: The sorting approach takes O(n log n) due to the sorting algorithm. 
+  By switching to a single-pass loop that scans the elements precisely once to find 
+  the 3 maximums and 2 minimums via O(1) comparison assignments, the time complexity 
+  becomes strictly linear, O(n).
+
+Space Complexity: O(1)
+- Explanation: Both the sorting approach (if sorted in-place) and the single-pass 
+  tracking loop run in constant space because they require only a fixed number of 
+  local scalar scalar helper variables regardless of array size.
+===================================================================

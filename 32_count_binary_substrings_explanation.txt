@@ -1,0 +1,85 @@
+===================================================================
+LEETCODE 696: COUNT BINARY SUBSTRINGS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a binary string 's', return the number of non-empty substrings that 
+have the same number of 0's and 1's, where all the 0's and all the 1's 
+in these substrings are grouped consecutively.
+
+Substrings that occur multiple times are counted each time they appear.
+
+-------------------------------------------------------------------
+[METHODOLOGY: CONSECUTIVE GROUP RUN-LENGTHS (LINEAR O(N) SCAN)]
+-------------------------------------------------------------------
+
+A brute-force strategy checking all possible windows takes O(n^2) time. We can 
+optimize this down to a single O(n) pass by analyzing how valid substrings form 
+at the transition boundaries between 0s and 1s.
+
+1. THE RUN-LENGTH GROUPING INSIGHT:
+   - Let's take a string like s = "00011". We can collapse this into consecutive 
+     character count groups: Three '0's followed by Two '1's. 
+   - Run-lengths: [3, 2].
+
+2. THE BOUNDARY LIMIT MINIMUM LAW:
+   - When a block of 0s sits directly adjacent to a block of 1s, how many valid 
+     alternating substrings can they form?
+   - From "00011", we can form:
+     * "01" (using one '0' and one '1')
+     * "0011" (using two '0's and two '1's)
+   - We cannot form "000111" because we run out of '1's. The number of valid 
+     substrings formed between two adjacent groups is strictly constrained by the 
+     smaller group size: min(Count of 0s, Count of 1s).
+
+3. STREAMLINED TRACKING POTENTIALS:
+   - Instead of allocating an auxiliary vector array to store all run lengths explicitly, 
+     we track them dynamically on the fly using two sliding state buckets:
+     * 'curr': Stores the run-length count of the active character sequence block.
+     * 'prev': Stores the run-length count of the immediately preceding character block.
+   - When 's[i] == s[i-1]', we expand our current block: 'curr++'.
+   - When 's[i] != s[i-1]', a transition boundary occurs:
+     * We add 'min(prev, curr)' to our running 'total'.
+     * The old 'curr' block now becomes the historical 'prev' block.
+     * Reset 'curr = 1' to start counting the new character block.
+
+4. POST-LOOP CLEANUP:
+   - The loop terminates when it reaches the end of the string. Because the string ends, 
+     the final transition block is never flushed out inside the loop logic. 
+   - We must append an extra 'total += min(prev, curr)' right after the loop ends.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "00110"
+Initial State: total = 0, prev = 0, curr = 1
+
+- i = 1 (s[1]='0', s[0]='0'): Match! curr++ -> curr = 2
+- i = 2 (s[2]='1', s[1]='0'): Mismatch! Boundary Hit!
+         total += min(prev, curr) -> total += min(0, 2) -> total = 0
+         Shift states: prev = 2, curr = 1
+- i = 3 (s[3]='1', s[2]='1'): Match! curr++ -> curr = 2
+- i = 4 (s[4]='0', s[3]='1'): Mismatch! Boundary Hit!
+         total += min(prev, curr) -> total += min(2, 2) -> total = 2
+         Shift states: prev = 2, curr = 1
+
+Loop Terminates.
+Post-Loop Cleanup: total += min(prev, curr) -> total += min(2, 1) -> 2 + 1 = 3.
+
+Returns 3. (Valid substrings: "01", "0011", "10").
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: The algorithm scans through the string of length 'n' exactly once, 
+  starting from index 1. Within each iteration, it performs simple character identity 
+  comparisons and scalar assignments which take constant O(1) time. This ensures 
+  optimal linear scalability.
+
+Space Complexity: O(1)
+- Explanation: The tracking registers compute run lengths completely in-place. 
+  Memory consumption is restricted to a small, immutable number of primitive scalar 
+  variables ('total', 'prev', 'curr'), guaranteeing absolute constant space.
+===================================================================

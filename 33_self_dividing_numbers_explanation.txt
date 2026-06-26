@@ -1,0 +1,77 @@
+===================================================================
+LEETCODE 728: SELF DIVIDING NUMBERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A self-dividing number is a number that is divisible by every digit it contains.
+For example, 128 is self-dividing because 128 % 1 == 0, 128 % 2 == 0, and 128 % 8 == 0.
+
+Note: A self-dividing number is strictly prohibited from containing the digit zero.
+Given two integers 'left' and 'right', return a list of all self-dividing numbers 
+in the range [left, right] (inclusive).
+
+-------------------------------------------------------------------
+[METHODOLOGY: MODULAR REVERSE DIGIT EXTRACTION & SHORT-CIRCUIT VALS]
+-------------------------------------------------------------------
+
+The solution uses a helper function to inspect every single number within the 
+given bounded range sequentially. 
+
+1. COMPONENT-DRIVEN ENCAPSULATION:
+   - Creating a dedicated private predicate method 'isSelfDividing(int num)' 
+     isolates the digit-extraction mechanics from the range traversal loop, 
+     matching clean software architecture standards.
+
+2. DIGIT EXTRACTION PIPELINE:
+   - To look at each digit, we create a temporary copy of the number ('temp = num').
+   - We run a loop while 'temp > 0':
+     * Slice off the rightmost digit using base-10 remainder math: 'digit = temp % 10'.
+     * Process validation checks on 'digit'.
+     * Evaporate the processed column using integer division: 'temp /= 10'.
+
+3. SHORT-CIRCUIT RISK GATES (CRITICAL ORDERING):
+   - Inside our digit inspection block, we run an evaluation condition:
+     'if (digit == 0 || num % digit != 0)'
+   - The ordering of these checks is extremely important due to **short-circuit evaluation**:
+     * We must check 'digit == 0' first. If a digit is 0, the expression evaluates to 
+       true immediately and exits the function.
+     * If we checked 'num % digit != 0' first on a number like 10, the CPU would 
+       attempt to divide by zero, triggering an immediate runtime crash.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: left = 11, right = 12 | Scanning index i = 12
+Inside isSelfDividing(12):
+  - temp = 12
+
+Iteration 1:
+  - digit = 12 % 10 = 2
+  - Check: Is 2 == 0? (False) OR Is 12 % 2 != 0? (False) -> Passes gate.
+  - Shift: temp = 12 / 10 = 1
+
+Iteration 2:
+  - digit = 1 % 10 = 1
+  - Check: Is 1 == 0? (False) OR Is 12 % 1 != 0? (False) -> Passes gate.
+  - Shift: temp = 1 / 10 = 0
+
+Loop terminates safely because temp == 0.
+Returns true. 12 is appended to the results array.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(R * log10(N))
+- Explanation: Where 'R' is the range size (right - left + 1) and 'N' is the 
+  magnitude of the numbers within the range. The outer loop runs 'R' times. 
+  The inner loop splits 'temp' by 10 continuously, meaning it runs equal to the 
+  total number of digits in the number, bounded by log10(num). Given that the maximum 
+  number is 10^4 (at most 5 digits), the inner loop is effectively bounded by a small 
+  constant, ensuring hyper-fast execution.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the vector container used to accumulate and return the output values, 
+  no extra dynamic collections or memory maps are declared. Primitive tracking variables 
+  ('temp', 'digit') are safely overwritten in-place inside the stack frame.
+===================================================================

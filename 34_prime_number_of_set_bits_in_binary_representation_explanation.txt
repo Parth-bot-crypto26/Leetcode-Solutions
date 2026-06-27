@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 762: PRIME NUMBER OF SET BITS IN BINARY REPRESENTATION
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two integers 'left' and 'right', return the count of numbers in the 
+inclusive range [left, right] having a prime number of set bits in their 
+binary representation.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LOGICAL BOUNDED SEEDING & HARDWARE POPCOUNT]
+-------------------------------------------------------------------
+
+A brute-force solution might try to calculate primes dynamically using standard 
+loops. However, we can completely optimize this check by identifying the 
+absolute boundaries of our search constraints.
+
+1. THE 32-BIT MEMORY LAYER INSIGHT:
+   - The problem operates on standard signed/unsigned 32-bit integers. 
+     The absolute maximum number of set bits (1s) a 32-bit integer can possibly 
+     contain is exactly 32 (e.g., when written as all 1s).
+   - Therefore, we do not need a generic primality test function. We only need 
+     to look up whether a number between 0 and 32 is a prime number.
+
+2. CONSTANT-TIME LOOKUP ARRAY/GATEWAY:
+   - The prime numbers strictly less than 32 are: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31.
+   - By creating a hardcoded list check, our 'isPrime' predicate drops to a 
+     uniquely fast O(1) logical evaluation path.
+   - Note: C++ integers can go up to 10^6 under these constraints, meaning their 
+     set bits will never exceed 20 anyway (since 2^20 > 10^6). Your check window 
+     safely covers all bases.
+
+3. HARDWARE CAPTURING VIA POPCOUNT:
+   - We scan integers linearly from 'left' to 'right'.
+   - We pull the bit count instantly using '__builtin_popcount(i)'. On modern x86/ARM 
+     architectures, the compiler maps this function to a single CPU execution cycle 
+     instruction, bypassing traditional bitwise extraction shifting loops.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: left = 6, right = 7
+Initial State: totalCount = 0
+
+- i = 6: Binary = 110 -> setBits = 2
+         Check: Is 2 in our hardcoded prime sequence? Yes.
+         Action: totalCount++ -> totalCount = 1
+
+- i = 7: Binary = 111 -> setBits = 3
+         Check: Is 3 in our hardcoded prime sequence? Yes.
+         Action: totalCount++ -> totalCount = 2
+
+Loop terminates.
+Returns 2.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(R)
+- Explanation: Where 'R' is the range size (right - left + 1). The loop processes 
+  exactly 'R' items. Inside the block, '__builtin_popcount' executes via a single 
+  hardware step, and the hardcoded conditional check runs in O(1) time. This ensures 
+  the runtime scales purely linearly with the range size (up to a maximum of 10^4 operations).
+
+Space Complexity: O(1)
+- Explanation: All checks execute strictly in-place. Auxiliary space is bounded 
+  exclusively to a fixed stack frame with local primitive scalar tracking variables 
+  ('totalCount', 'setBits'), maintaining absolute constant space.
+===================================================================

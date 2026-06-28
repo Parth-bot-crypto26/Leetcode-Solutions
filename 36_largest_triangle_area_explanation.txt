@@ -1,0 +1,69 @@
+===================================================================
+LEETCODE 812: LARGEST TRIANGLE AREA
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of points on the X-Y plane where points[i] = [xi, yi], 
+return the area of the largest triangle that can be formed by any 
+three different points. 
+
+Answers within 10^-5 of the actual answer will be accepted.
+
+-------------------------------------------------------------------
+[METHODOLOGY: THREE-POINTER COMBINATORIAL SCAN & SHOELACE GEOMETRY]
+-------------------------------------------------------------------
+
+Given that the maximum number of points is heavily constrained to 50, an 
+exhaustive combinatorial brute-force search is highly optimal. The number of unique 
+triplets we can pick from 'n' items is given by the combination formula nC3. 
+For n = 50, 50C3 evaluates to exactly 19,600 iterations, which takes negligible 
+processing time.
+
+1. INDEPENDENT INDEX COUPLING:
+   - To avoid duplicate checks and self-matching points, we lock the nested loops 
+     to strict subsequent offsets:
+     * Outer loop 'i' runs from 0 to n-1.
+     * Middle loop 'j' runs from i+1 to n-1.
+     * Inner loop 'k' runs from j+1 to n-1.
+
+2. COORDINATE AREA CALCULATION (SHOELACE FORMULA):
+   - Rather than computing geometric side lengths (which uses heavy square roots 
+     and introduces truncation floating-point errors), we use the Shoelace 
+     determinant algorithm to find the exact area of a polygon from its vertices:
+     Area = 0.5 * abs(x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))
+   - Taking the absolute value 'abs()' is vital because the orientation of the 
+     three points (clockwise vs. counter-clockwise) can yield a negative determinant.
+
+3. CONCURRENT OPTIMIZATION MAXIMIZATION:
+   - We track 'max_area' globally, updating it via 'max(max_area, area)' whenever 
+     a larger triangle configuration is discovered.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: points = [[0,0], [0,1], [1,0]]
+Triplets extracted: (x1,y1) = (0,0), (x2,y2) = (0,1), (x3,y3) = (1,0)
+
+Area calculation:
+  - area = 0.5 * abs(0*(1 - 0) + 0*(0 - 0) + 1*(0 - 1))
+  - area = 0.5 * abs(0 + 0 - 1)
+  - area = 0.5 * abs(-1) -> 0.5 * 1 = 0.5
+
+max_area updates from 0 to 0.5.
+Returns 0.5.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n^3)
+- Explanation: Where 'n' is the total number of coordinate positions inside the 
+  input array. The algorithm nests three separate loop layers to find all 
+  possible combinations of three points. The total step count scales cubically 
+  with respect to array sizes, which is perfectly viable here due to n <= 50.
+
+Space Complexity: O(1)
+- Explanation: The evaluation runs fully in-place on the points list parameters. 
+  Memory consumption is restricted to a few primitive coordinate floating scalars 
+  ('max_area', 'x1', 'y1', etc.), keeping auxiliary space constant.
+===================================================================

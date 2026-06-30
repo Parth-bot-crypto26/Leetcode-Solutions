@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 20: VALID PARENTHESES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 's' containing just the characters '(', ')', '{', '}', 
+'[' and ']', determine if the input string is valid.
+
+An input string is valid if:
+1. Open brackets must be closed by the same type of brackets.
+2. Open brackets must be closed in the correct order.
+3. Every close bracket has a corresponding open bracket of the same type.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LAST-IN, FIRST-OUT (LIFO) STACK PARSING]
+-------------------------------------------------------------------
+
+When dealing with structural nesting where the most recently opened symbol 
+must be the very first one to be closed, a Stack data structure is the optimal 
+architectural tool.
+
+1. OPENING BRACKET ACCUMULATION:
+   - We traverse the string character by character from left to right.
+   - If we encounter an opening character ('(', '{', or '['), we push it directly 
+     onto the stack. This records our open execution tracking timeline.
+
+2. CLOSING BRACKET VALIDATION GATES:
+   - If we encounter a closing character, it must immediately pair up with the 
+     absolute most recent opening character available.
+   - Gate A (Premature Empty Check): We check if the stack is empty. If it is 
+     empty when a closing bracket arrives, there is no opening partner available. 
+     Return false immediately.
+   - Gate B (Type Match Check): We look at the top element of our stack ('st.top()'). 
+     If the current closing bracket matches the type of the top opening bracket, 
+     the pair is valid. We pop the opening bracket off the stack ('st.pop()') 
+     and continue.
+   - Gate C (Mismatch Invalidation): If the current closing bracket does not match 
+     the type of the top opening bracket (e.g., current is ']' but top is '('), 
+     the string breaks nesting order rules. Return false immediately.
+
+3. CONVERGENCE TERMINATION:
+   - Once the loop finishes, we evaluate 'st.empty()'. If the stack still contains 
+     elements, it implies some opening brackets were left unclosed (e.g., "([]"). 
+     A valid string must result in a completely empty stack.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+
+Input: s = "([])"
+Initial State: st = []
+
+- i = 0 | c = '(' -> Opening bracket. Push onto stack.   st = ['(']
+- i = 1 | c = '[' -> Opening bracket. Push onto stack.   st = ['(', '[']
+- i = 2 | c = ']' -> Closing bracket. 
+                     Stack not empty. top = '['.
+                     Match found ('[' and ']'). Pop stack. st = ['(']
+- i = 3 | c = ')' -> Closing bracket. 
+                     Stack not empty. top = '('.
+                     Match found ('(' and ')'). Pop stack. st = []
+
+Loop terminates.
+Evaluation: st.empty() is TRUE.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: The algorithm evaluates the input string of length 'n' using a 
+  single linear scan. Within each step, pushing elements, reading the top node, 
+  and popping items out of a standard library stack container run in absolute 
+  constant O(1) time. The performance profile scales perfectly linearly.
+
+Space Complexity: O(n)
+- Explanation: In the worst-case scenario (such as an input string composed entirely 
+  of opening characters like "(((((((("), no matching evaluations trigger to flush the 
+  buffer, causing the stack to grow continuously up to size 'n'. Thus, auxiliary 
+  space scales linearly with input size.
+===================================================================

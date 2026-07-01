@@ -1,0 +1,73 @@
+===================================================================
+LEETCODE 836: RECTANGLE OVERLAP
+===================================================================
+
+[PROBLEM DESCRIPTION]
+An axis-aligned rectangle is represented as a list [x1, y1, x2, y2], where 
+(x1, y1) is the coordinate of its bottom-left corner, and (x2, y2) is the 
+coordinate of its top-right corner.
+
+Two rectangles overlap if the area of their intersection is positive. 
+Two rectangles that only touch at the corners or edges do not overlap.
+Given two rectangles 'rec1' and 'rec2', return true if they overlap.
+
+-------------------------------------------------------------------
+[METHODOLOGY: INVERSE SEPARATION LINE LAW (DE MORGAN'S STRATEGY)]
+-------------------------------------------------------------------
+
+Trying to map out positive structural intersection intersections can involve 
+tedious edge cases. The cleaner architectural approach is to check for the 
+inverse conditions: **When is it completely impossible for them to overlap?**
+
+Two axis-aligned rectangles fail to overlap if and only if one rectangle is 
+completely separated from the other along one of the cardinal axes.
+
+Let's look at the 4 clear separation scenarios:
+
+1. COMPLETELY TO THE LEFT:
+   - rec1 is entirely to the left of rec2 if rec1's rightmost edge is less than 
+     or equal to rec2's leftmost edge: 'rec1[2] <= rec2[0]'
+
+2. COMPLETELY TO THE RIGHT:
+   - rec1 is entirely to the right of rec2 if rec1's leftmost edge is greater than 
+     or equal to rec2's rightmost edge: 'rec1[0] >= rec2[2]'
+
+3. COMPLETELY BELOW:
+   - rec1 is entirely below rec2 if rec1's topmost edge is less than or equal to 
+     rec2's bottommost edge: 'rec1[3] <= rec2[1]'
+
+4. COMPLETELY ABOVE:
+   - rec1 is entirely above rec2 if rec1's bottommost edge is greater than or equal 
+     to rec2's topmost edge: 'rec1[1] >= rec2[3]'
+
+THE LOGICAL FALL-THROUGH:
+If *any* of these four guard gates evaluate to true, the rectangles are fully 
+separated, so we return false. If none of these conditions are met, they must 
+overlap.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: rec1 = [0,0,2,2], rec2 = [1,1,3,3]
+
+- Gate 1 (Left Check):  rec1[2] <= rec2[0] -> 2 <= 1 (False)
+- Gate 2 (Right Check): rec1[0] >= rec2[2] -> 0 >= 3 (False)
+- Gate 3 (Above Check): rec1[1] >= rec2[3] -> 0 >= 3 (False)
+- Gate 4 (Below Check): rec1[3] <= rec2[1] -> 2 <= 1 (False)
+
+All separation checks failed. 
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The algorithm processes a fixed sequence of exactly 4 primitive scalar 
+  comparisons. It runs instantly in a handful of CPU cycles and does not scale with 
+  input sizes.
+
+Space Complexity: O(1)
+- Explanation: The calculation executes entirely in-place on the input coordinates 
+  without allocating any extra tracking arrays or data variables.
+===================================================================

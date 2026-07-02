@@ -1,0 +1,74 @@
+===================================================================
+LEETCODE 892: SURFACE AREA OF 3D SHAPES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an n x n grid where each value v = grid[i][j] represents a 
+tower of v cubes placed on top of cell (i, j). Any directly adjacent cubes 
+are glued to each other, forming several irregular 3D shapes.
+
+Return the total surface area of the resulting shapes. Both top and bottom 
+faces count toward the surface area.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LOCALIZED CARDINAL CONTRIBUTION SCAN (O(N²))]
+-------------------------------------------------------------------
+
+A brute-force calculation that counts individual cube sides and tries to cross-check 
+global overlaps will easily run into messy indexing bugs. The optimal strategy is 
+to evaluate the surface area contribution of each tower cell (i, j) independently.
+
+For any given tower of height 'v':
+
+1. HORIZONTAL SURFACE PLANES (TOP & BOTTOM):
+   - As long as the tower height is greater than zero ('v > 0'), it will expose 
+     exactly 1 top face to the sky and 1 bottom face to the ground.
+   - Action: 'total += 2;'
+
+2. VERTICAL SIDE PLANES (CARDINAL NEIGHBORS):
+   - A tower has 4 vertical side exposures: North, South, East, and West.
+   - The surface area exposed on a given side depends completely on its neighbor's 
+     height. If a neighboring tower is shorter, the difference in height represents 
+     the vertical side wall surface area exposed to the air.
+   - Formula: exposed_wall = max(0, v - neighbor_height)
+   - If the neighbor is out of bounds (matrix edge), the 'neighbor_height' is treated 
+     as 0, meaning the entire vertical face of height 'v' is exposed.
+
+3. DUAL-COUNT PREVENTION:
+   - Using 'max(0, v - neighbor)' means a cell only logs its own *protruding* surface 
+     area. If the neighbor is taller, the expression yields 0. The exposed wall will 
+     be handled symmetrically when the loop moves to that neighbor's coordinate.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: grid = [[1, 2], [3, 4]] | n = 2
+Let's evaluate Cell (0, 0) where v = 1:
+
+- Top/Bottom contribution: v > 0 -> total += 2 (total = 2)
+- North Neighbor: Out of bounds -> north = 0.
+                  Exposed: max(0, 1 - 0) = 1 -> total += 1 (total = 3)
+- South Neighbor: grid[1][0] = 3. 
+                  Exposed: max(0, 1 - 3) = 0 -> total += 0 (total = 3)
+- West Neighbor:  Out of bounds -> west = 0.
+                  Exposed: max(0, 1 - 0) = 1 -> total += 1 (total = 4)
+- East Neighbor:  grid[0][1] = 2.
+                  Exposed: max(0, 1 - 2) = 0 -> total += 0 (total = 4)
+
+Cell (0, 0) contributes exactly 4 units to the global surface area.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n^2)
+- Explanation: Where 'n' is the row/column dimension of the grid. The nested loop 
+  visits each cell coordinate in the grid exactly once. Within the inner block, the 
+  algorithm performs a fixed number of lookups and basic arithmetic maximum/subtraction 
+  operations. The execution time scales completely linearly with the total number of cells.
+
+Space Complexity: O(1)
+- Explanation: The algorithm executes entirely in-place. Auxiliary space allocation is 
+  restricted to local scalar primitive variables ('n', 'total', 'v', 'north', etc.), 
+  ensuring a clean, absolute constant memory profile.
+===================================================================

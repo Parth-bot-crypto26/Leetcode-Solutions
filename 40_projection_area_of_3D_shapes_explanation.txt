@@ -1,0 +1,78 @@
+===================================================================
+LEETCODE 883: PROJECTION AREA OF 3D SHAPES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an n x n grid where each value v = grid[i][j] represents a 
+tower of v cubes placed on top of cell (i, j). We view the projection 
+("shadow") of these cubes onto the XY, YZ, and ZX planes.
+
+Return the total area of all three projections combined.
+
+-------------------------------------------------------------------
+[METHODOLOGY: MULTI-VIEW PROJECTION REDUCTION (SINGLE-PASS SCAN)]
+-------------------------------------------------------------------
+
+Instead of trying to think in 3D coordinate space, we can break down what each 
+plane's shadow mathematically represents in our 2D grid:
+
+1. THE TOP VIEW (XY-PLANE PROJECTION):
+   - Looking from the top down, a cell contributes exactly 1 unit of shadow area 
+     as long as there is at least one cube sitting on it.
+   - Condition: If grid[i][j] > 0, we increment our 'total' area tracker by 1.
+
+2. THE SIDE VIEW (YZ-PLANE PROJECTION):
+   - Looking from the side along the rows, the shadow height of each row is 
+     determined exclusively by its tallest tower. 
+   - Rule: For each row 'i', find the maximum value 'rowMax' across all columns 'j'.
+
+3. THE FRONT VIEW (ZX-PLANE PROJECTION):
+   - Looking from the front along the columns, the shadow height of each column is 
+     determined exclusively by its tallest tower.
+   - Rule: For each column 'i', find the maximum value 'colMax' across all rows 'j'.
+
+THE SINGLE-PASS OPTIMIZATION:
+Instead of running three distinct loop sets, we use a single symmetric nested loop. 
+By pulling the row value using grid[i][j] and the transposed column value using 
+grid[j][i] at the same time, we compute 'rowMax' and 'colMax' simultaneously.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: grid = [[1, 2], [3, 4]] | n = 2
+
+Row i = 0:
+  - j = 0: grid[0][0] = 1 > 0 -> total++ (total=1)
+           rowMax = max(0, grid[0][0]) -> max(0, 1) = 1
+           colMax = max(0, grid[0][0]) -> max(0, 1) = 1
+  - j = 1: grid[0][1] = 2 > 0 -> total++ (total=2)
+           rowMax = max(1, grid[0][1]) -> max(1, 2) = 2
+           colMax = max(1, grid[1][0]) -> max(1, 3) = 3
+  - Loop end for Row 0: total += rowMax + colMax -> total += 2 + 3 (total=7)
+
+Row i = 1:
+  - j = 0: grid[1][0] = 3 > 0 -> total++ (total=8)
+           rowMax = max(0, grid[1][0]) -> max(0, 3) = 3
+           colMax = max(0, grid[0][1]) -> max(0, 2) = 2
+  - j = 1: grid[1][1] = 4 > 0 -> total++ (total=9)
+           rowMax = max(3, grid[1][1]) -> max(3, 4) = 4
+           colMax = max(2, grid[1][1]) -> max(2, 4) = 4
+  - Loop end for Row 1: total += rowMax + colMax -> total += 4 + 4 (total=17)
+
+Returns 17.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n^2)
+- Explanation: Where 'n' is the grid's dimension length. The algorithm utilizes a 
+  nested loop structure that hits every coordinate element cell exactly once. Inside 
+  the block, evaluations are confined to constant-time scalar comparisons, matching 
+  optimal quadratic boundaries.
+
+Space Complexity: O(1)
+- Explanation: The calculation operates completely in-place. Auxiliary space allocations 
+  are bound to local tracking primitive variables ('n', 'total', 'rowMax', 'colMax'), 
+  maintaining fixed constant space.
+===================================================================

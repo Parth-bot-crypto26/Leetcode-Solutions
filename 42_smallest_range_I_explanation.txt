@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 908: SMALLEST RANGE I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'nums' and an integer 'k'. In one operation, 
+you can change any element nums[i] to nums[i] + x where x is an integer 
+from the range [-k, k]. You can apply this operation at most once per index.
+
+The score of the array is the difference between its maximum and minimum elements.
+Return the minimum possible score after optimal modifications.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BOUNDARY COMPRESSION & RANGE OVERLAP LAW]
+-------------------------------------------------------------------
+
+The problem statement seems complex because it allows modifying *every* index. 
+However, the optimization score is defined entirely by the two extreme elements:
+the absolute maximum element ('max_val') and the absolute minimum element ('min_val').
+
+Internal elements do not dictate the score; they will always fall comfortably 
+within the range configured by the extremes once the extremes are optimized.
+
+1. EXTREME EXTRACTION PASSTHROUGH:
+   - We run a single linear loop over the array to identify 'min_val' and 'max_val'.
+
+2. GREEDY RANGE COMPRESSION:
+   - To make the total span between the largest and smallest numbers as narrow 
+     as possible, we must greedily bring them closer together:
+     * We push the lowest boundary UP as far as allowed: min_val + k
+     * We pull the highest boundary DOWN as far as allowed: max_val - k
+   - The new optimal compressed difference becomes: diff = (max_val - k) - (min_val + k)
+   - Rearranging the algebra shows: diff = (max_val - min_val) - 2k
+
+3. ZERO-BOUND FLOOR GATEWAY:
+   - If the original distance between the extremes is small enough ($max_val - min_val <= 2k$), 
+     the modified boundaries will cross or meet, meaning 'diff' evaluates to 0 or a 
+     negative value. 
+   - A negative score is geometrically impossible since a range cannot be less than zero. 
+     It simply means we could choose smaller 'x' values to make every element in the array 
+     perfectly equal.
+   - We safeguard this boundary using: return max(0, diff).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 3, 6], k = 3
+Initial Scan: min_val = 1, max_val = 6
+
+Compression Calculation:
+  - Push min up: 1 + 3 = 4
+  - Pull max down: 6 - 3 = 4
+  - diff = 4 - 4 = 0
+
+Evaluation: max(0, 0) -> 0.
+Returns 0. (The array can be transformed completely into [4, 4, 4]).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of the 'nums' array. The algorithm reads 
+  through the array elements exactly once to extract the minimum and maximum scalar values. 
+  The subsequent arithmetic expressions and floor value selections take O(1) constant 
+  time, providing optimal linear execution.
+
+Space Complexity: O(1)
+- Explanation: The entire optimization evaluates in-place. Auxiliary storage is 
+  restricted to local scalar primitive registers ('min_val', 'max_val', 'diff'), 
+  maintaining absolute constant space.
+===================================================================

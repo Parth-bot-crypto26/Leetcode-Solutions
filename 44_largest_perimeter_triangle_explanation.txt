@@ -1,0 +1,77 @@
+===================================================================
+LEETCODE 976: LARGEST PERIMETER TRIANGLE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', return the largest perimeter of a triangle 
+with a non-zero area, formed from three of these lengths. If it is 
+impossible to form any triangle of a non-zero area, return 0.
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY BACKWARD SCAN & TRIANGLE INEQUALITY PROPERTY]
+-------------------------------------------------------------------
+
+A brute-force solution that checks every unique triplet combination takes O(n^3) 
+time, which would fail under constraints where nums.length = 10^4. Instead, we can 
+leverage sorting to construct a highly optimal greedy algorithm.
+
+1. THE TRIANGLE INEQUALITY GROUND LAW:
+   - For any three side lengths a, b, and c to form a valid non-zero area triangle, 
+     the sum of the lengths of any two sides must be strictly greater than the length 
+     of the remaining side.
+   - If we sort the sides such that a <= b <= c, the condition simplifies down to 
+     a single check: **a + b > c**. (If the two smaller sides together can beat the 
+     longest side, the other two combinations like a+c > b are guaranteed to be true).
+
+2. GREEDY BACKWARD TRAVERSAL:
+   - We sort the 'nums' array in ascending order.
+   - To maximize the perimeter, we must greedily test the largest side lengths first. 
+     We start our index tracker 'i' at the very end of the array ('nums.size() - 1') 
+     and look at adjacent triplets:
+     * c = nums[i]   (Largest side in the triplet window)
+     * b = nums[i-1] (Middle side in the triplet window)
+     * a = nums[i-2] (Smallest side in the triplet window)
+
+3. IMMEDIATE CONVERGENCE SHORT-CIRCUIT:
+   - If nums[i-2] + nums[i-1] > nums[i], we have found a valid triangle. Because we 
+     are scanning from the highest values down to the lowest values, this very first 
+     valid triplet is mathematically guaranteed to provide the largest sum. We return 
+     the perimeter 'a + b + c' immediately.
+   - If the condition fails, it means 'nums[i]' is too large to be balanced by the 
+     two numbers right under it. Since any elements further to the left are even smaller, 
+     'nums[i]' can *never* form a valid triangle with any other elements. We shift our 
+     triplet window left by decrementing 'i'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 1, 10]
+Sorted State: [1, 1, 2, 10] | size = 4
+
+Iteration 1 (i = 3):
+  - c = nums[3] = 10, b = nums[2] = 2, a = nums[1] = 1
+  - Check: Is 1 + 2 > 10? -> 3 > 10 is FALSE. 
+  - (10 cannot form a triangle with these or any smaller numbers to the left).
+
+Iteration 2 (i = 2):
+  - c = nums[2] = 2, b = nums[1] = 1, a = nums[0] = 1
+  - Check: Is 1 + 1 > 2? -> 2 > 2 is FALSE.
+
+Loop terminates (i drops below index 2).
+Returns 0.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n log n)
+- Explanation: Sorting the array using 'std::sort' dominates the execution timeline, 
+  taking O(n log n) time. The subsequent backward scan runs a single loop that executes 
+  at most 'n - 2' times, executing basic scalar comparisons and additions in O(1) 
+  constant time per step. This fits perfectly within execution boundaries.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: The array is sorted in-place. Auxiliary storage is restricted to a 
+  handful of loop control tracking index registers on the stack, maintaining a completely 
+  constant memory profile.
+===================================================================

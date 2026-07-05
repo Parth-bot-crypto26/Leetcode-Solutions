@@ -1,0 +1,78 @@
+===================================================================
+LEETCODE 914: X OF A KIND IN A DECK OF CARDS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'deck' where deck[i] represents the number 
+written on the i-th card. Partition the cards into one or more groups such that:
+1. Each group has exactly X cards where X > 1.
+2. All cards in a single group have the exact same integer written on them.
+
+Return true if such a partition is possible, or false otherwise.
+
+-------------------------------------------------------------------
+[METHODOLOGY: FREQUENCY COUNTING & GLOBAL GREATEST COMMON DIVISOR (GCD)]
+-------------------------------------------------------------------
+
+The problem states that every group must contain exactly X identical cards. 
+This means that if a card value appears 'F' times in the deck, its frequency 'F' 
+must be perfectly divisible by X without any remainder (F % X == 0).
+
+If multiple card types exist with unique frequencies (F1, F2, F3...), the chosen 
+group size X must be a **common divisor** for every single one of those frequencies. 
+To check if such a valid integer X (where X >= 2) exists, we compute the 
+Greatest Common Divisor (GCD) across all frequencies.
+
+1. FREQUENCY MAPPING:
+   - We use an 'unordered_map<int, int> counts' to map each card integer to its total 
+     frequency count via a single linear pass.
+
+2. RUNNING GCD CASCADE:
+   - We initialize our 'common_gcd = 0'.
+   - We iterate through the frequency map values. For the first frequency encountered, 
+     we seed 'common_gcd = freq'.
+   - For every subsequent frequency, we update our running value using the Euclidean 
+     algorithm: 'common_gcd = gcd(common_gcd, freq);'
+   - If at any point the GCD falls to 1, it implies the counts are co-prime, meaning 
+     no uniform partition size greater than 1 can exist.
+
+3. EVALUATION BOUNDARY:
+   - At the end of the loop, if 'common_gcd >= 2', it means all card types can be 
+     split into clean matching sets of that size (or its factors). We return true.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: deck = [1, 2, 3, 4, 4, 3, 2, 1]
+
+Step 1: Frequency Collection
+  - Map counts: {1: 2, 2: 2, 3: 2, 4: 2}
+
+Step 2: GCD Accumulation
+  - Loop item 1 (freq = 2): common_gcd = 2
+  - Loop item 2 (freq = 2): common_gcd = gcd(2, 2) -> 2
+  - Loop item 3 (freq = 2): common_gcd = gcd(2, 2) -> 2
+  - Loop item 4 (freq = 2): common_gcd = gcd(2, 2) -> 2
+
+Step 3: Verification
+  - Return: 2 >= 2 is TRUE.
+
+Returns true. (Groups are [1,1], [2,2], [3,3], [4,4]).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * log(max_freq))
+- Explanation: Where 'n' is the total number of cards in the deck. Building the frequency 
+  map takes O(n) linear time. The second loop iterates over the unique card keys (at most 'n' keys). 
+  In each step, computing the GCD using the logarithmic Euclidean reduction algorithm takes 
+  O(log(max_freq)) operations. This yields a highly efficient time complexity that easily 
+  passes well within the 10^4 constraint boundaries.
+
+Space Complexity: O(u)
+- Explanation: Where 'u' is the number of unique card integers present in the deck. 
+  Auxiliary memory is used exclusively by the hash map to keep track of the frequency counters. 
+  In the worst-case scenario where every card is unique, 'u' scales linearly with 'n', bounding 
+  the space complexity to O(n).
+===================================================================

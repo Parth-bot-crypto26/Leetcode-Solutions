@@ -1,0 +1,74 @@
+===================================================================
+LEETCODE 342: POWER OF FOUR
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer n, return true if it is a power of four. Otherwise, return false.
+An integer n is a power of four, if there exists an integer x such that n == 4^x.
+
+Follow up: Could you solve it without loops/recursion?
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE MASKING & POWER-OF-TWO CONVERGENCE (O(1))]
+-------------------------------------------------------------------
+
+Your initial iteration implements a clean linear division scan. To meet the follow-up 
+requirement of O(1) loopless execution, we can exploit how powers of 4 map into 
+binary registers.
+
+1. THE POWER OF TWO PROPERTY:
+   - Every power of four (1, 4, 16, 64...) is inherently a power of two (2^0, 2^2, 2^4, 2^6...).
+   - A positive power of two always contains exactly one single set bit ('1') in its 
+     entire binary representation.
+   - We validate this instantly using the bitwise boundary formula: 'n > 0 && (n & (n - 1)) == 0'
+
+2. THE POSITION STRUCTURAL LAW:
+   - Let's look at where the single '1' bit lands for powers of 4:
+     * 4^0 = 1   -> Binary: 0000 0001  (1st bit position - odd)
+     * 4^1 = 4   -> Binary: 0000 0100  (3rd bit position - odd)
+     * 4^2 = 16  -> Binary: 0001 0000  (5th bit position - odd)
+   - Powers of 2 that are *not* powers of 4 have their '1' at even bit positions (e.g., 2 is 0010, 8 is 1000).
+
+3. THE HEXADECIMAL MAGIC MASK (0x55555555):
+   - To ensure the single '1' resides strictly in an odd bit position, we introduce 
+     a bitmask. The hex value '0x55555555' expands to a 32-bit binary pattern of:
+     0101 0101 0101 0101 0101 0101 0101 0101
+   - Performing '(n & 0x55555555)' acts as a selective filter. If the result equals 'n' 
+     (or is non-zero), it confirms that the single '1' bit is standing in a valid 
+     power-of-four column.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 16 (Binary: 0001 0000)
+
+Step 1: Guard Gates
+  - 16 > 0 (TRUE)
+
+Step 2: Power-of-Two verification
+  - 16 & 15 -> (10000 & 01111) = 00000 (0)
+  - (16 & 15) == 0 evaluates to TRUE. (It is a power of 2)
+
+Step 3: Position verification via Hex Mask
+  - 16 & 0x55555555:
+    0001 0000  (16)
+  & 0101 0101  (0x55...)
+  -----------
+    0001 0000  (Result is 16, which is non-zero!)
+
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The complete check is condensed into three distinct bitwise operations 
+  (subtraction, bitwise AND, and a mask comparison). These map directly to basic register 
+  gates executing in single instruction cycles. No loops or branch recursions exist, 
+  ensuring true constant time performance.
+
+Space Complexity: O(1)
+- Explanation: The validation calculates fully in-place within native registers, 
+  consuming zero auxiliary allocation units.
+===================================================================

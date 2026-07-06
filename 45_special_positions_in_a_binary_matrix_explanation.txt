@@ -1,0 +1,67 @@
+===================================================================
+LEETCODE 1582: SPECIAL POSITIONS IN A BINARY MATRIX
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an m x n binary matrix 'mat', return the number of special positions.
+A position (i, j) is called special if mat[i][j] == 1 and all other elements 
+in row i and column j are 0.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-PASS MATRIX FREQUENCY PRECOMPUTATION]
+-------------------------------------------------------------------
+
+A naive check would search row 'i' and column 'j' dynamically whenever it runs 
+into a 1, resulting in redundant, overlapping matrix scans. We can eliminate this 
+overhead entirely by using a prefix-frequency tracking strategy:
+
+1. FREQUENCY PRECOMPUTATION PASS:
+   - We allocate two tracking vectors initialized to zero:
+     * 'rowCount' of size 'm' to store the sum of 1s in each row.
+     * 'colCount' of size 'n' to store the sum of 1s in each column.
+   - We run our first nested scan over the matrix. Every time 'mat[i][j] == 1', 
+     We increment its corresponding row and column counters: 'rowCount[i]++' and 
+     'colCount[j]++'.
+
+2. COORDINATE VERIFICATION PASS:
+   - We run a second nested scan over the matrix cells to locate special positions.
+   - For a position (i, j) to be "special", it must fulfill three conditions:
+     * Condition A: The cell itself must contain a 1 ('mat[i][j] == 1').
+     * Condition B: The total number of 1s in that row must be exactly 1 ('rowCount[i] == 1').
+     * Condition C: The total number of 1s in that column must be exactly 1 ('colCount[j] == 1').
+   - If a cell matches all three criteria, we increment our 'specialCount'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input Matrix:
+  [1, 0, 0]
+  [0, 0, 1]
+  [1, 0, 0]
+
+Pass 1 (Frequency Collection):
+  - rowCount = [1, 1, 1]  (Each row contains exactly one '1')
+  - colCount = [2, 0, 1]  (Column 0 has two '1's, Col 1 has zero, Col 2 has one)
+
+Pass 2 (Verification Lookup):
+  - Cell (0, 0) -> mat[0][0]=1, rowCount[0]=1, colCount[0]=2 (FAIL: Col has two 1s)
+  - Cell (1, 2) -> mat[1][2]=1, rowCount[1]=1, colCount[2]=1 (PASS!)
+  - Cell (2, 0) -> mat[2][0]=1, rowCount[2]=1, colCount[0]=2 (FAIL)
+
+Returns specialCount -> 1.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(m * n)
+- Explanation: The algorithm performs exactly two sequential nested loops over the 
+  matrix cells. Since each phase processes basic indexing reads and assignments 
+  running in O(1) constant time, the runtime scales cleanly and linearly with the total 
+  number of cells in the matrix (max 100 * 100 = 10,000 operations).
+
+Space Complexity: O(m + n)
+- Explanation: Extra memory scales linearly with the dimensions of the grid to store 
+  the frequency arrays ('rowCount' and 'colCount'). For a 100x100 matrix, this allocates 
+  only 200 integers, maintaining an extremely light memory footprint.
+===================================================================

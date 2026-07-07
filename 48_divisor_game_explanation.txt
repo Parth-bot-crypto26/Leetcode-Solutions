@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 1025: DIVISOR GAME
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Alice and Bob take turns playing a game, with Alice starting first. Initially, 
+there is a number 'n' on the chalkboard. On each player's turn, they choose 
+any integer 'x' such that 0 < x < n and n % x == 0, then replace 'n' with 'n - x'.
+
+If a player cannot make a valid move, they lose. Return true if and only if 
+Alice wins the game, assuming both players play optimally.
+
+-------------------------------------------------------------------
+[METHODOLOGY: GAME THEORY MATHEMATICAL PARITY INVARIANCE (O(1))]
+-------------------------------------------------------------------
+
+While this problem can technically be modeled using backward-induction Dynamic 
+Programming, analyzing the invariant properties of odd/even integers yields 
+an instant constant-time mathematical solution.
+
+1. THE POWER OF EVEN NUMBERS (THE WINNING STATE):
+   - If a player is given an even number 'n', they can always choose x = 1 
+     (since 1 is a universal factor of all numbers, and 0 < 1 < n).
+   - Subtracting 1 from an even number leaves behind an **odd** number (n - 1).
+
+2. THE TRAP OF ODD NUMBERS (THE LOSING STATE):
+   - If a player is given an odd number 'n', they are completely trapped by number theory. 
+     An odd number has **absolutely no even divisors**. Therefore, any factor 'x' 
+     they choose *must* be odd.
+   - Subtracting an odd factor 'x' from an odd number 'n' always results in an 
+     **even** number (n - x).
+
+3. THE OPTIMAL MATRYOSHKA LOOP:
+   - Alice starts first. If 'n' is even, Alice chooses x = 1 and hands an odd number to Bob.
+   - Bob receives an odd number and is forced to hand an even number right back to Alice.
+   - Alice can continuously execute this strategy, controlling the board until she reduces 
+     the game down to n = 2. Alice chooses x = 1, leaving Bob with n = 1.
+   - Since no integer exists such that 0 < x < 1, Bob has no valid moves and loses.
+
+Thus, the game reduces down to checking who starts with an even number. 
+If 'n % 2 == 0', Alice wins unconditionally.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 3 (Odd)
+
+- Alice's Turn (n = 3): 
+  Factors of 3 are just 1. Alice must choose x = 1.
+  New number: 3 - 1 = 2. Hands to Bob.
+- Bob's Turn (n = 2):
+  Bob receives an even number. Bob chooses x = 1.
+  New number: 2 - 1 = 1. Hands to Alice.
+- Alice's Turn (n = 1):
+  Alice has no valid moves because 0 < x < 1 has no integer solutions.
+  Alice loses.
+
+Evaluation: 3 % 2 == 0 is FALSE. Returns false.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The complete game simulation resolves down to a single parity modulo 
+  operation. This executes inside a single hardware instruction cycle and remains 
+  independent of the magnitude of 'n'.
+
+Space Complexity: O(1)
+- Explanation: The validation is evaluated purely in-place, allocating absolutely 
+  no auxiliary variables or recursive call stacks.
+===================================================================

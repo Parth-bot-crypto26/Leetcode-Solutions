@@ -1,0 +1,93 @@
+===================================================================
+LEETCODE 989: ADD TO ARRAY-FORM OF INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+The array-form of an integer num is an array representing its digits in left 
+to right order (e.g., 1321 is [1, 3, 2, 1]). Given 'num' and an integer 'k', 
+return the array-form of the integer calculation: num + k.
+
+-------------------------------------------------------------------
+[METHODOLOGY: UNIFIED CARRY MODULO CASCADE (ELEMENT-WISE ADDITION)]
+-------------------------------------------------------------------
+
+A common trap is attempting to convert the array 'num' back into a standard integer or 
+long long type, adding 'k', and converting it back to a vector. This will instantly 
+throw a **Runtime Overflow Exception** because the length of 'num' can be up to 10^4 digits, 
+which far exceeds the storage limits of 64-bit or even 128-bit primitive integers.
+
+The optimal approach mimics elementary-school column addition, processing the 
+numbers digit-by-digit from right to left:
+
+1. THE CARRY OVERLOAD TECHNIQUE:
+   - Instead of breaking 'k' down into independent arrays or maintaining a standalone 
+     'carry' flag variable, we elegantly treat the integer 'k' itself as our running 
+     accumulative carry reservoir.
+
+2. REVERSE COLUMN SLIDING TRAVERSAL:
+   - We position an index pointer 'i' at the final element of the array ('num.size() - 1').
+   - We run a loop while 'i >= 0' OR 'k > 0':
+     * If there are digits left to process in the vector ('i >= 0'), we inject the 
+       current column's value straight into our carry reservoir: 'k += num[i]'.
+     * The single-digit value for our active column is captured using base-10 remainder 
+       math: 'k % 10'. We push this directly into our 'result' buffer.
+     * We drop the units place of our carry reservoir by performing integer division 
+       'k /= 10'. The remaining value shifts down to serve as the carry factor for the next round.
+     * Shift our pointer left ('i--').
+
+3. ALIGNMENT TRANSPOSITION:
+   - Because our processing scans from right-to-left, digits are appended into 'result' 
+     in backwards order (Least Significant Digit first). 
+   - We finalize our array structure by calling 'std::reverse' on the vector before returning.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = [2, 1, 5], k = 806
+Initial State: result = [], i = 2, k = 806
+
+Iteration 1 (i = 2):
+  - i >= 0 -> k += num[2] -> k = 806 + 5 = 811
+  - result.push_back(811 % 10) -> result = [1]
+  - k /= 10 -> k = 81
+  - i-- -> i = 1
+
+Iteration 2 (i = 1):
+  - i >= 0 -> k += num[1] -> k = 81 + 1 = 82
+  - result.push_back(82 % 10) -> result = [1, 2]
+  - k /= 10 -> k = 8
+  - i-- -> i = 0
+
+Iteration 3 (i = 0):
+  - i >= 0 -> k += num[0] -> k = 8 + 2 = 10
+  - result.push_back(10 % 10) -> result = [1, 2, 0]
+  - k /= 10 -> k = 1
+  - i-- -> i = -1
+
+Iteration 4 (i = -1):
+  - i is out of bounds, but k > 0 (k = 1) -> Loop continues!
+  - result.push_back(1 % 10) -> result = [1, 2, 0, 1]
+  - k /= 10 -> k = 0
+  - i-- -> i = -2
+
+Loop Terminates (i = -2, k = 0).
+Reversing 'result' -> [1, 0, 2, 1]
+
+Returns [1, 0, 2, 1].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(max(N, log10(K)))
+- Explanation: Where 'N' is the length of the 'num' vector array. The math execution loop 
+  runs a total number of times proportional to whichever value is longer: the number of 
+  digits in the array ('N') or the number of digits inside 'k' (bounded by log10(K)). 
+  Reversing the final output array takes linear time relative to the output length. 
+  This ensures highly scalable linear execution performance.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory allocated for the final 'result' vector required 
+  to satisfy the function's return template type signature, no additional dynamic data 
+  structures, map lookups, or call stacks are instantiated, preserving constant space.
+===================================================================

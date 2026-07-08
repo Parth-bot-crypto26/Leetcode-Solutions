@@ -1,0 +1,71 @@
+===================================================================
+LEETCODE 1030: MATRIX CELLS IN DISTANCE ORDER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given four integers: rows, cols, rCenter, and cCenter. There is a 
+rows x cols matrix and you are on the cell with coordinates (rCenter, cCenter).
+
+Return the coordinates of all cells in the matrix, sorted by their Manhattan 
+distance from (rCenter, cCenter) from the smallest distance to the largest.
+The distance between (r1, c1) and (r2, c2) is |r1 - r2| + |c1 - c2|.
+
+-------------------------------------------------------------------
+[METHODOLOGY: CUSTOM SORTING COMPARATOR VS. LINEAR BUCKET SORT]
+-------------------------------------------------------------------
+
+Your initial implementation populates all matrix coordinates and passes a custom 
+lambda comparator to std::sort. This sorts the elements in O(N log N) time. We can 
+optimize this to pure O(N) linear time by exploiting the mathematical limits of 
+Manhattan distance.
+
+1. THE FINITE DISTANCE BOUNDARY:
+   - The dimensions of the matrix are at most 100 x 100.
+   - The absolute maximum possible Manhattan distance between any two cells in this 
+     grid is (rows - 1) + (cols - 1), which is less than 200.
+   - When sorting elements with an exceptionally small, bounded range of integer keys, 
+     **Bucket Sort** can group and order items without a single comparison step.
+
+2. BUCKET ARRAY MAP CONFIGURATION:
+   - We create an array of lists (or vectors) where each index represents a specific 
+     Manhattan distance value.
+   - Array structure: vector<vector<int>> buckets[max_distance + 1]
+
+3. SINGLE-PASS DISTRIBUTION & FLUSHING:
+   - We traverse every cell in the grid linearly. For each cell (r, c), we calculate 
+     its distance from the center and immediately push its coordinates into the 
+     corresponding distance bucket: buckets[distance].push_back({r, c}).
+   - Finally, we flatten our bucket array sequentially from index 0 up to max_distance, 
+     pouring the coordinate lists directly into our output array.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE (BUCKET METHOD)]
+-------------------------------------------------------------------
+Input: rows = 1, cols = 2, rCenter = 0, cCenter = 0
+Max Distance = (1-1) + (2-1) = 1. Buckets allocated: 2 (Index 0 and 1).
+
+Traverse Grid:
+  - Cell (0, 0): dist = |0-0| + |0-0| = 0 -> Push to bucket[0]
+  - Cell (0, 1): dist = |0-0| + |0-1| = 1 -> Push to bucket[1]
+
+Flatten Buckets:
+  - Read bucket[0] -> append [0, 0]
+  - Read bucket[1] -> append [0, 1]
+
+Returns [[0,0], [0,1]].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(rows * cols)
+- Explanation: The bucket sort implementation scans through the grid cells exactly 
+  once to distribute them into their distance groups, taking O(N) time. The subsequent 
+  flattening pass iterates through the bounded buckets to flush out exactly N elements. 
+  This scales entirely in linear time, bypassing the O(N log N) comparison sorting floor.
+
+Space Complexity: O(rows * cols)
+- Explanation: In addition to the output container, the bucket system holds references 
+  to all N coordinates distributed across the distance segments. Memory allocation remains 
+  perfectly linear with respect to the total cell count.
+===================================================================

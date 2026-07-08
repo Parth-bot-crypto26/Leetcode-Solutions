@@ -1,0 +1,68 @@
+===================================================================
+LEETCODE 1037: VALID BOOMERANG
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array points where points[i] = [xi, yi] represents a point on the 
+X-Y plane, return true if these points are a boomerang.
+
+A boomerang is a set of three points that are all distinct and not in a 
+straight line (non-collinear).
+
+-------------------------------------------------------------------
+[METHODOLOGY: CROSS-MULTIPLICATION COLINEARITY INVERSION (O(1))]
+-------------------------------------------------------------------
+
+The traditional approach to checking colinearity is to compute and compare 
+the slopes between two pairs of points (e.g., Slope of AB vs Slope of AC).
+  - Slope(AB) = (y2 - y1) / (x2 - x1)
+  - Slope(AC) = (y3 - y1) / (x3 - x1)
+
+If the slopes match, the points form a straight line and do not form a boomerang.
+
+THE REFACTORING DIVISION TRAP:
+Using the raw fraction comparison introduces two architectural failure paths:
+  1. If any two points share an X-coordinate, the denominator drops to zero, 
+     triggering a fatal runtime divide-by-zero exception.
+  2. Floating-point division introduces rounding inaccuracies that compromise accuracy.
+
+THE CROSS-PRODUCT INTEGER SOLUTION:
+We can isolate the slopes completely into pure integer math by clearing the 
+fractional denominators crosswise via multiplication:
+  (y2 - y1) * (x3 - x1) != (y3 - y1) * (x2 - x1)
+
+AUTOMATIC DUPLICATE PROTECTION:
+The problem demands all points be distinct. If any two points are identical, 
+the displacement values on both sides of our multiplication will collapse to zero 
+(0 == 0), causing the inequality expression to return false automatically.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: points = [[1,1], [2,2], [3,3]]
+
+- Coordinates: 
+  (x1, y1) = (1, 1)
+  (x2, y2) = (2, 2)
+  (x3, y3) = (3, 3)
+
+- Math Evaluation:
+  Left Side:  (2 - 1) * (3 - 1) = 1 * 2 = 2
+  Right Side: (3 - 1) * (2 - 1) = 2 * 1 = 2
+
+Check: Is 2 != 2? False.
+Returns false. (Points are collinear).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The complete check evaluates inside a single compound logical 
+  statement consisting of exactly 4 subtractions and 2 multiplications. It executes 
+  instantly on the CPU registers in constant time.
+
+Space Complexity: O(1)
+- Explanation: The calculation operates completely in-place, allocating only a 
+  handful of lightweight primitive scalar reference registers on the stack frame.
+===================================================================

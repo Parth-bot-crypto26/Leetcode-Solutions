@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 1175: PRIME ARRANGEMENTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Return the number of permutations of 1 to n so that prime numbers are placed 
+strictly at prime indices (using 1-indexed notation). 
+
+Since the final total can be exceptionally large, return the result modulo 10^9 + 7.
+
+-------------------------------------------------------------------
+[METHODOLOGY: INDEPENDENT COMBINATORIAL FACTORIAL PRODUCT]
+-------------------------------------------------------------------
+
+The problem statement sounds tricky, but it simplifies down to a beautiful, clear 
+combinatorics property. If we must place prime values at prime locations, then by 
+extension, all non-prime values must automatically fill the remaining non-prime positions.
+
+Let's break the sequence down into two independent sets:
+1. Count the number of primes 'P' less than or equal to 'n'.
+2. Count the number of non-primes 'N' less than or equal to 'n' (simply given by: n - P).
+
+THE PERMUTATION RULE:
+- The 'P' prime elements can be arranged among the 'P' available prime slot positions 
+  in exactly P! (P factorial) unique ways.
+- The 'N' non-prime elements can be arranged among the 'N' remaining non-prime slot 
+  positions in exactly N! (N factorial) unique ways.
+
+By the Fundamental Counting Principle, the total number of valid permutations is the 
+product of these two independent choices:
+Total Arrangements = (P! * N!) % (10^9 + 7)
+
+MODULAR ARITHMETIC PRECAUTIONS:
+Because factorials grow exponentially, we apply the modulo operator '1e9 + 7' inside 
+our factorial loop step dynamically: 'res = (res * i) % mod'. This safeguards our runtime registers 
+against intermediate scalar overflow errors.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 5
+Range values: 1, 2, 3, 4, 5
+
+Step 1: Classification Scan
+  - Primes: 2, 3, 5 -> P = 3
+  - Non-Primes: 1, 4 -> N = 5 - 3 = 2
+
+Step 2: Factorial Computations
+  - P! = 3! = 3 * 2 * 1 = 6
+  - N! = 2! = 2 * 1 = 2
+
+Step 3: Multiplication Synthesis
+  - Total = (6 * 2) % 1000000007 = 12
+
+Returns 12.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * sqrt(n))
+- Explanation: Where 'n' is the maximum boundary integer input limit. The code loops 
+  from 1 up to 'n' to check for primality. Each individual primality check runs a trial 
+  division up to the square root of the number 'sqrt(i)', leading to an overall scan 
+  complexity of O(n * sqrt(n)). The subsequent factorial loops run in pure linear O(n) 
+  time. Given n <= 100, this runs completely instantaneously.
+
+Space Complexity: O(1)
+- Explanation: The complete check processes entirely in-place. Auxiliary storage is 
+  locked to local primitive tracking scalar variables on the stack frame ('primeCount', 
+  'nonPrimeCount', 'res', 'i'), preserving a constant memory profile.
+===================================================================

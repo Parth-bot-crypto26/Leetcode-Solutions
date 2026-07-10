@@ -1,0 +1,74 @@
+===================================================================
+LEETCODE 1154: DAY OF THE YEAR
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 'date' representing a Gregorian calendar date formatted as 
+YYYY-MM-DD, return the day number of the year.
+
+-------------------------------------------------------------------
+[METHODOLOGY: FIXED STRING PARSING & CALENDAR MESH SCAN]
+-------------------------------------------------------------------
+
+Because the input string adheres to a strict, fixed width structure (YYYY-MM-DD), 
+we can completely skip complex delimiter pattern scanning and extract our numerical 
+targets directly using standard index substring offsets.
+
+1. SUBSTRING SUB-REGULATION PARSING:
+   - We extract the numeric variables using hardcoded string window slices:
+     * Year:  date.substr(0, 4) -> Indices 0, 1, 2, 3
+     * Month: date.substr(5, 2) -> Indices 5, 6
+     * Day:   date.substr(8, 2) -> Indices 8, 9
+   - We wrap these extractions inside 'std::stoi()' to immediately parse them into 
+     native runtime integers.
+
+2. GREGORIAN LEAP YEAR FILTER:
+   - We establish a baseline lookup container tracking the standard day count per 
+     month: {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}.
+   - To check if February must expand to 29 days, we apply the formal Gregorian leap rule:
+     The year must be evenly divisible by 4, but if it is divisible by 100, it must 
+     also be divisible by 400. 
+     Expression: '(year % 400 == 0) || (year % 4 == 0 && year % 100 != 0)'
+
+3. ACCUMULATIVE COMPONENT SLIDE:
+   - We loop through the 'daysInMonths' vector, adding up the full month capacities up 
+     to index 'month - 2' (the month right before our target month).
+   - Finally, we add the remaining 'day' component value to get the exact calendar offset 
+     within that year.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: date = "2019-02-10"
+
+Step 1: Parsing
+  - year = stoi("2019") = 2019
+  - month = stoi("02") = 2
+  - day = stoi("10") = 10
+
+Step 2: Leap Evaluation
+  - 2019 % 4 == 3 (False). February stays at 28 days.
+
+Step 3: Accumulation Loop (runs up to i < month - 1 -> i < 1)
+  - i = 0 (January): dayCount += 31 -> dayCount = 31
+  - Loop ends.
+
+Step 4: Final Injection
+  - dayCount += day -> 31 + 10 = 41.
+
+Returns 41.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The input string length is completely fixed at 10 characters. String 
+  slicing, numerical conversions, and the monthly loops execute a maximum of 
+  12 steps. The system performs a small, fixed number of calculations regardless of 
+  the size of the numbers, running in true constant time.
+
+Space Complexity: O(1)
+- Explanation: The array table size tracking month variations is completely bounded to 
+  exactly 12 integers. Memory utilization stays constant, ensuring a clean, in-place footprint.
+===================================================================

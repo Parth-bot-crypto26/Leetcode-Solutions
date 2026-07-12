@@ -1,0 +1,73 @@
+===================================================================
+LEETCODE 1185: DAY OF THE WEEK
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a date, return the corresponding day of the week for that date. 
+The input is given as three integers representing the day, month, and year. 
+Return the output string from the set: 
+{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}.
+
+Constraints guarantee valid Gregorian dates between the years 1971 and 2100.
+Note: January 1, 1971 was a Friday.
+
+-------------------------------------------------------------------
+[METHODOLOGY: HISTORICAL BASE-ANCHOR CHRONO-SUMMATION]
+-------------------------------------------------------------------
+
+Instead of pulling in a massive external system datetime library or trying to 
+memorize specialized algorithms like Zeller's Congruence, the cleanest way to 
+solve this under fixed bounds is to count the exact number of calendar days that 
+have passed since our absolute anchor date: **January 1, 1971 (Friday)**.
+
+1. THE COMPONENT ACCUMULATION PHASES:
+   - Phase A (Full Years passed): We loop from 1971 up to 'year - 1'. For each year, 
+     we add 365 days. If the year passes our 'isLeap()' validation gate, we add an 
+     extra day for the leap year offset.
+   - Phase B (Full Months passed): We loop through the standard monthly capacities 
+     within our active year up to 'month - 2'. If our loop processes February (index 1) 
+     and the target year itself is a leap year, we add an extra day.
+   - Phase C (Days passed): We add the numerical value of the active day parameter 
+     to our cumulative total.
+
+2. THE SEED WEEK OFFSET MAPPING:
+   - January 1, 1971 was a Friday. If we anchor our day-of-week string lookup array 
+     with Sunday at index 0, Friday naturally aligns with index 5.
+   - Because our 'totalDays' summation accumulates a minimum starting unit of 1 on 
+     day one, we offset the final value by 4:
+     Formula: week_index = (totalDays + 4) % 7
+   - This aligns day 1 with index 5 (Friday) and wraps around perfectly.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: day = 31, month = 8, year = 2019
+
+- Step 1: Accumulate years from 1971 to 2018.
+  * Total normal days = 48 years * 365 = 17,520
+  * Leap years in that window = 12 years -> totalDays = 17,520 + 12 = 17,532
+- Step 2: Accumulate full months within 2019 (Jan to Jul).
+  * 31 + 28 + 31 + 30 + 31 + 30 + 31 = 212 days -> totalDays = 17,532 + 212 = 17,744
+- Step 3: Add active day component.
+  * totalDays = 17,744 + 31 = 17,775
+- Step 4: Map Week Index
+  * index = (17,775 + 4) % 7 = 17,779 % 7 = 6
+  * weeks[6] maps to "Saturday".
+
+Returns "Saturday".
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(Y + M)
+- Explanation: Where 'Y' is the number of years between 1971 and the input year 
+  (at most 130 steps), and 'M' is the month number (at most 12 steps). The loop counts 
+  execute fixed basic arithmetic additions and mod comparisons running in O(1) time 
+  per iteration. The execution runtime is completely bounded and runs instantly.
+
+Space Complexity: O(1)
+- Explanation: Bypasses heavy data allocations. Auxiliary memory is locked to small, 
+  fixed scalar primitive arrays tracking month durations and string names on the stack frame, 
+  ensuring an absolute constant memory footprint.
+===================================================================

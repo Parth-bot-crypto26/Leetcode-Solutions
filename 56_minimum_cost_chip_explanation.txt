@@ -1,0 +1,71 @@
+===================================================================
+LEETCODE 1217: MINIMUM COST TO MOVE CHIPS TO THE SAME POSITION
+===================================================================
+
+[PROBLEM DESCRIPTION]
+We have n chips, where the position of the i-th chip is 'position[i]'. 
+We need to move all the chips to the same position. In one step, we can change 
+the position of the i-th chip by:
+- position[i] + 2 or position[i] - 2 with cost = 0.
+- position[i] + 1 or position[i] - 1 with cost = 1.
+
+Return the minimum cost needed to move all the chips to the same position.
+
+-------------------------------------------------------------------
+[METHODOLOGY: PARITY COLLAPSE & MINIMUM TOWER BRIDGE STRATEGY]
+-------------------------------------------------------------------
+
+Simulating physical chip movements or trying to evaluate every coordinate index 
+as a potential destination would result in slow, redundant loops. By focusing on the 
+cost weights, the problem simplifies down to basic odd/even parity tracking.
+
+1. THE FREE STEP INVARIANT (ZERO-COST LANDING):
+   - Moving any chip by exactly 2 units costs 0. By applying this rule repeatedly, 
+     we can shift any chip infinitely along its parity track for free.
+   - Therefore:
+     * All chips at even positions can be clustered at position 0 with a total cost of 0.
+     * All chips at odd positions can be clustered at position 1 with a total cost of 0.
+
+2. THE PARITY TOWER PARADOX:
+   - After consolidating our chips for free, the entire board reduces down to 
+     just two towers standing next to each other at positions 0 and 1.
+   - To finish the game, we must merge these two final towers into a single spot. 
+     Moving a chip between position 0 and position 1 spans exactly 1 unit, which costs 
+     exactly 1 point per chip.
+
+3. THE GREEDY CHOICE:
+   - To keep the total merge cost as small as possible, we should leave the larger 
+     tower exactly where it is and move the smaller tower across the 1-unit gap.
+   - Total Minimal Cost = min(even_count, odd_count).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: position = [2, 2, 2, 3, 3]
+
+Step 1: Loop Categorization Scan
+  - p = 2 (Even) -> even_count = 1
+  - p = 2 (Even) -> even_count = 2
+  - p = 2 (Even) -> even_count = 3
+  - p = 3 (Odd)  -> odd_count = 1
+  - p = 3 (Odd)  -> odd_count = 2
+
+Step 2: Synthesize Minima Bridge
+  - return min(3, 2) -> 2.
+
+Returns 2. (We move the 2 odd chips to position 2 for a cost of 1 each).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: The algorithm inspects each element inside the 'position' vector array 
+  exactly once using a simple linear scan. The tracking increments and the final 
+  minimum comparison take O(1) constant time, yielding optimal linear performance.
+
+Space Complexity: O(1)
+- Explanation: The computation runs completely in-place. Auxiliary storage is restricted 
+  to two local tracking primitive integer registers ('even_count' and 'odd_count'), 
+  maintaining a perfectly flat constant memory footprint.
+===================================================================

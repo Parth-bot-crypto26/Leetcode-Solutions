@@ -1,0 +1,76 @@
+===================================================================
+LEETCODE 1252: CELLS WITH ODD VALUES IN A MATRIX
+===================================================================
+
+[PROBLEM DESCRIPTION]
+There is an m x n matrix initialized to all 0s. You are given a 2D array 
+'indices' where each indices[i] = [ri, ci] dictates that you must increment 
+all cells in row 'ri' and all cells in column 'ci' by 1.
+
+Return the number of odd-valued cells in the matrix after processing all indices.
+
+Follow up: Could you solve this in O(n + m + indices.length) time with only 
+O(n + m) extra space?
+
+-------------------------------------------------------------------
+[METHODOLOGY: BOOLEAN PARITY COMPRESSION & COMBINATORIAL SYNTHESIS]
+-------------------------------------------------------------------
+
+A brute-force matrix simulation results in severe time and memory overhead. 
+Since the problem only asks for the final count of *odd* values, we can skip 
+cell increments entirely by focusing on numerical parity properties (Odd vs Even).
+
+1. THE BOOLEAN TOGGLE INVARIANT:
+   - Adding 1 to a cell flips its state from even to odd, or odd to even.
+   - The parity of any cell (i, j) is determined exclusively by the sum of its row 
+     increments and its column increments: Value(i, j) = RowIncrements[i] + ColIncrements[j].
+   - Instead of tracking exact numbers, we compress our storage into two boolean vectors:
+     * 'rowOdd' of size 'm'
+     * 'colOdd' of size 'n'
+   - For every operation in indices, we flip the boolean value at that coordinate: 
+     'rowOdd[r] = !rowOdd[r]' and 'colOdd[c] = !colOdd[c]'.
+
+2. COMBINATORIAL COUNT REDUCTION:
+   - After mapping our inputs, we count the total number of odd rows ('oddRows') 
+     and odd columns ('oddCols'). By extension, the number of even columns is 
+     '(n - oddCols)' and even rows is '(m - oddRows)'.
+   - A cell turns out odd if and only if its row and column parities are *different*:
+     * (Odd Row intersecting an Even Column) -> Odd + Even = ODD
+     * (Even Row intersecting an Odd Column) -> Even + Odd = ODD
+     * (Odd Row intersecting an Odd Column)  -> Odd + Odd = EVEN (cancels out!)
+   - This provides our final algebraic equation:
+     Total = oddRows * (n - oddCols) + oddCols * (m - oddRows)
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: m = 2, n = 3, indices = [[0,1], [1,1]]
+
+Step 1: Process Operations
+  - Op 1 [0, 1]: rowOdd[0] = true,  colOdd[1] = true
+  - Op 2 [1, 1]: rowOdd[1] = true,  colOdd[1] = false (flipped back!)
+
+Step 2: Sum Parities
+  - rowOdd = [true, true]   -> oddRows = 2
+  - colOdd = [false, false, false] -> oddCols = 0
+
+Step 3: Synthesis Arithmetic
+  - Total = 2 * (3 - 0) + 0 * (2 - 2) 
+          = 2 * 3 + 0 = 6.
+
+Returns 6.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(m + n + indices.length)
+- Explanation: The code iterates through the 'indices' collection once to map out parities, 
+  followed by two quick linear passes to aggregate the boolean states of the dimensions. 
+  This easily hits the follow-up optimal runtime boundaries.
+
+Space Complexity: O(m + n)
+- Explanation: Auxiliary storage is strictly bounded to the two bitwise tracking tracks 
+  ('rowOdd' and 'colOdd') scales completely linearly with the grid dimensions rather than 
+  the full grid area, minimizing spatial overhead.
+===================================================================

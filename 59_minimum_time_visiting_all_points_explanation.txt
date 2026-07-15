@@ -1,0 +1,75 @@
+===================================================================
+LEETCODE 1266: MINIMUM TIME VISITING ALL POINTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+On a 2D plane, there are n points with integer coordinates points[i] = [xi, yi]. 
+Return the minimum time in seconds to visit all the points in the exact order 
+given by the array.
+
+Movement Rules (per 1 second):
+- Move vertically by 1 unit
+- Move horizontally by 1 unit
+- Move diagonally by sqrt(2) units (changes both X and Y by 1 unit simultaneously)
+
+-------------------------------------------------------------------
+[METHODOLOGY: CHEBYSHEV DISTANCE METRIC REDUCTION (O(N))]
+-------------------------------------------------------------------
+
+A brute-force solution might try to simulate the individual step paths or count 
+diagonal steps followed by straight remaining lines. However, understanding the 
+geometry of the grid reveals a direct mathematical shortcut known as the 
+**Chebyshev Distance**.
+
+1. THE DIAGONAL STEP EQUALIZATION:
+   - Moving diagonally alters both the X and Y positions by 1 unit while taking 
+     only 1 second. 
+   - This means that as long as we have distance remaining along both axes, we can 
+     close the gap along both dimensions simultaneously at a 1:1 time cost.
+
+2. THE MAX GAP INVARIANT:
+   - Once the shorter axis gap drops to zero, we are forced to finish the journey 
+     moving in a flat straight line along the longer axis, costing 1 second per unit.
+   - Consequently, the total time required to travel between any two points is 
+     strictly bounded by the maximum absolute coordinate delta:
+     Formula: Time = max(|x2 - x1|, |y2 - y1|)
+
+3. LINEAR ADJACENCY OVERLAP:
+   - We run a single pass from index 0 up to 'size - 2', evaluating the Chebyshev 
+     span between each successive pair of points and accumulating the sums directly 
+     into 'totalTime'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: points = [[1,1], [3,4], [-1,0]]
+Initial State: totalTime = 0
+
+Iteration 1 (i = 0): From [1,1] to [3,4]
+  - dx = |3 - 1| = 2
+  - dy = |4 - 1| = 3
+  - Increment: max(2, 3) = 3 -> totalTime = 3
+
+Iteration 2 (i = 1): From [3,4] to [-1,0]
+  - dx = |-1 - 3| = 4
+  - dy = |0 - 4| = 4
+  - Increment: max(4, 4) = 4 -> totalTime = 3 + 4 = 7
+
+Loop terminates cleanly.
+Returns 7.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the number of coordinate pairs inside the 'points' vector array. 
+  The algorithm iterates through the point chain sequentially exactly once, performing a 
+  fixed set of absolute subtractions and maximum comparisons running in O(1) constant 
+  time per link.
+
+Space Complexity: O(1)
+- Explanation: The evaluation runs entirely in-place. Auxiliary space allocations are 
+  restricted to local primitive tracking registers ('totalTime', 'dx', 'dy', 'i') on the 
+  stack frame, ensuring a completely flat constant memory profile.
+===================================================================

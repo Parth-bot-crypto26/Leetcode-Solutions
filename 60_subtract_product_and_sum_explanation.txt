@@ -1,0 +1,67 @@
+===================================================================
+LEETCODE 1281: SUBTRACT THE PRODUCT AND SUM OF DIGITS OF AN INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer number n, return the difference between the product of its 
+digits and the sum of its digits.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SINGLE-PASS BASE-10 ITERATIVE DIGIT EXTRACTION]
+-------------------------------------------------------------------
+
+Instead of translating the integer into a string wrapper (which adds heap allocation 
+overhead and slow char-to-int parsing cycles), we extract the numeric digits 
+directly using pure mathematical register updates.
+
+1. ACCUMULATOR INITIALIZATION:
+   - We set 'sum = 0' as the additive identity element.
+   - We set 'product = 1' as the multiplicative identity element.
+
+2. RIGHT-TO-LEFT DIGIT STRIPPING:
+   - We run a loop that persists as long as 'n > 0'.
+   - In each cycle, we pick off the lowest order digit (Least Significant Digit) 
+     using a base-10 remainder expression: 'digit = n % 10'.
+   - We immediately feed this value into both tracking metrics:
+     * sum += digit
+     * product *= digit
+   - We then drop the processed units place by shifting the integer rightward via 
+     truncating integer division: 'n /= 10'.
+
+3. REDUCTION SYNTHESIS:
+   - Once 'n' hits 0, the loop breaks, and we return 'product - sum'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 234
+Initial State: sum = 0, product = 1
+
+- Iteration 1: digit = 234 % 10 = 4
+               sum = 0 + 4 = 4 | product = 1 * 4 = 4
+               n = 234 / 10 = 23
+- Iteration 2: digit = 23 % 10 = 3
+               sum = 4 + 3 = 7 | product = 4 * 3 = 12
+               n = 23 / 10 = 2
+- Iteration 3: digit = 2 % 10 = 2
+               sum = 7 + 2 = 9 | product = 12 * 2 = 24
+               n = 2 / 10 = 0
+
+Loop terminates (n == 0).
+Returns: product - sum -> 24 - 9 = 15.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log10(n))
+- Explanation: The total number of iteration steps is completely proportional to 
+  the number of base-10 digits inside 'n'. Since we divide 'n' by 10 each step, the 
+  runtime scales logarithmically. Given the maximum constraint n <= 10^5, the loop 
+  will execute a maximum of 6 times, running in near-instant constant performance.
+
+Space Complexity: O(1)
+- Explanation: The digit parsing relies entirely on mutating the input parameters 
+  in-place. Memory tracking is locked to local stack primitive registers ('sum', 
+  'product', 'digit'), preserving an absolute zero-allocation space profile.
+===================================================================

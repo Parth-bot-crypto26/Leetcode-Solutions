@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 1290: CONVERT BINARY NUMBER IN A LINKED LIST TO INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given 'head', which is a reference node to a singly-linked list containing 0s 
+and 1s. The linked list holds the binary representation of a number, where 
+the most significant bit (MSB) sits at the head of the list.
+
+Return the decimal integer value of the encoded binary sequence.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SINGLE-PASS HARDWARE BITWISE SHIFT CASCADE]
+-------------------------------------------------------------------
+
+A naive approach would perform a preliminary pass to count the list nodes just 
+to figure out the maximum power of two ($2^k$) ahead of time, or allocate a 
+temporary array buffer. We can eliminate both overhead vectors completely using 
+**Horner's Method** implemented at the bit-register level.
+
+1. STREAMING ACCUMULATOR DRIFT:
+   - We initialize our tracking accumulator register 'res = 0'.
+   - As we step forward along the linked list from left to right, every new node 
+     we encounter means all previously processed bits must be pushed one slot higher 
+     in binary positional value.
+
+2. BITWISE BIT-PACKING INSTRUCTIONS:
+   - Instead of using standard arithmetic loops ('res = res * 2 + val'), we execute 
+     the transformation using two native bit manipulation primitives:
+     * Bitwise Left Shift ('res << 1'): Multiplies the current accumulator value 
+       by 2 instantly by shifting all binary columns leftward by 1 space.
+     * Bitwise OR ('| head->val'): Fuses the new binary bit state into the newly opened 
+       least significant bit position column slot.
+   - Combined statement: 'res = (res << 1) | head->val;'
+
+3. TRAVERSAL STEPPING:
+   - We move the pointer forward 'head = head->next' until the stream hits 'nullptr', 
+     leaving the finalized base-10 integer inside 'res'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input List: head = [1, 0, 1]
+Initial State: res = 0 (Binary: 000)
+
+- Node 1 (val = 1): 
+  res = (000 << 1) | 1 -> 000 | 001 = 001 (Decimal: 1)
+- Node 2 (val = 0): 
+  res = (001 << 1) | 0 -> 010 | 000 = 010 (Decimal: 2)
+- Node 3 (val = 1): 
+  res = (010 << 1) | 1 -> 100 | 001 = 101 (Decimal: 5)
+
+Stream terminates on next step.
+Returns 5.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total number of nodes present within the singly-linked 
+  list. The traversal pointer steps over each node structure exactly once. Each step 
+  processes basic bitwise logical operations that compile straight into single-cycle 
+  hardware CPU instructions, providing exceptional speed profiles.
+
+Space Complexity: O(1)
+- Explanation: The conversion resolves completely in-place. Auxiliary storage is restricted 
+  to a single primitive integer tracking register ('res'), preserving a completely 
+  zero-allocation memory footprint.
+===================================================================

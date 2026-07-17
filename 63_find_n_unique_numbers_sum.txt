@@ -1,0 +1,65 @@
+===================================================================
+LEETCODE 1304: FIND N UNIQUE INTEGERS SUM UP TO ZERO
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer n, return any array containing n unique integers such 
+that they add up to exactly 0.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SYMMETRIC ADDITIVE INVERSE PAIR BALANCE (O(N))]
+-------------------------------------------------------------------
+
+A chaotic approach would generate random numbers and then compute a massive trailing 
+offset number at the end to balance the ledger. We can completely bypass arithmetic 
+tracking by using the algebraic **Additive Inverse Property**.
+
+Every non-zero integer 'i' has a perfect mirror counterpart '-i' such that:
+  i + (-i) = 0
+
+1. SYSTEMATIC BALANCED PAIRING:
+   - We loop from 1 up to 'n / 2'. In each step, we insert both the active positive number 
+     and its matching negative inverse into the vector container:
+     * result.push_back(i);
+     * result.push_back(-i);
+   - Because each pair sums to 0, the collective sum of the entire array stays perfectly 
+     locked at 0 throughout the generation.
+
+2. ODD PARITY FILLER GUARD:
+   - If 'n' is an odd number, integer division 'n / 2' leaves behind 1 remaining element 
+     slot to fill. 
+   - Since adding 0 to any sum does not alter its value (Additive Identity), we can simply 
+     check 'n % 2 != 0' and push a single '0' to seamlessly complete the array.
+
+This ensures all generated values are guaranteed to be unique and sum to zero in a 
+single, clean iteration pass.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 5
+Initial State: result = []
+
+Step 1: Loop Pairing Pass (runs from 1 up to 5 / 2 -> 2 steps)
+  - i = 1 -> Append 1, Append -1 -> result = [1, -1]
+  - i = 2 -> Append 2, Append -2 -> result = [1, -1, 2, -2]
+
+Step 2: Odd Parity Check
+  - 5 % 2 != 0 is TRUE -> Append 0 -> result = [1, -1, 2, -2, 0]
+
+Returns [1, -1, 2, -2, 0] (Sums to 0, all unique).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: The array generation scales linearly with 'n'. The loop processes exactly 
+  'n / 2' pairing steps, performing basic vector array inserts running in O(1) constant 
+  time per item.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory block required for the final 'result' return vector 
+  prescribed by the signature template, no additional tracking maps, recursion frames, 
+  or auxiliary tables are allocated, keeping the footprint perfectly constant.
+===================================================================

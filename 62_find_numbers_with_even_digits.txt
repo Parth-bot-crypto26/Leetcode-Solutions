@@ -1,0 +1,61 @@
+===================================================================
+LEETCODE 1295: FIND NUMBERS WITH EVEN NUMBER OF DIGITS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array 'nums' of integers, return how many of them contain an 
+even number of digits.
+
+Constraints point out: 1 <= nums[i] <= 10^5.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BOUNDED RANGE CHECKING COMPRESSION (O(1) PER ELEMENT)]
+-------------------------------------------------------------------
+
+Your initial implementation correctly uses a classic base-10 division loop 
+to determine digit counts dynamically. To step up the execution speed, we can 
+exploit the tight value constraints (up to 100,000) to entirely eliminate 
+the internal loop overhead.
+
+An integer within this window will only ever contain 1, 2, 3, 4, 5, or 6 digits. 
+The even digit buckets fall into distinct, non-overlapping numeric ranges:
+  - 2 Digits: [10, 99]
+  - 4 Digits: [1000, 9999]
+  - 6 Digits: 100000
+
+Instead of counting digits explicitly via repeated mutations, we can pass each element 
+through a direct condition block check:
+  if ((num >= 10 && num <= 99) || (num >= 1000 && num <= 9999) || num == 100000)
+
+If a number hits any of these target zones, we immediately increment our 'count'. 
+This replaces dynamic loop cycles with a small set of simple CPU comparisons.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [12, 345, 2, 6, 7896]
+Initial State: count = 0
+
+- Scan num = 12: Matches range [10, 99] -> count = 1
+- Scan num = 345: Fails all checks -> count = 1
+- Scan num = 2: Fails all checks -> count = 1
+- Scan num = 6: Fails all checks -> count = 1
+- Scan num = 7896: Matches range [1000, 9999] -> count = 2
+
+Loop finishes. Returns 2.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total length of the 'nums' array. The algorithm reads 
+  the elements in a single flat pass. Because digit verification is optimized into basic 
+  scalar range bounds checks running in O(1) constant time, the overall complexity scale 
+  is perfectly linear.
+
+Space Complexity: O(1)
+- Explanation: The entire array checks execute fully in-place. Storage utilization is 
+  restricted to a single tracking local integer counter register ('count'), ensuring a 
+  completely zero-allocation space profile.
+===================================================================

@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 1317: CONVERT INTEGER TO THE SUM OF TWO NO-ZERO INTEGERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A "No-Zero integer" is defined as a positive integer that does not contain the 
+digit '0' anywhere in its decimal representation. Given an integer 'n', return 
+a list of two integers [a, b] such that:
+- Both 'a' and 'b' are No-Zero integers.
+- a + b = n
+
+Constraints guarantee at least one valid solution exists, where 2 <= n <= 10^4.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LINEAR COMPLEMENT SEARCH & BASE-10 DIGIT SCAN]
+-------------------------------------------------------------------
+
+Because the mathematical window for 'n' is exceptionally small (max 10,000), 
+an optimized linear scan easily achieves near-instantaneous execution. We can 
+find a matching pair by checking values sequentially:
+
+1. LINEAR PAIRING TRAVERSAL:
+   - We iterate 'a' from 1 up to 'n - 1'.
+   - For each choice of 'a', its complementary value 'b' is uniquely determined by:
+     b = n - a
+   - This approach inherently guarantees that 'a + b = n' is true on every step, 
+     allowing us to focus entirely on validating the "No-Zero" rule.
+
+2. REGISTER-LEVEL DIGIT VALIDATION:
+   - To check if a number is a No-Zero integer, we strip its digits one by one 
+     from right to left using arithmetic instead of costly string transformations.
+   - While 'num > 0':
+     * We inspect the trailing digit using a base-10 remainder check: 'num % 10'. 
+     * If the remainder equals 0, the number is invalid, and we immediately return false.
+     * Otherwise, we truncate the units column via integer division: 'num /= 10'.
+   - If the number completely unwinds without hitting a zero digit, it passes verification.
+
+3. IMMEDIATE SHORT-CIRCUIT RETURN:
+   - The moment we find a loop step where both 'isNoZero(a)' and 'isNoZero(b)' evaluate 
+     to true, we return the pair '{a, b}' immediately, cutting off any remaining loops.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 11
+
+- Step 1 (a = 1): b = 11 - 1 = 10
+                 isNoZero(1)  -> TRUE
+                 isNoZero(10) -> 10 % 10 == 0 -> FALSE (Contains 0)
+- Step 2 (a = 2): b = 11 - 2 = 9
+                 isNoZero(2)  -> TRUE
+                 isNoZero(9)  -> TRUE
+
+Both checks pass! Short-circuit return triggered.
+Returns [2, 9].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * log10(n))
+- Explanation: The primary outer loop runs a maximum of 'n' times. For each step, 
+  the digit verification function processes a number of iterations proportional 
+  to the number of decimal digits in 'a' and 'b' (bounded by log10(n)). Given that 
+  n <= 10^4, the inner check executes at most 5 times per number, ensuring highly efficient, 
+  near-instant performance.
+
+Space Complexity: O(1)
+- Explanation: The entire analysis runs cleanly in-place. Memory footprints are restricted 
+  exclusively to lightweight primitive scalar counters and tracking variables ('a', 'b', 
+  'num') allocated directly on the stack frame.
+===================================================================

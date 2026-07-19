@@ -1,0 +1,69 @@
+===================================================================
+LEETCODE 26: REMOVE DUPLICATES FROM SORTED ARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' sorted in non-decreasing order, remove the 
+duplicates in-place such that each unique element appears only once. The 
+relative order of the elements must be kept the same.
+
+Return the total number of unique elements 'k'. The first 'k' indices of 
+the array must house these unique values. The contents of the array beyond 
+index 'k - 1' do not matter.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER IN-PLACE ADJACENCY SCAN (O(N))]
+-------------------------------------------------------------------
+
+A naive approach might use an external hash set or lookahead buffer, which violates 
+the strict O(1) auxiliary space constraint. Because the input array is already **sorted**, 
+all duplicate copies of any value are mathematically guaranteed to sit next to each other. 
+This allows us to track adjustments efficiently using a two-pointer scheme.
+
+1. EDGE GUARD DECOUPLING:
+   - If the vector is completely empty ('nums.empty()'), there are no unique elements, 
+     so we immediately return 0.
+
+2. READ/WRITE POINTER MECHANICS:
+   - We establish a writer pointer index 'k = 1' (since the element at index 0 is 
+     trivially unique and acts as our baseline reference anchor).
+   - We scan a read pointer index 'i' from 1 through the rest of the collection.
+
+3. ADJACENCY UNIQUENESS GAUNTLET:
+   - At each iteration step, we check if the active item matches its neighbor:
+     'if (nums[i] != nums[i - 1])'
+   - If the items match, we skip forward (ignoring the duplicate).
+   - If they are different, we have discovered a brand-new unique value. We overwrite the 
+     location marked by our write tracker: 'nums[k] = nums[i]', and bump 'k++'.
+
+Once the read scan terminates, the value of 'k' represents the exact count of unique items 
+compacted cleanly at the front of the container.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 1, 2]
+Initial State: k = 1, i = 1
+
+- i = 1: nums[1] == nums[0] (1 == 1) -> Duplicate found! Skip overwrite.
+- i = 2: nums[2] != nums[1] (2 != 1) -> Unique found!
+         nums[k] = nums[2] -> nums[1] = 2 -> Array becomes [1, 2, 2]
+         k++ -> k = 2
+
+Loop terminates. Returns k = 2.
+(First two elements are [1, 2], matching the unique value count).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total length of the 'nums' vector array. The read pointer 
+  'i' runs a single, flat linear pass from the second index to the end. Each item undergoes 
+  a single constant-time equality check, ensuring optimal linear scaling.
+
+Space Complexity: O(1)
+- Explanation: Element deduplication executes entirely in-place by overwriting historical indices. 
+  Dynamic lookups, heap tables, or additional structural array vectors are completely 
+  bypassed, locking memory to two local stack primitives ('k' and 'i').
+===================================================================

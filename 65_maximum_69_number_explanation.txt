@@ -1,0 +1,63 @@
+===================================================================
+LEETCODE 1323: MAXIMUM 69 NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a positive integer 'num' consisting only of the digits 6 and 9. 
+Return the maximum number you can get by changing at most one digit 
+(6 becomes 9, or 9 becomes 6).
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY HIGHEST-PLACE-VALUE TRANSFORMATION]
+-------------------------------------------------------------------
+
+This problem is a perfect showcase for a **Greedy Strategy**. Changing a digit from 
+6 to 9 increases the value of the number, whereas changing a 9 to 6 decreases it. 
+Therefore, our objective is strictly to find a 6 to upgrade to a 9.
+
+THE LAW OF PLACE VALUE WEIGHTING:
+- Upgrading a digit in a higher place value slot creates a far greater impact on the 
+  final magnitude than upgrading one in a lower position.
+  * Changing a 6 to 9 at the thousands column increases the value by 3000.
+  * Changing a 6 to 9 at the tens column only increases the value by 30.
+
+STRATEGY:
+1. We parse the integer value into an easily indexable character array sequence using 
+   'std::to_string(num)'.
+2. We iterate through the string from left to right (from the Most Significant Digit 
+   down to the Least Significant Digit).
+3. The moment we encounter the very first character '6', we immediately upgrade it 
+   to '9', execute a 'break' to cancel further operations, and skip down to the exit gate.
+4. If the string contains only '9's, the loop finishes without doing anything, which 
+   is also correct since the number is already maximized.
+5. We parse the string back into a standard integer using 'std::stoi()' and return it.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: num = 9669
+Initial String: numStr = "9669"
+
+- i = 0: numStr[0] == '9' -> Skip.
+- i = 1: numStr[1] == '6' -> Match found!
+         Modify: numStr[1] = '9' -> numStr becomes "9969"
+         Break condition triggered. Loop exits.
+
+Parsing "9969" back to integer -> 9969.
+Returns 9969.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log10(num))
+- Explanation: The total number of digits inside 'num' scales logarithmically relative 
+  to its numerical value. The string transformation, single-pass iteration check, and 
+  final integer conversion are all strictly bounded by the number of digits. Given the 
+  constraint num <= 10^4, the string has at most 5 characters, executing instantly.
+
+Space Complexity: O(log10(num))
+- Explanation: Auxiliary memory is used exclusively to allocate the temporary 
+  string representation container ('numStr') on the stack frame, which takes up a 
+  handful of bytes and scales linearly with the digit count.
+===================================================================

@@ -1,0 +1,69 @@
+===================================================================
+LEETCODE 27: REMOVE ELEMENT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' and an integer 'val', remove all occurrences 
+of 'val' in-place. The relative order of the elements can change. 
+
+Return the number of elements 'k' that are not equal to 'val'. The first 
+'k' elements of the array must house the valid non-matching values. The 
+array values remaining past index 'k - 1' can be ignored.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER IN-PLACE COMPRESSION DISPLACEMENT]
+-------------------------------------------------------------------
+
+To remove targeted elements completely in-place without generating a copy array 
+(which would violate the O(1) auxiliary space barrier), we structure a 
+two-pointer filter setup.
+
+1. INDEPENDENT READ/WRITE POINTERS:
+   - We introduce a slow-moving write index pointer 'k = 0' that marks the absolute 
+     boundary layer where the next valid element belongs.
+   - We run a fast-moving read index pointer 'i' to evaluate every item across 
+     the original collection sequentially.
+
+2. TARGET FILTER GATEWAY:
+   - At each iteration step, we run a filter match guard check:
+     'if (nums[i] != val)'
+   - If the element matches 'val', we leave it alone and increment only 'i', bypassing 
+     the index block.
+   - If the element does not match 'val', it represents a valid survivor. We overwrite 
+     the position marked by our slow pointer: 'nums[k] = nums[i]', and increment 'k++'.
+
+Once the fast pointer finishes parsing the array, 'k' tracks the precise length of the 
+compacted sequence stored at the front of the vector container.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 2, 2, 3], val = 3
+Initial State: k = 0, i = 0
+
+- i = 0: nums[0] == 3 -> Filter match! Skip index step. (k = 0)
+- i = 1: nums[1] != 3 (2 != 3) -> Survivor found!
+         nums[k] = nums[1] -> nums[0] = 2 -> Array becomes [2, 2, 2, 3]
+         k++ -> k = 1
+- i = 2: nums[2] != 3 (2 != 3) -> Survivor found!
+         nums[k] = nums[2] -> nums[1] = 2 -> Array becomes [2, 2, 2, 3]
+         k++ -> k = 2
+- i = 3: nums[3] == 3 -> Filter match! Skip index step. (k = 2)
+
+Loop terminates cleanly. Returns k = 2.
+(First two array numbers are [2, 2]).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total element capacity of the 'nums' array vector. 
+  The read loop pointer 'i' moves linearly over the index range exactly once. Every item 
+  is processed using standard O(1) constant-time primitive checks and vector overwrites.
+
+Space Complexity: O(1)
+- Explanation: The array consolidation executes entirely in-place by shuffling elements 
+  forward into earlier memory frames. Auxiliary storage allocations remain completely 
+  locked to primitive index loop trackers ('k' and 'i').
+===================================================================

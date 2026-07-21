@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 2839: CHECK IF STRINGS CAN BE MADE EQUAL WITH OPERATIONS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two strings s1 and s2, both of length 4, consisting of lowercase 
+English letters. You can apply the following operation any number of times:
+- Choose any two indices i and j such that j - i = 2, then swap the two 
+  characters at those indices.
+
+Return true if you can make s1 equal to s2, and false otherwise.
+
+-------------------------------------------------------------------
+[METHODOLOGY: ISOLATED PARITY TRACK INVARIANT CHECKING (O(1))]
+-------------------------------------------------------------------
+
+A brute-force solution would attempt to physically perform swaps or use sorting algorithms 
+on chunks of data. However, analyzing the jump constraint ($j - i = 2$) reveals that 
+characters are permanently locked to their specific index parity tracks.
+
+1. PARITY TRACK SEPARATION:
+   - Characters at even indices (0 and 2) can only be swapped with each other.
+   - Characters at odd indices (1 and 3) can only be swapped with each other.
+   - An even-indexed character can never cross over to an odd-indexed slot, and vice versa.
+
+2. FINITE PERMUTATION BOUNDS:
+   - Since the string length is strictly fixed at 4, each independent track contains 
+     exactly 2 elements.
+   - For the even positions (0 and 2) to match up between s1 and s2, they must satisfy 
+     one of two conditions:
+     * They already match perfectly: (s1[0] == s2[0] && s1[2] == s2[2])
+     * They match perfectly if swapped: (s1[0] == s2[2] && s1[2] == s2[0])
+   - We apply the exact same evaluation logic to the odd index track (1 and 3).
+
+3. COMPOSITE GATE EVALUATION:
+   - The two strings can be made identical if and only if both the even track AND 
+     the odd track find a valid configuration match.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s1 = "abcd", s2 = "cdab"
+
+- Even Track Check (Indices 0 and 2):
+  s1[0]='a', s1[2]='c' | s2[0]='c', s2[2]='a'
+  Match check 1: ('a' == 'c' && 'c' == 'a') -> False
+  Match check 2: ('a' == 'a' && 'c' == 'c') -> True
+  Result: evenMatch = true
+
+- Odd Track Check (Indices 1 and 3):
+  s1[1]='b', s1[3]='d' | s2[1]='d', s2[3]='b'
+  Match check 1: ('b' == 'd' && 'd' == 'b') -> False
+  Match check 2: ('b' == 'b' && 'd' == 'd') -> True
+  Result: oddMatch = true
+
+Return: evenMatch && oddMatch -> true && true -> true.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: The total string length is locked at a fixed 4 characters. The algorithm 
+  performs a hardcoded set of 8 character comparisons and basic logical operations 
+  directly inside CPU registers, guaranteeing instant, constant-time performance.
+
+Space Complexity: O(1)
+- Explanation: The check runs fully in-place. Memory tracking footprint is limited 
+  entirely to two primitive local boolean flags ('evenMatch', 'oddMatch') allocated on 
+  the stack frame, avoiding any auxiliary dynamic memory allocations.
+===================================================================

@@ -1,0 +1,65 @@
+===================================================================
+LEETCODE 657: ROBOT RETURN TO ORIGIN
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A robot starts at position (0, 0) on a 2D Cartesian plane. Given a sequence of 
+its moves as a string, return true if the robot ends up at (0, 0) after completing 
+all instructions, or false otherwise.
+
+Valid moves:
+- 'U' (Up): Increment Y coordinate by 1
+- 'D' (Down): Decrement Y coordinate by 1
+- 'R' (Right): Increment X coordinate by 1
+- 'L' (Left): Decrement X coordinate by 1
+
+-------------------------------------------------------------------
+[METHODOLOGY: 2D CARTESIAN DISPLACEMENT TRACKING (O(N))]
+-------------------------------------------------------------------
+
+Because operations on orthogonal axes are mathematically independent, we can decompose 
+the robot's movement vector into two independent 1D displacement scalar counters:
+  - Horizontal Axis Displacement (X)
+  - Vertical Axis Displacement (Y)
+
+1. COORDINATE DISPLACEMENT SIMULATION:
+   - We initialize 'x = 0' and 'y = 0' to represent the origin (0, 0).
+   - We iterate over each character in the string:
+     * 'U': y++
+     * 'D': y--
+     * 'R': x++
+     * 'L': x--
+
+2. ORIGIN CONVERGENCE GUARD:
+   - For the robot to return to the origin (0, 0), the total upward steps must 
+     exactly cancel out the downward steps (Count('U') == Count('D')), and the total 
+     rightward steps must cancel out the leftward steps (Count('R') == Count('L')).
+   - Evaluating 'x == 0 && y == 0' after the loop finishes verifies if net displacement 
+     is zero.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: moves = "UD"
+Initial State: x = 0, y = 0
+
+- Move 1 ('U'): y++ -> y = 1 | Position: (0, 1)
+- Move 2 ('D'): y-- -> y = 0 | Position: (0, 0)
+
+Check: x == 0 && y == 0 (0 == 0 && 0 == 0) -> TRUE.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of the 'moves' string. The algorithm parses 
+  each move instruction sequentially in a single pass, performing primitive scalar 
+  increments and decrements running in O(1) time per character.
+
+Space Complexity: O(1)
+- Explanation: The operation runs entirely in-place without dynamic data structures. 
+  Auxiliary storage is restricted strictly to two local integer tracking registers 
+  ('x' and 'y') on the stack frame, preserving a constant space profile.
+===================================================================

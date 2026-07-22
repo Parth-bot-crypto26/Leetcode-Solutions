@@ -1,0 +1,66 @@
+===================================================================
+LEETCODE 1360: NUMBER OF DAYS BETWEEN TWO DATES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a program to count the number of days between two dates given as 
+strings formatted as YYYY-MM-DD. 
+
+Constraints state valid dates between the years 1971 and 2100.
+
+-------------------------------------------------------------------
+[METHODOLOGY: COMMON ANCHOR EPOCH CONVERSION & ABSOLUTE DELTA]
+-------------------------------------------------------------------
+
+Directly incrementing from date1 to date2 requires complex branch tracking depending 
+on which date is chronologically earlier. A far cleaner architecture uses an **Epoch Anchor**:
+
+1. COMMON BASE REFERENCE ANCHOR (1971-01-01):
+   - We create a helper function 'daysFrom1971(date)' that counts how many total calendar 
+     days have elapsed from January 1, 1971 to the input date.
+
+2. THREE-STAGE CALENDAR ACCUMULATION:
+   - Stage A (Full Years): We sum 365 days (or 366 for leap years) for every full year 
+     between 1971 and 'year - 1'.
+   - Stage B (Full Months): We sum the standard month capacities up to 'month - 2'. If 
+     February (index 1) is included and the current year is a leap year, we add +1 day.
+   - Stage C (Days): We add the day component directly.
+
+3. ABSOLUTE DIFFERENCE SYNTHESIS:
+   - Once both string inputs are converted into uniform scalar integer offsets, 
+     the number of days between them simplifies to:
+     Formula: abs(daysFrom1971(date1) - daysFrom1971(date2))
+
+This completely bypasses date ordering checks and guarantees correct $O(1)$ scalar execution.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: date1 = "2019-06-29", date2 = "2019-06-30"
+
+- daysFrom1971("2019-06-29"):
+  * Years (1971 to 2018): 17,532 days
+  * Months (Jan to May 2019): 31 + 28 + 31 + 30 + 31 = 151 days
+  * Days: 29 days
+  * Total = 17,532 + 151 + 29 = 17,712 days
+
+- daysFrom1971("2019-06-30"):
+  * Total = 17,532 + 151 + 30 = 17,713 days
+
+Difference: |17,712 - 17,713| = 1.
+Returns 1.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(Y + M)
+- Explanation: Where 'Y' is the number of years between 1971 and the target year 
+  (at most 129 iterations) and 'M' is the month number (at most 12 iterations). 
+  Because these bounds are strictly locked by the constraints (years 1971-2100), 
+  the function executes in true O(1) constant time.
+
+Space Complexity: O(1)
+- Explanation: The entire processing runs in-place on the stack without dynamic memory 
+  allocations or data structure overhead, maintaining a flat memory footprint.
+===================================================================

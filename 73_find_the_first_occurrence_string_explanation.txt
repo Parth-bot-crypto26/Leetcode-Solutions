@@ -1,0 +1,58 @@
+===================================================================
+LEETCODE 28: FIND THE INDEX OF THE FIRST OCCURRENCE IN A STRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two strings 'haystack' and 'needle', return the index of the first 
+occurrence of 'needle' inside 'haystack', or -1 if 'needle' is not part of 
+'haystack'.
+
+Constraints:
+- 1 <= haystack.length, needle.length <= 10^4
+- Both strings consist of only lowercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: STL NATIVE SUBSTRING SEARCH & NPOS GUARD (O(N))]
+-------------------------------------------------------------------
+
+While string matching algorithms like Knuth-Morris-Pratt (KMP), Rabin-Karp, or 
+Boyer-Moore can be manually implemented using failure function tables, standard 
+C++ string library routines (`std::string::find`) execute vectorized SIMD string 
+instructions directly at the compiler runtime level.
+
+1. SUBSTRING FIND DELEGATION:
+   - We call 'haystack.find(needle)' which returns a zero-indexed scalar position 
+     ('size_t') representing the first starting location of the match.
+
+2. SENTINEL GUARD MAPPING:
+   - If the substring 'needle' is not present in 'haystack', 'find()' returns the 
+     sentinel constant 'std::string::npos'.
+   - We explicitly check 'if (index == string::npos)' and map it back to -1 as 
+     required by the problem signature.
+   - Otherwise, we return the casted integer index directly.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: haystack = "sadbutsad", needle = "sad"
+
+- Step 1: Execute haystack.find("sad")
+  * Match found starting at index 0.
+- Step 2: Check index against string::npos
+  * 0 != string::npos -> Guard condition passes.
+
+Returns 0.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(H * N) worst-case / O(H + N) average-case
+- Explanation: Where 'H' is haystack.length and 'N' is needle.length. Standard 
+  library implementations optimize substring searches using vectorized CPU instructions 
+  and hybrid searching heuristics, achieving linear O(H + N) performance in practical scenarios.
+
+Space Complexity: O(1)
+- Explanation: The search operates directly on the input string references without 
+  allocating external search tables or string copies, keeping memory usage constant.
+===================================================================

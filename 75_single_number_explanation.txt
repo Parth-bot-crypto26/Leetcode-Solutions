@@ -1,0 +1,62 @@
+===================================================================
+LEETCODE 136: SINGLE NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a non-empty array of integers 'nums', every element appears twice except 
+for one. Find that single element.
+
+Constraints:
+- Must implement a linear runtime complexity O(n).
+- Must use only constant extra space O(1).
+
+-------------------------------------------------------------------
+[METHODOLOGY: BITWISE XOR CANCELLATION INVARIANT]
+-------------------------------------------------------------------
+
+Using hash sets or frequency maps violates the O(1) auxiliary space constraint, 
+and sorting the array violates the O(n) runtime complexity constraint. 
+
+We solve this in optimal linear time and constant space by leveraging the 
+algebraic properties of the Bitwise XOR Operator (^):
+
+1. ALGEBRAIC PROPERTIES OF XOR:
+   - Self-Inverse (Cancellation): x ^ x = 0 (Any number XORed with itself becomes 0)
+   - Identity: x ^ 0 = x (Any number XORed with 0 remains unchanged)
+   - Commutativity & Associativity: The grouping and order of operations do not matter.
+
+2. ACCUMULATION CHAIN:
+   - We initialize an accumulator 'result = 0'.
+   - As we iterate through 'nums', every duplicate pair (x, x) will XOR together to form 0.
+   - The single non-duplicate number 'S' XORed against 0 resolves directly to 'S'.
+   - Therefore, cumulative XOR across the entire vector leaves only the unique element.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [4, 1, 2, 1, 2]
+
+Initial State: result = 0
+
+- x = 4: result = 0 ^ 4 = 4
+- x = 1: result = 4 ^ 1 = 5
+- x = 2: result = 5 ^ 2 = 7
+- x = 1: result = 7 ^ 1 = 6 (cancels previous 1)
+- x = 2: result = 6 ^ 2 = 4 (cancels previous 2)
+
+Loop terminates.
+Returns 4.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of the 'nums' vector. The algorithm scans 
+  the array in a single flat pass, executing bitwise XOR operations in O(1) 
+  constant CPU time per element.
+
+Space Complexity: O(1)
+- Explanation: The XOR aggregation operates fully in-place using a single 
+  scalar integer register ('result') on the stack, ensuring a constant memory profile.
+===================================================================

@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 219: CONTAINS DUPLICATE II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' and an integer 'k', return true if there are two 
+distinct indices 'i' and 'j' in the array such that nums[i] == nums[j] and 
+abs(i - j) <= k. Otherwise, return false.
+
+Constraints:
+- 1 <= nums.length <= 10^5
+- -10^9 <= nums[i] <= 10^9
+- 0 <= k <= 10^5
+
+-------------------------------------------------------------------
+[METHODOLOGY: HASH MAP INDEX TRACKING & GREEDY GAP CHECK]
+-------------------------------------------------------------------
+
+A brute-force solution checking all pairs (i, j) results in O(n * k) or O(n^2) 
+time complexity, leading to Time Limit Exceeded (TLE) on large inputs.
+
+We optimize this using a Hash Map ('unordered_map<int, int>') to map each value 
+to its most recent index position:
+
+1. GREEDY NEARBY GAP PRINCIPLE:
+   - To satisfy 'abs(i - j) <= k', we only care about the **closest prior index** 
+     where 'nums[i]' occurred.
+   - If the gap between the current index 'i' and the last recorded index for 
+     'nums[i]' is <= k, we have satisfied the condition and immediately short-circuit.
+
+2. STATE UPDATE:
+   - If the value is present in the map but the gap is > k, the previous index is 
+     no longer useful (since future indices will only be even further away).
+   - We update 'lastSeen[nums[i]] = i' to store the current index as the new reference point.
+
+3. SINGLE-PASS EXECUTION:
+   - We iterate linearly through 'nums' from index 0 to 'nums.size() - 1'.
+   - Hash map lookups and updates execute in O(1) average time, making the entire 
+     algorithm linear.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 3, 1], k = 3
+
+Initial State: lastSeen = {}
+
+- i = 0 (val = 1): Not in lastSeen. Set lastSeen[1] = 0.
+- i = 1 (val = 2): Not in lastSeen. Set lastSeen[2] = 1.
+- i = 2 (val = 3): Not in lastSeen. Set lastSeen[3] = 2.
+- i = 3 (val = 1): Found in lastSeen! 
+                   Check gap: 3 - lastSeen[1] = 3 - 0 = 3.
+                   Is 3 <= k (3)? TRUE!
+
+Short-circuit triggered.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. We process each element once in a 
+  single loop pass. Hash map lookups and insertions run in O(1) average time.
+
+Space Complexity: O(min(n, k))
+- Explanation: In the worst-case scenario, the hash map stores at most 'n' unique 
+  elements (or 'k' distinct elements if restricted to a sliding window bounds), 
+  yielding linear auxiliary space.
+===================================================================

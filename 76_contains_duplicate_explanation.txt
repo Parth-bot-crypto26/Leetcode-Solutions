@@ -1,0 +1,59 @@
+===================================================================
+LEETCODE 217: CONTAINS DUPLICATE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', return true if any value appears at least twice 
+in the array, and return false if every element is distinct.
+
+Constraints:
+- 1 <= nums.length <= 10^5
+- -10^9 <= nums[i] <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: IN-PLACE SORTING & ADJACENCY COMPARISON]
+-------------------------------------------------------------------
+
+To check if an array contains duplicate values, we can either track seen elements 
+in a hash table or group identical values together.
+
+1. SORTING PREPARATION:
+   - Calling 'std::sort(nums.begin(), nums.end())' arranges all elements in ascending 
+     order.
+   - Sorting guarantees that if any value appears two or more times in the array, 
+     its occurrences will sit directly adjacent to each other in memory.
+
+2. SINGLE-PASS ADJACENCY SCAN:
+   - We iterate 'i' from 0 up to 'nums.size() - 2'.
+   - At each step, we compare adjacent elements: 'if (nums[i] == nums[i + 1])'.
+   - If a match is found, we immediately short-circuit and return true.
+   - If the loop completes without finding adjacent duplicate pairs, all elements 
+     are distinct, so we return false.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 3, 1]
+
+- Step 1: Sort array
+  nums becomes [1, 1, 2, 3]
+
+- Step 2: Scan adjacencies
+  * i = 0: nums[0] == nums[1] (1 == 1) -> Match found!
+
+Short-circuit triggered.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n log n)
+- Explanation: Where 'n' is the number of elements in 'nums'. Sorting the array using 
+  'std::sort' (IntroSort) takes O(n log n) time. The subsequent linear scan takes O(n), 
+  making the overall time complexity dominated by the sorting step.
+
+Space Complexity: O(1) or O(log n)
+- Explanation: The check operates in-place on the input vector. Auxiliary space usage 
+  is O(1) beyond the call stack space utilized internally by C++'s standard sort (O(log n)).
+===================================================================

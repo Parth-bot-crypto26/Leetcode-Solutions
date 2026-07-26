@@ -1,0 +1,80 @@
+===================================================================
+LEETCODE 228: SUMMARY RANGES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a sorted unique integer array 'nums', return the smallest sorted list 
+of ranges that cover all numbers in the array exactly.
+
+Format rules:
+- "a->b" if a != b
+- "a" if a == b
+
+Constraints:
+- 0 <= nums.length <= 20
+- -2^31 <= nums[i] <= 2^31 - 1
+- 'nums' is strictly sorted in ascending order with distinct values.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER CONTIGUOUS INTERVAL COMPRESSION (O(N))]
+-------------------------------------------------------------------
+
+A brute-force approach that tracks individual flags or state transitions adds 
+unnecessary complexity. Because the input array is strictly sorted and unique, 
+consecutive values in a range always satisfy 'nums[i + 1] == nums[i] + 1'.
+
+1. INTERVAL HEAD ANCHORING:
+   - We iterate 'i' from 0 to 'n - 1'.
+   - At the start of each range, we anchor the baseline value: 'start = nums[i]'.
+
+2. INNER CONTIGUOUS EXTENSION:
+   - We execute an inner 'while' loop that expands the range end pointer as long 
+     as the next neighbor is strictly consecutive: 
+     'while (i + 1 < n && nums[i + 1] == nums[i] + 1)'
+   - Incrementing 'i' inside the inner loop consumes the contiguous numbers directly, 
+     ensuring every element in 'nums' is visited exactly once across the whole run.
+
+3. RANGE FORMATTING & STRING SYNTHESIS:
+   - Upon exiting the inner loop, 'nums[i]' holds the boundary endpoint of the sequence.
+   - If 'start == nums[i]', the range contains a single element, formatted as "a".
+   - Otherwise, the range spans multiple elements, formatted as "a->b".
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [0, 1, 2, 4, 5, 7]
+
+- Loop 1 (i = 0):
+  * start = nums[0] = 0
+  * while check: nums[1] == 0+1 (1==1) -> i = 1
+  * while check: nums[2] == 1+1 (2==2) -> i = 2
+  * while check: nums[3] == 2+1 (4==3) -> False.
+  * start (0) != nums[2] (2) -> Append "0->2"
+
+- Loop 2 (i = 3):
+  * start = nums[3] = 4
+  * while check: nums[4] == 4+1 (5==5) -> i = 4
+  * while check: nums[5] == 5+1 (7==6) -> False.
+  * start (4) != nums[4] (5) -> Append "4->5"
+
+- Loop 3 (i = 5):
+  * start = nums[5] = 7
+  * while check: i + 1 < n -> False.
+  * start (7) == nums[5] (7) -> Append "7"
+
+Returns ["0->2", "4->5", "7"].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. Although there is a nested 'while' 
+  loop, the index 'i' is incremented monotonically across both loops. Each array 
+  element is evaluated at most twice, maintaining strict O(n) linear performance.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory required for the 'result' string vector returned 
+  by the function, the algorithm relies entirely on local scalar integer registers 
+  ('start', 'i', 'n'), ensuring constant auxiliary space usage.
+===================================================================

@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 1399: COUNT LARGEST GROUP
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'n', group the numbers from 1 to 'n' according to the sum 
+of their decimal digits. 
+
+Return the number of groups that have the largest size (i.e., contain the maximum 
+number of elements).
+
+Constraints:
+- 1 <= n <= 10^4
+
+-------------------------------------------------------------------
+[METHODOLOGY: BOUNDED DIGIT SUM FREQUENCY BUCKETING (O(N))]
+-------------------------------------------------------------------
+
+A naive approach might use an unordered hash map to track group frequencies dynamically. 
+However, analyzing the input domain reveals a strict upper bound on the digit sum:
+- Constraint $n \le 10000$.
+- The maximum possible digit sum occurs at 9999 ($9 + 9 + 9 + 9 = 36$).
+- Therefore, all digit sums are strictly guaranteed to fall within the index range $[1, 36]$.
+
+1. STACK-ALLOCATED FIXED FREQUENCY ARRAY:
+   - We allocate a lightweight array 'int groupSizes[37] = {0}' directly on the stack.
+   - This eliminates dynamic heap allocations and hash function computation overhead.
+
+2. SINGLE-PASS DIGIT SUMMATION & MAX TRACKING:
+   - We iterate 'i' from 1 to 'n'.
+   - For each number, we extract its base-10 digit sum using modulo reduction ('num % 10') 
+     and integer division ('num /= 10').
+   - We increment 'groupSizes[sum]++' and update 'maxSize = max(maxSize, groupSizes[sum])' 
+     dynamically within the pass.
+
+3. FREQUENCY TALLY PASS:
+   - We perform a fast 36-step scan over 'groupSizes'.
+   - Every index matching 'groupSizes[i] == maxSize' increments our target result counter 
+     'largestGroupCount'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 13
+
+Step 1: Process Numbers 1 through 13
+  - 1..9  -> sums 1..9   -> groupSizes[1..9] = 1
+  - 10    -> sum = 1     -> groupSizes[1] = 2
+  - 11    -> sum = 2     -> groupSizes[2] = 2
+  - 12    -> sum = 3     -> groupSizes[3] = 2
+  - 13    -> sum = 4     -> groupSizes[4] = 2
+
+  Max Size tracked: maxSize = 2
+
+Step 2: Tally Groups matching maxSize = 2
+  - Indices with size 2: [1, 2, 3, 4] -> Total = 4
+
+Returns 4.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * log10(n))
+- Explanation: Iterating from 1 to 'n' takes O(n) steps. For each number, extracting 
+  its decimal digits takes O(log10(num)) operations. Given n <= 10^4, the digit count 
+  is at most 5, rendering the overall runtime linear and near-instantaneous.
+
+Space Complexity: O(1)
+- Explanation: The auxiliary memory allocation is restricted strictly to a static 
+  37-element integer array, maintaining a perfectly flat O(1) constant space footprint.
+===================================================================

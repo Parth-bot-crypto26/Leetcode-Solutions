@@ -1,0 +1,68 @@
+===================================================================
+LEETCODE 283: MOVE ZEROES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', move all 0's to the end of it while maintaining 
+the relative order of the non-zero elements.
+
+Constraints:
+- Must perform operations in-place without allocating a copy array.
+- Follow-up: Minimize the total number of write/swap operations performed.
+
+-------------------------------------------------------------------
+[METHODOLOGY: OPTIMAL SINGLE-PASS TWO-POINTER SWAP (O(N))]
+-------------------------------------------------------------------
+
+A basic two-pointer write approach executes N writes on the first pass and then 
+performs additional writes to backfill zeros. We can minimize total operations to 
+a single pass using a **Partitioning Swap Strategy**:
+
+1. POINTER ROLES:
+   - 'lastNonZero' (Write Pointer): Tracks the boundary where the next non-zero 
+     element should be placed.
+   - 'i' (Read Pointer): Scans through every position in the array.
+
+2. IN-PLACE SWAP PARTITIONING:
+   - When 'nums[i] != 0', we swap 'nums[lastNonZero]' with 'nums[i]'.
+   - If 'i == lastNonZero' (e.g., prior to encountering any zeroes), the element 
+     swaps with itself, maintaining its position.
+   - Once a zero is encountered, 'lastNonZero' lags behind 'i'. Future swaps move 
+     non-zero elements to 'lastNonZero' while sending the zero back to index 'i'.
+   - After each swap, we increment 'lastNonZero++'.
+
+3. RELATIVE ORDER PRESERVATION:
+   - Because both pointers move strictly from left to right, non-zero elements 
+     maintain their exact original relative ordering.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [0, 1, 0, 3, 12]
+
+Initial State: lastNonZero = 0
+
+- i = 0 (nums[0] = 0): Skip swap. lastNonZero stays 0.
+- i = 1 (nums[1] = 1): Swap nums[0] and nums[1] -> nums becomes [1, 0, 0, 3, 12]
+                       lastNonZero = 1
+- i = 2 (nums[2] = 0): Skip swap. lastNonZero stays 1.
+- i = 3 (nums[3] = 3): Swap nums[1] and nums[3] -> nums becomes [1, 3, 0, 0, 12]
+                       lastNonZero = 2
+- i = 4 (nums[4] = 12): Swap nums[2] and nums[4] -> nums becomes [1, 3, 12, 0, 0]
+                        lastNonZero = 3
+
+Loop terminates.
+Final Array: [1, 3, 12, 0, 0].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total length of 'nums'. The read pointer 'i' makes 
+  a single pass through the array. Swap operations execute in O(1) constant time.
+
+Space Complexity: O(1)
+- Explanation: All swaps occur in-place within the existing array vector. Memory usage 
+  is restricted strictly to the integer tracking variable ('lastNonZero').
+===================================================================

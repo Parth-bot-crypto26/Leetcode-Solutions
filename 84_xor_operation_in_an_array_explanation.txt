@@ -1,0 +1,61 @@
+===================================================================
+LEETCODE 1486: XOR OPERATION IN AN ARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer 'n' and an integer 'start'.
+Define an array 'nums' where nums[i] = start + 2 * i (0-indexed) and n == nums.length.
+Return the bitwise XOR of all elements of 'nums'.
+
+Constraints:
+- 1 <= n <= 1000
+- 0 <= start <= 1000
+
+-------------------------------------------------------------------
+[METHODOLOGY: STREAMING BITWISE ACCUMULATION (O(N))]
+-------------------------------------------------------------------
+
+Instead of allocating an array container of size 'n' in memory (which requires O(N) auxiliary space), 
+we can calculate the XOR sum on-the-fly in a single pass.
+
+1. ACCUMULATOR INITIALIZATION:
+   - We initialize 'ans = 0'. Because '0 ^ x = x' (identity property of XOR), seeding 
+     with 0 ensures the first element is integrated correctly without altering its value.
+
+2. ITERATIVE ARITHMETIC GENERATION:
+   - We run a loop 'i' from 0 up to 'n - 1'.
+   - At each iteration step, we compute the 'i-th' term using the formula 'start + 2 * i'.
+   - We immediately accumulate this term using bitwise XOR: 'ans ^= (start + 2 * i)'.
+
+3. SPACE EFFICIENCY:
+   - Generating elements on demand allows us to achieve $O(1)$ constant space complexity.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 5, start = 0
+
+Initial State: ans = 0
+
+- i = 0: term = 0 + 2*0 = 0 | ans = 0 ^ 0 = 0
+- i = 1: term = 0 + 2*1 = 2 | ans = 0 ^ 2 = 2
+- i = 2: term = 0 + 2*2 = 4 | ans = 2 ^ 4 = 6
+- i = 3: term = 0 + 2*3 = 6 | ans = 6 ^ 6 = 0
+- i = 4: term = 0 + 2*4 = 8 | ans = 0 ^ 8 = 8
+
+Loop terminates.
+Returns 8.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the given integer length. The loop executes 'n' times, 
+  performing basic scalar multiplication, addition, and bitwise XOR operations in O(1) 
+  constant CPU clock cycles per iteration.
+
+Space Complexity: O(1)
+- Explanation: Evaluated strictly in-place using local integer registers ('ans', 'i') 
+  on the stack frame, avoiding array allocations.
+===================================================================

@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 1071: GREATEST COMMON DIVISOR OF STRINGS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+For two strings 's' and 't', we say "t divides s" if 's' can be constructed by 
+concatenating 't' one or more times. Given two strings 'str1' and 'str2', return 
+the largest string 'x' such that 'x' divides both 'str1' and 'str2'.
+
+Constraints:
+- 1 <= str1.length, str2.length <= 1000
+- Both strings consist of English uppercase letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: CONCATENATION COMMUTATIVITY & LENGTH GCD (O(N))]
+-------------------------------------------------------------------
+
+A brute-force solution checking substrings of all potential lengths requires repeated 
+string matching. We can solve this in linear time using fundamental string algebra:
+
+1. COMMUTATIVITY VALIDATION (Existence Invariant):
+   - If 'str1' and 'str2' have a common divisor string 'x', then both strings are 
+     composed entirely of repeated units of 'x'.
+   - Therefore, concatenating them in either order must yield the exact same result:
+     'str1 + str2 == str2 + str1'
+   - If 'str1 + str2 != str2 + str1', no such common substring exists, and we 
+     immediately short-circuit by returning "".
+
+2. NUMERICAL LENGTH REDUCTION (Euclidean GCD):
+   - Given that a valid common divisor string exists, its length must divide both 
+     'str1.length()' and 'str2.length()'.
+   - To find the largest such string, its length must equal the Greatest Common 
+     Divisor of the two lengths:
+     'gcd_length = std::gcd(str1.length(), str2.length())'
+
+3. SUBSTRING EXTRACTION:
+   - We extract a prefix of length 'gcd_length' from 'str1' using 'str1.substr(0, gcd_length)' 
+     and return it directly.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: str1 = "ABABAB", str2 = "ABAB"
+
+- Step 1: Concatenation Check
+  str1 + str2 = "ABABAB" + "ABAB" = "ABABABABAB"
+  str2 + str1 = "ABAB" + "ABABAB" = "ABABABABAB"
+  "ABABABABAB" == "ABABABABAB" -> Valid GCD exists!
+
+- Step 2: Compute GCD of Lengths
+  len(str1) = 6, len(str2) = 4
+  std::gcd(6, 4) = 2
+
+- Step 3: Extract Substring Prefix
+  str1.substr(0, 2) -> "AB"
+
+Returns "AB".
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n + m)
+- Explanation: Where 'n' is the length of 'str1' and 'm' is the length of 'str2'. 
+  String concatenation and equality comparison take O(n + m) time. Computing 
+  'std::gcd(n, m)' takes logarithmic time O(log(min(n, m))), which is dominated by 
+  the string comparison.
+
+Space Complexity: O(n + m)
+- Explanation: Temporary string allocations for 'str1 + str2' and 'str2 + str1' 
+  require auxiliary memory proportional to the sum of their lengths.
+===================================================================

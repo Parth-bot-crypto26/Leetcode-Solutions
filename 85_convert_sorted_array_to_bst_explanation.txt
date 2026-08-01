@@ -1,0 +1,80 @@
+===================================================================
+LEETCODE 108: CONVERT SORTED ARRAY TO BINARY SEARCH TREE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' where elements are sorted in ascending order, 
+convert it to a height-balanced binary search tree (BST).
+
+A height-balanced binary tree is defined as a binary tree in which the depth 
+of the two subtrees of every node never differs by more than one.
+
+Constraints:
+- 1 <= nums.length <= 10^4
+- -10^4 <= nums[i] <= 10^4
+- 'nums' is sorted in strictly increasing order.
+
+-------------------------------------------------------------------
+[METHODOLOGY: DIVIDE AND CONQUER WITH MIDPOINT ROOT SELECTION (O(N))]
+-------------------------------------------------------------------
+
+To construct a height-balanced BST from a sorted array, we must ensure that 
+the left and right subtrees contain as close to an equal number of elements 
+as possible at every step.
+
+1. MIDPOINT ROOT SELECTION:
+   - Because the input array 'nums' is strictly sorted, picking the median element 
+     'nums[mid]' as the root splits the remaining elements evenly between the 
+     left and right subtrees.
+   - We compute the mid index safely using: 'mid = left + (right - left) / 2'.
+
+2. RECURSIVE SUBTREE CONSTRUCTION:
+   - The left child is constructed from the left half subarray: range [left, mid - 1].
+   - The right child is constructed from the right half subarray: range [mid + 1, right].
+   - Base Case: When 'left > right', the search range becomes invalid, and we return 'nullptr'.
+
+3. HEIGHT-BALANCE GUARANTEE:
+   - Halving the input range at every level guarantees that subtrees differ in size by 
+     at most 1 element, ensuring the resulting BST stays within an O(log N) depth bound.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [-10, -3, 0, 5, 9]
+
+- Call 1: buildBST(0, 4)
+  * mid = 0 + (4 - 0) / 2 = 2 (nums[2] = 0) -> Root = 0
+  * Recurse Left: range [0, 1]
+  * Recurse Right: range [3, 4]
+
+- Call 2 (Left Branch): buildBST(0, 1)
+  * mid = 0 + (1 - 0) / 2 = 0 (nums[0] = -10) -> Node = -10
+  * Recurse Left: range [0, -1] -> returns nullptr
+  * Recurse Right: range [1, 1] -> mid = 1 (nums[1] = -3) -> Node = -3
+
+- Call 3 (Right Branch): buildBST(3, 4)
+  * mid = 3 + (4 - 3) / 2 = 3 (nums[3] = 5) -> Node = 5
+  * Recurse Left: range [3, 2] -> returns nullptr
+  * Recurse Right: range [4, 4] -> mid = 4 (nums[4] = 9) -> Node = 9
+
+Tree Constructed:
+        0
+       / \
+    -10   5
+      \    \
+      -3    9
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the number of elements in 'nums'. The divide-and-conquer 
+  recursion visits each element in the array exactly once to instantiate a corresponding 
+  'TreeNode', running in linear time.
+
+Space Complexity: O(log n) [Auxiliary Call Stack Space]
+- Explanation: The recursion tree has a max depth equal to the height of the balanced BST, 
+  which is locked to O(log n). Excluding the memory allocated for the output tree nodes, 
+  the call stack overhead requires logarithmic space.
+===================================================================

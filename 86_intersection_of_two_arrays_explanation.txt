@@ -1,0 +1,86 @@
+===================================================================
+LEETCODE 350: INTERSECTION OF TWO ARRAYS II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two integer arrays 'nums1' and 'nums2', return an array of their 
+intersection. Each element in the result must appear as many times as it shows 
+in both arrays (minimum frequency match), and elements may be returned in any order.
+
+Constraints:
+- 1 <= nums1.length, nums2.length <= 1000
+- 0 <= nums1[i], nums2[i] <= 1000
+
+-------------------------------------------------------------------
+[METHODOLOGY: FREQUENCY MAP WITH MEMORY-OPTIMIZED SWAP (O(N + M))]
+-------------------------------------------------------------------
+
+Unlike LeetCode 349 (which required unique elements), LeetCode 350 requires tracking 
+element frequencies to account for duplicates across both arrays.
+
+1. SMALLER ARRAY MEMORY OPTIMIZATION:
+   - If 'nums1.size() > nums2.size()', we recursively call 'intersect(nums2, nums1)'.
+   - This guarantees that our hash map stores frequencies for the smaller array, 
+     keeping space complexity bound strictly to O(min(N, M)).
+
+2. FREQUENCY COUNT BUILDING:
+   - We populate an 'unordered_map<int, int>' ('count') with element counts from 'nums1'.
+
+3. MATCHING & FREQUENCY DECREMENT PASS:
+   - We scan through 'nums2'.
+   - If 'count[num] > 0', 'num' exists in both arrays with remaining availability.
+   - We push 'num' into 'result' and decrement 'count[num]--'.
+
+-------------------------------------------------------------------
+[FOLLOW-UP SYSTEM DESIGN SOLUTIONS]
+-------------------------------------------------------------------
+
+Q1: What if the given arrays are already sorted?
+- Solution: Use a Two-Pointer strategy. Place pointer 'p1' at nums1[0] and 'p2' at nums2[0].
+  * If nums1[p1] == nums2[p2]: Add element to result, increment p1++, p2++.
+  * If nums1[p1] < nums2[p2]: Increment p1++.
+  * If nums1[p1] > nums2[p2]: Increment p2++.
+  * Runtime: O(N + M), Auxiliary Space: O(1).
+
+Q2: What if nums1's size is small compared to nums2's size?
+- Solution: The hash map approach implemented above is optimal. Storing the smaller array 
+  'nums1' in memory takes O(N) space, while 'nums2' can be scanned sequentially in linear time.
+
+Q3: What if nums2 is stored on disk and memory is limited?
+- Solution: If 'nums1' fits into memory, load 'nums1' into the frequency map, then stream 
+  'nums2' from disk in chunks/blocks, updating frequencies sequentially.
+- If neither array fits in memory, perform External Merge Sort on both files on disk, then 
+  stream both sorted files using the two-pointer technique.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums1 = [1, 2, 2, 1], nums2 = [2, 2]
+
+- Step 1: Check sizes -> nums1.size() (4) > nums2.size() (2)
+  * Swaps parameters: call intersect([2, 2], [1, 2, 2, 1])
+
+- Step 2: Build Frequency Map on [2, 2]
+  * count = { 2: 2 }
+
+- Step 3: Iterate through [1, 2, 2, 1]
+  * num = 1: count[1] is 0 -> skip
+  * num = 2: count[2] = 2 (> 0) -> result = [2], count[2] becomes 1
+  * num = 2: count[2] = 1 (> 0) -> result = [2, 2], count[2] becomes 0
+  * num = 1: count[1] is 0 -> skip
+
+Returns [2, 2].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n + m)
+- Explanation: Where 'n' is nums1.length and 'm' is nums2.length. Building the map 
+  takes O(min(n, m)) time, and scanning the second array takes O(max(n, m)) time with 
+  O(1) hash map operations.
+
+Space Complexity: O(min(n, m))
+- Explanation: Memory is allocated only for elements in the smaller array within the 
+  frequency hash map, optimizing auxiliary memory usage.
+===================================================================

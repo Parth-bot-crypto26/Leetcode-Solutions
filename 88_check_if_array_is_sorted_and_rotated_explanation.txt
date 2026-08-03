@@ -1,0 +1,64 @@
+===================================================================
+LEETCODE 1752: CHECK IF ARRAY IS SORTED AND ROTATED
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array 'nums', return true if the array was originally sorted in 
+non-decreasing order and then rotated some number of positions (including zero). 
+Otherwise, return false. Duplicates are allowed.
+
+Constraints:
+- 1 <= nums.length <= 100
+- 1 <= nums[i] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: CIRCULAR DROP-POINT INVARIANT SCAN (O(N))]
+-------------------------------------------------------------------
+
+Instead of attempting all possible rotation shifts or physically sorting a copy, 
+we can determine validity by analyzing neighbor order invariants:
+
+1. THE DROP-POINT INVARIANT:
+   - In a non-decreasing sorted array, every adjacent pair satisfies 'A[i] <= A[i + 1]'. 
+     There are 0 instances where 'A[i] > A[i + 1]'.
+   - Rotating a non-decreasing array breaks sorted order at exactly ONE position: 
+     the pivot point where the maximum element wraps back around to the minimum element.
+   - If an array has more than 1 drop point, it could never have been formed by 
+     rotating a sorted array.
+
+2. CIRCULAR WRAPAROUND CHECK:
+   - To check the boundary wrap between the last element 'nums[n - 1]' and the first 
+     element 'nums[0]', we use the modulo index operator: '(i + 1) % n'.
+   - We increment a counter 'count' whenever 'nums[i] > nums[(i + 1) % n]'.
+
+3. DECISION GUARD:
+   - If 'count <= 1', the array is a valid rotated sorted array -> return true.
+   - If 'count > 1', the array has multiple out-of-order inversions -> return false.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 4, 5, 1, 2] | n = 5
+
+- i = 0: nums[0] (3) <= nums[1] (4) -> count = 0
+- i = 1: nums[1] (4) <= nums[2] (5) -> count = 0
+- i = 2: nums[2] (5) >  nums[3] (1) -> count = 1  (Pivot drop detected)
+- i = 3: nums[3] (1) <= nums[4] (2) -> count = 1
+- i = 4: nums[4] (2) <= nums[0] (3) -> count = 1  (Circular boundary check)
+
+Total drop points = 1.
+1 <= 1 evaluates to TRUE.
+Returns true.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs a single 
+  linear pass over the array with simple scalar comparisons running in constant time.
+
+Space Complexity: O(1)
+- Explanation: The evaluation runs entirely in-place on the stack, maintaining a 
+  flat memory footprint without dynamic auxiliary allocations.
+===================================================================

@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 83: REMOVE DUPLICATES FROM SORTED LIST
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the head of a sorted linked list, delete all duplicates such that each 
+element appears only once. Return the linked list sorted as well.
+
+Constraints:
+- The number of nodes in the list is in the range [0, 300].
+- -100 <= Node.val <= 100
+- The list is guaranteed to be sorted in ascending order.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SINGLE-PASS ADJACENCY POINTER REWIRING (O(N))]
+-------------------------------------------------------------------
+
+A brute-force strategy using a hash set to track seen values adds unnecessary O(N) 
+space overhead. Because the input linked list is strictly sorted, all identical 
+elements are grouped into contiguous node blocks.
+
+1. HEAD ANCHOR PRESERVATION:
+   - We store 'res = head' to maintain a pointer reference to the start of the list.
+
+2. ADJACENCY COMPARISON & CONDITIONAL ADVANCEMENT:
+   - We traverse the list with a 'while(head && head->next)' loop.
+   - If 'head->val == head->next->val', we detect a duplicate pair. We bypass the duplicate 
+     node by rewiring: 'head->next = head->next->next'. 
+   - CRITICAL: We do NOT advance 'head' during a deletion step. This guarantees that 
+     runs of 3+ consecutive duplicate values are iteratively pruned off the same anchor node.
+   - If 'head->val != head->next->val', the current node is unique relative to its neighbor, 
+     so we advance: 'head = head->next'.
+
+3. IN-PLACE EXECUTION:
+   - The traversal rebinds existing node pointers in memory without creating new heap nodes 
+     or copying values.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [1, 1, 2, 3, 3]
+
+- Initial: head -> 1 -> 1 -> 2 -> 3 -> 3 | res = head
+- Iteration 1: head->val (1) == head->next->val (1)
+  * Bypass duplicate: head->next = head->next->next (points to 2)
+  * List state: 1 -> 2 -> 3 -> 3 (head stays at first 1)
+- Iteration 2: head->val (1) != head->next->val (2)
+  * Advance: head = head->next (head points to 2)
+- Iteration 3: head->val (2) != head->next->val (3)
+  * Advance: head = head->next (head points to first 3)
+- Iteration 4: head->val (3) == head->next->val (3)
+  * Bypass duplicate: head->next = head->next->next (nullptr)
+  * List state: 1 -> 2 -> 3 -> nullptr
+
+Loop terminates (head->next is nullptr).
+Returns res = [1, 2, 3].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the total number of nodes in the linked list. The loop 
+  traverses each node pointer at most once, performing O(1) comparison and reference 
+  reassignment steps per iteration.
+
+Space Complexity: O(1)
+- Explanation: Rebinding is executed completely in-place on the existing linked list 
+  structure, utilizing scalar pointer tracking variables ('res', 'head') on the stack.
+===================================================================

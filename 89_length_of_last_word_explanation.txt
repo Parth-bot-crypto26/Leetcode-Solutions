@@ -1,0 +1,65 @@
+===================================================================
+LEETCODE 58: LENGTH OF LAST WORD
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 's' consisting of words and spaces, return the length of the 
+last word in the string.
+
+A word is a maximal substring consisting of non-space characters only.
+
+Constraints:
+- 1 <= s.length <= 10^4
+- 's' consists of only English letters and spaces ' '.
+- There will be at least one word in 's'.
+
+-------------------------------------------------------------------
+[METHODOLOGY: REVERSE SINGLE-PASS TWO-STAGE SCAN (O(N))]
+-------------------------------------------------------------------
+
+Using string stream splitters or trimming utilities creates unnecessary temporary 
+string memory allocations. Scanning backwards from right to left avoids extra overhead:
+
+1. TRAILING SPACE BARS SKIPPING (Stage 1):
+   - We initialize our pointer 'i = s.length() - 1'.
+   - The first 'while(i >= 0 && s[i] == ' ')' loop decrements 'i' until it lands 
+     on the rightmost non-space character (the end of the last word).
+
+2. WORD CHARACTER COUNTING (Stage 2):
+   - The second 'while(i >= 0 && s[i] != ' ')' loop increments our counter 'length' 
+     and decrements 'i' until it encounters a space or hits the left array boundary (index -1).
+
+3. RESULT DISPATCH:
+   - Returning 'length' yields the exact character count of the final word without 
+     modifying the original string.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "   fly me   to   the moon  " | length = 0, i = 26
+
+- Stage 1 (Skip Trailing Spaces):
+  * i = 26 (' '), 25 (' ') -> decrements down to i = 24 ('n').
+
+- Stage 2 (Count Word Length):
+  * i = 24 ('n') -> length = 1
+  * i = 23 ('o') -> length = 2
+  * i = 22 ('o') -> length = 3
+  * i = 21 ('m') -> length = 4
+  * i = 20 (' ') -> Loop stops!
+
+Returns 4.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of string 's'. In the worst-case scenario 
+  (e.g., a single word padded by spaces), the index pointer scans at most 'n' 
+  characters once from right to left.
+
+Space Complexity: O(1)
+- Explanation: Operations run in-place on the input reference string using local 
+  scalar integer registers ('length', 'i') on the stack.
+===================================================================

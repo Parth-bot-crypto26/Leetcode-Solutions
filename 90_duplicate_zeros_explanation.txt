@@ -1,0 +1,73 @@
+===================================================================
+LEETCODE 1089: DUPLICATE ZEROS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a fixed-length integer array 'arr', duplicate each occurrence of zero, 
+shifting the remaining elements to the right. Elements beyond the length of 
+the original array are discarded. Perform all modifications in-place.
+
+Constraints:
+- 1 <= arr.length <= 10^4
+- 0 <= arr[i] <= 9
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER BACKWARD FILL WITH BOUNDARY EDGE GUARD (O(N))]
+-------------------------------------------------------------------
+
+A naive approach using element shifts takes O(N^2) time, while creating a duplicate 
+array violates the O(1) space constraint. We solve this in optimal linear time 
+using a two-pass strategy:
+
+1. FORWARD COUNT PASS (Boundary Determination):
+   - We calculate how many zeros can be duplicated before reaching array capacity.
+   - We track an effective boundary pointer 'length = n - 1' and count duplicate 
+     zeros 'zeroDup'.
+   - EDGE CASE (Boundary Zero): If 'arr[i] == 0' and 'i == length', this zero lands 
+     at the very end of the array. It cannot be duplicated because there is no room 
+     for a second zero. We explicitly set 'arr[n - 1] = 0', reduce the target array 
+     size, and break early.
+
+2. BACKWARD FILL PASS (In-Place Overwrite Avoidance):
+   - We iterate backwards from 'lastIdx' down to '0'.
+   - Moving right-to-left ensures we write elements to their final positions 
+     ('i + zeroDup') without overwriting unread elements earlier in the array.
+   - If 'arr[i] == 0', we write zero twice and decrement 'zeroDup'.
+   - If 'arr[i] != 0', we copy 'arr[i]' directly to 'arr[i + zeroDup]'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: arr = [1, 0, 2, 3, 0, 4, 5, 0] | n = 8
+
+- Step 1: Forward Pass
+  * i=0 (1): length=7
+  * i=1 (0): zeroDup=1, length=6
+  * i=2 (2): length=6
+  * i=3 (3): length=6
+  * i=4 (0): zeroDup=2, length=5
+  * i=5 (4): length=5 (loop terminates as i > length)
+  * Resulting bounds: lastIdx = 5, zeroDup = 2
+
+- Step 2: Backward Pass (from i = 5 down to 0)
+  * i=5 (4): arr[5+2] = arr[7] = 4
+  * i=4 (0): arr[4+2] = arr[6] = 0, zeroDup=1, arr[4+1] = arr[5] = 0
+  * i=3 (3): arr[3+1] = arr[4] = 3
+  * i=2 (2): arr[2+1] = arr[3] = 2
+  * i=1 (0): arr[1+1] = arr[2] = 0, zeroDup=0, arr[1+0] = arr[1] = 0
+  * i=0 (1): arr[0+0] = arr[0] = 1
+
+Final Array: [1, 0, 0, 2, 3, 0, 0, 4].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'arr'. The algorithm makes two linear 
+  passes through the array, running in O(n) time overall.
+
+Space Complexity: O(1)
+- Explanation: All reads and writes occur directly on the input vector in-place, 
+  requiring zero auxiliary dynamic memory allocations.
+===================================================================

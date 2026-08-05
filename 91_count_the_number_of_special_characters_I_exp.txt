@@ -1,0 +1,69 @@
+===================================================================
+LEETCODE 3120: COUNT THE NUMBER OF SPECIAL CHARACTERS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a string 'word'. A letter is called special if it appears both in 
+lowercase and uppercase in 'word'. Return the number of special letters in 'word'.
+
+Constraints:
+- 1 <= word.length <= 50
+- 'word' consists of only lowercase and uppercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: FIXED-SIZE DUAL BOOLEAN LOOKUP TABLES (O(N))]
+-------------------------------------------------------------------
+
+Using hash sets works, but since the character set is restricted strictly to 
+English letters, allocating fixed stack/vector buffers of size 26 avoids 
+hash map allocation overhead and bucket collisions.
+
+1. DIRECT-INDEXING LOOKUP ARRAYS:
+   - We allocate two boolean vectors of size 26: 'lower' and 'upper', initialized 
+     to false.
+   - For lowercase characters ('a' through 'z'), we mark 'lower[c - 'a'] = true'.
+   - For uppercase characters ('A' through 'Z'), we mark 'upper[c - 'A'] = true'.
+
+2. SINGLE-PASS CHARACTER MARKING:
+   - We scan string 'word' character by character.
+   - ASCII character arithmetic computes the relative alphabet offset in O(1) time.
+
+3. ALPHABET AGGREGATION PASS:
+   - We iterate 'i' from 0 to 25 across the alphabet length.
+   - If 'lower[i] && upper[i]' is true, the letter corresponding to index 'i' 
+     exists in both cases within 'word', so we increment 'count'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: word = "aaAbcBC"
+
+- Step 1: Scan Characters
+  * 'a': lower[0] = true
+  * 'a': lower[0] = true
+  * 'A': upper[0] = true
+  * 'b': lower[1] = true
+  * 'c': lower[2] = true
+  * 'B': upper[1] = true
+  * 'C': upper[2] = true
+
+- Step 2: Evaluate 26 Alphabet Slots
+  * i = 0 ('a'/'A'): lower[0] (true) && upper[0] (true) -> count = 1
+  * i = 1 ('b'/'B'): lower[1] (true) && upper[1] (true) -> count = 2
+  * i = 2 ('c'/'C'): lower[2] (true) && upper[2] (true) -> count = 3
+  * i = 3..25: false
+
+Returns 3.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'word'. Processing the string takes O(n) 
+  time. The final aggregation loop takes O(26) = O(1) time, yielding linear time overall.
+
+Space Complexity: O(1)
+- Explanation: Uses two fixed-size vectors of size 26, maintaining a strict O(1) 
+  constant auxiliary space footprint regardless of input string length.
+===================================================================

@@ -1,0 +1,79 @@
+===================================================================
+LEETCODE 118: PASCAL'S TRIANGLE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'numRows', return the first 'numRows' of Pascal's triangle. 
+In Pascal's triangle, each number is the sum of the two numbers directly above it.
+
+Constraints:
+- 1 <= numRows <= 30
+
+-------------------------------------------------------------------
+[METHODOLOGY: DYNAMIC MEMORY PADDING & ADJACENCY SUMMATION (O(N^2))]
+-------------------------------------------------------------------
+
+Pascal's triangle exhibits a fundamental dynamic recurrence relation:
+Row 'i' (0-indexed) contains 'i + 1' elements. The first and last elements 
+are always 1, while any interior element at index 'j' is calculated as:
+  row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j]
+
+1. DEFAULT VECTOR INITIALIZATION:
+   - For each row 'i', we construct a vector initialized directly with 'i + 1' 
+     elements, each set to value 1: 'vector<int> row(i + 1, 1)'.
+   - This implicitly satisfies the boundary condition (row[0] = 1, row[i] = 1) 
+     without requiring manual boundary checks or conditional branches.
+
+2. INTERIOR ELEMENT POPULATION:
+   - We run an inner loop 'j' from 1 up to 'i - 1'.
+   - We compute each interior value using the sum of the two parent elements 
+     from the previously built row: 'triangle[i - 1][j - 1] + triangle[i - 1][j]'.
+
+3. MATRIX ACCUMULATION:
+   - Once populated, the completed 'row' vector is appended directly to 
+     our dynamic 2D array 'triangle'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: numRows = 4
+
+- Row 0 (i = 0):
+  * row initialized to size 1 with ones: [1]
+  * Inner loop (1 to -1) does not run.
+  * triangle = [[1]]
+
+- Row 1 (i = 1):
+  * row initialized to size 2 with ones: [1, 1]
+  * Inner loop (1 to 0) does not run.
+  * triangle = [[1], [1, 1]]
+
+- Row 2 (i = 2):
+  * row initialized to size 3 with ones: [1, 1, 1]
+  * j = 1: row[1] = triangle[1][0] + triangle[1][1] = 1 + 1 = 2
+  * row becomes: [1, 2, 1]
+  * triangle = [[1], [1, 1], [1, 2, 1]]
+
+- Row 3 (i = 3):
+  * row initialized to size 4 with ones: [1, 1, 1, 1]
+  * j = 1: row[1] = triangle[2][0] + triangle[2][1] = 1 + 2 = 3
+  * j = 2: row[2] = triangle[2][1] + triangle[2][2] = 2 + 1 = 3
+  * row becomes: [1, 3, 3, 1]
+  * triangle = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1]]
+
+Returns [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1]].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(numRows^2)
+- Explanation: Where 'N' is 'numRows'. The total number of elements generated 
+  across all rows is the sum of integers from 1 to N: N * (N + 1) / 2. Since each 
+  element is computed in O(1) constant time, total time complexity is quadratic O(N^2).
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Excluding the memory required to build the result 2D matrix 
+  'triangle' (which takes O(N^2) space to store the output), auxiliary operations 
+  use only local loop counter variables on the stack.
+===================================================================

@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 119: PASCAL'S TRIANGLE II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer 'rowIndex', return the 'rowIndex'-th (0-indexed) row of Pascal's 
+triangle.
+
+Constraints:
+- 0 <= rowIndex <= 33
+- Follow-up: Optimize algorithm to use only O(rowIndex) extra space.
+
+-------------------------------------------------------------------
+[METHODOLOGY: COMBINATORIAL RELATION & ITERATIVE EXTENSION (O(N))]
+-------------------------------------------------------------------
+
+While LeetCode 118 requires generating the entire 2D matrix up to row N, LeetCode 119 
+asks for a single row. Constructing previous rows leads to unnecessary O(N^2) space. 
+
+We derive the target row in linear time and space using Combinatorics:
+
+1. COMBINATORIAL PROPERTY OF PASCAL'S ROW:
+   - The k-th element in row N (0-indexed) is represented by the combination formula: 
+     C(N, k) = N! / (k! * (N - k)!)
+   - Rather than calculating factorials directly (which quickly overflows 64-bit integers), 
+     we use the recursive term relation:
+     C(N, k) = C(N, k - 1) * (N - k + 1) / k
+
+2. OVERFLOW PRECAUTION (long long Accumulator):
+   - We initialize 'current = 1' typed as a 'long long'.
+   - Multiplying 'current * (rowIndex - i + 1)' before dividing by 'i' can briefly exceed 
+     32-bit signed integer limits ('INT_MAX'). Storing 'current' as 64-bit 'long long' 
+     guarantees arithmetic safety without precision loss.
+
+3. LINEAR SINGLE-PASS FILL:
+   - We pre-allocate a vector of size 'rowIndex + 1' filled with default value 1.
+   - We loop 'i' from 1 to 'rowIndex - 1', computing 'current' iteratively and assigning 
+     'row[i] = current'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: rowIndex = 3
+
+- Initialization: row = [1, 1, 1, 1], current = 1
+
+- i = 1:
+  * current = 1 * (3 - 1 + 1) / 1 = 3 / 1 = 3
+  * row[1] = 3
+
+- i = 2:
+  * current = 3 * (3 - 2 + 1) / 2 = 6 / 2 = 3
+  * row[2] = 3
+
+- Loop terminates (i < 3).
+
+Final Array: [1, 3, 3, 1].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(rowIndex)
+- Explanation: Where 'N' is 'rowIndex'. The loop executes 'N - 1' times, performing 
+  scalar 64-bit multiplication and division operations running in constant CPU time.
+
+Space Complexity: O(1) [Auxiliary Space]
+- Explanation: Beyond the output array container required for returning the result vector 
+  of size 'N + 1', auxiliary memory usage is limited strictly to local integer registers.
+===================================================================

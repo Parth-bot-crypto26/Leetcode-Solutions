@@ -1,0 +1,69 @@
+===================================================================
+LEETCODE 2144: MINIMUM COST OF BUYING CANDIES WITH DISCOUNT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A shop sells candies with a discount deal: For every two candies bought, you can 
+get a third candy for free, provided its cost is <= the minimum cost of the two 
+purchased candies.
+
+Given an integer array 'cost' representing candy prices, return the minimum total 
+cost required to acquire all candies.
+
+Constraints:
+- 1 <= cost.length <= 100
+- 1 <= cost[i] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY DESCENDING SORT & MODULO STRIPING (O(N LOG N))]
+-------------------------------------------------------------------
+
+To minimize total expenditure, we must maximize the monetary value of the candies 
+we obtain for free:
+
+1. GREEDY DESCENDING SORTING:
+   - We sort the 'cost' array in descending order: 'sort(cost.rbegin(), cost.rend())'.
+   - This groups the most expensive available candies at the front of the array.
+
+2. OPTIMAL CANDY PAIRING:
+   - By picking the two highest remaining prices (indices 0 and 1), we are eligible 
+     to claim the third highest remaining price (index 2) for free, as its cost is 
+     guaranteed to be <= cost[1].
+   - Repeating this process iteratively skips every 3rd candy in descending sequence.
+
+3. 1-INDEXED MODULO FILTER:
+   - For 0-based loop index 'i', position offset is '(i + 1)'.
+   - If '(i + 1) % 3 == 0', the candy is claimed for free and skipped.
+   - Otherwise, its cost is added to 'totalCost'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: cost = [6, 5, 7, 9, 2, 2]
+
+- Step 1: Descending Sort
+  cost = [9, 7, 6, 5, 2, 2]
+
+- Step 2: Iterate & Accumulate
+  * i = 0 (val 9): (0+1)%3 = 1 != 0 -> totalCost += 9 = 9
+  * i = 1 (val 7): (1+1)%3 = 2 != 0 -> totalCost += 7 = 16
+  * i = 2 (val 6): (2+1)%3 = 0 == 0 -> SKIP (FREE)
+  * i = 3 (val 5): (3+1)%3 = 1 != 0 -> totalCost += 5 = 21
+  * i = 4 (val 2): (4+1)%3 = 2 != 0 -> totalCost += 2 = 23
+  * i = 5 (val 2): (5+1)%3 = 0 == 0 -> SKIP (FREE)
+
+Returns 23.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n log n)
+- Explanation: Where 'n' is the length of 'cost'. Sorting the array takes O(n log n) 
+  time. The subsequent linear pass takes O(n) time, making comparison sorting the 
+  dominating factor.
+
+Space Complexity: O(1) or O(log n)
+- Explanation: In-place sorting algorithms like introsort require logarithmic stack space 
+  O(log n) for recursive calls, using no dynamic memory allocations.
+===================================================================

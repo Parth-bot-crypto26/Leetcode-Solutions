@@ -1,0 +1,82 @@
+===================================================================
+LEETCODE 3633: EARLIEST FINISH TIME FOR LAND AND WATER RIDES I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two categories of theme park attractions—land rides and water rides—with 
+their respective opening start times and durations, determine the earliest possible 
+completion time for a tourist to experience exactly one land ride and one water 
+ride in either order.
+
+Constraints:
+- 1 <= n, m <= 100
+- 1 <= start times, durations <= 1000
+
+-------------------------------------------------------------------
+[METHODOLOGY: ALL-PAIRS SEQUENTIAL SCHEDULING SIMULATION (O(N * M))]
+-------------------------------------------------------------------
+
+With small array bounds ($n, m \le 100$), testing every permutation of one land ride 
+and one water ride guarantees finding the global minimum completion time:
+
+1. DUAL DIRECTION EVALUATION:
+   For every pair $(i, j)$ of land ride $i$ and water ride $j$, we evaluate two options:
+   
+   - Scenario A: Land Ride First -> Water Ride Second
+     * Land finish time: $L_{\text{finish}} = \text{landStartTime}[i] + \text{landDuration}[i]$
+     * Water start time: $W_{\text{start}} = \max(L_{\text{finish}}, \text{waterStartTime}[j])$
+     * Total completion: $\text{ScenarioA} = W_{\text{start}} + \text{waterDuration}[j]$
+
+   - Scenario B: Water Ride First -> Land Ride Second
+     * Water finish time: $W_{\text{finish}} = \text{waterStartTime}[j] + \text{waterDuration}[j]$
+     * Land start time: $L_{\text{start}} = \max(W_{\text{finish}}, \text{landStartTime}[i])$
+     * Total completion: $\text{ScenarioB} = L_{\text{start}} + \text{landDuration}[i]$
+
+2. GLOBAL MINIMUM SELECTION:
+   - We update 'minFinishTime = min({minFinishTime, ScenarioA, ScenarioB})' for 
+     every evaluated pair across both loops.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: landStartTime = [2, 8], landDuration = [4, 1]
+       waterStartTime = [6], waterDuration = [3]
+
+Iterating Pair (Land 0, Water 0):
+- Scenario A (Land 0 -> Water 0):
+  * landFinish = 2 + 4 = 6
+  * waterStart = max(6, 6) = 6
+  * finishScenario1 = 6 + 3 = 9
+
+- Scenario B (Water 0 -> Land 0):
+  * waterFinish = 6 + 3 = 9
+  * landStart = max(9, 2) = 9
+  * finishScenario2 = 9 + 4 = 13
+
+Iterating Pair (Land 1, Water 0):
+- Scenario A (Land 1 -> Water 0):
+  * landFinish = 8 + 1 = 9
+  * waterStart = max(9, 6) = 9
+  * finishScenario1 = 9 + 3 = 12
+
+- Scenario B (Water 0 -> Land 1):
+  * waterFinish = 6 + 3 = 9
+  * landStart = max(9, 8) = 9
+  * finishScenario2 = 9 + 1 = 10
+
+Minimum across all scenarios: min(9, 13, 12, 10) = 9.
+Returns 9.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * m)
+- Explanation: Where 'n' is the number of land rides and 'm' is the number of water rides. 
+  The nested loop executes $n \times m$ iterations, performing $O(1)$ scalar additions and 
+  max/min comparisons per pair.
+
+Space Complexity: O(1)
+- Explanation: All checks execute using scalar local integer registers on the stack frame 
+  without dynamic heap memory allocations.
+===================================================================

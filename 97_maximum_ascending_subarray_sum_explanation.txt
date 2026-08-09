@@ -1,0 +1,60 @@
+===================================================================
+LEETCODE 1800: MAXIMUM ASCENDING SUBARRAY SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of positive integers 'nums', return the maximum possible sum of 
+a strictly increasing contiguous subarray in 'nums'.
+
+Constraints:
+- 1 <= nums.length <= 100
+- 1 <= nums[i] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: OPTIMAL SINGLE-PASS ACCUMULATOR SCAN (O(N))]
+-------------------------------------------------------------------
+
+A two-pointer nested iteration computes subarray sums in O(N^2) time. However, 
+maximal strictly increasing subarrays form disjoint contiguous segments. We can 
+evaluate all segment sums in a single linear pass:
+
+1. STATE TRACKING:
+   - 'maxSum': Stores the maximum ascending subarray sum seen so far (initialized to 'nums[0]').
+   - 'currentSum': Stores the running sum of the active strictly increasing subarray 
+     (initialized to 'nums[0]').
+
+2. LINEAR TRANSITION LOGIC:
+   - We iterate 'i' from 1 to 'n - 1':
+     * IF 'nums[i] > nums[i - 1]': The ascending sequence continues. We append 
+       'nums[i]' to the current sum: 'currentSum += nums[i]'.
+     * ELSE ('nums[i] <= nums[i - 1]'): The strict order breaks. We reset 
+       'currentSum = nums[i]' to start a new ascending segment.
+   - After each step, we update 'maxSum = max(maxSum, currentSum)'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [10, 20, 30, 5, 10, 50]
+
+Initial State: currentSum = 10, maxSum = 10
+
+- i = 1 (20 > 10): currentSum = 10 + 20 = 30 | maxSum = max(10, 30) = 30
+- i = 2 (30 > 20): currentSum = 30 + 30 = 60 | maxSum = max(30, 60) = 60
+- i = 3 (5 <= 30): Strict order broken! Reset currentSum = 5 | maxSum = 60
+- i = 4 (10 > 5):  currentSum = 5 + 10 = 15  | maxSum = max(60, 15) = 60
+- i = 5 (50 > 10): currentSum = 15 + 50 = 65 | maxSum = max(60, 65) = 65
+
+Returns 65.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The single-pass approach inspects 
+  each element exactly once, performing constant-time comparisons and updates.
+
+Space Complexity: O(1)
+- Explanation: Uses only scalar state variables ('maxSum', 'currentSum') allocated 
+  on the stack frame.
+===================================================================

@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 414: THIRD MAXIMUM NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', return the third distinct maximum number in this array. 
+If the third distinct maximum does not exist, return the global maximum number.
+
+Constraints:
+- 1 <= nums.length <= 10^4
+- -2^31 <= nums[i] <= 2^31 - 1
+- Follow-up: Achieve an O(n) runtime complexity.
+
+-------------------------------------------------------------------
+[METHODOLOGY: THREE-POINTER CASCADING TRACKER (O(N))]
+-------------------------------------------------------------------
+
+Sorting the array takes O(N log N) time and set conversions allocate extra space. 
+We achieve optimal linear O(N) runtime and O(1) space using three tracking variables:
+
+1. 64-BIT BOUNDARY HANDLING:
+   - Elements in 'nums' can equal 'INT_MIN' (-2^31). Using 'INT_MIN' as an uninitialized 
+     flag leads to false-positive updates or incorrect state detection.
+   - We initialize 'first', 'second', and 'third' to 'LLONG_MIN' (64-bit integer minimum), 
+     providing a safe sentinel value outside the range of 32-bit signed integers.
+
+2. DEDUPLICATION GUARD:
+   - If 'num' matches 'first', 'second', or 'third', we skip it immediately:
+     'if (num == first || num == second || num == third) continue;'
+   - This enforces the distinct element requirement without requiring hash sets.
+
+3. CASCADING VALUE TRANSITIONS:
+   - 'num > first': Push down all values: 'third = second', 'second = first', 'first = num'.
+   - 'num > second': Push down lower values: 'third = second', 'second = num'.
+   - 'num > third': Update third value: 'third = num'.
+
+4. FALLBACK RESOLUTION:
+   - If 'third == LLONG_MIN', fewer than 3 distinct values were encountered. 
+     Per problem constraints, we return the global maximum 'first'.
+   - Otherwise, we return 'third'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [2, 2, 3, 1]
+
+Initial State: first = LLONG_MIN, second = LLONG_MIN, third = LLONG_MIN
+
+- num = 2:
+  * 2 > first -> third = LLONG_MIN, second = LLONG_MIN, first = 2
+- num = 2:
+  * 2 == first -> MATCH DETECTED -> SKIP
+- num = 3:
+  * 3 > first -> third = LLONG_MIN, second = 2, first = 3
+- num = 1:
+  * 1 < second (2) but 1 > third (LLONG_MIN) -> third = 1
+
+Final state: first = 3, second = 2, third = 1.
+'third' != LLONG_MIN -> Returns 1.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The array is traversed once in a single 
+  linear pass, making at most three scalar comparisons per element.
+
+Space Complexity: O(1)
+- Explanation: Uses only three 64-bit local variables ('first', 'second', 'third') 
+  on the stack frame, requiring constant auxiliary memory.
+===================================================================

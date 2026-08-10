@@ -1,0 +1,72 @@
+===================================================================
+LEETCODE 53: MAXIMUM SUBARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', find the contiguous subarray (containing at least 
+one number) which has the largest sum, and return its sum.
+
+Constraints:
+- 1 <= nums.length <= 10^5
+- -10^4 <= nums[i] <= 10^4
+- Follow-up: Implement an O(N log N) Divide and Conquer solution.
+
+-------------------------------------------------------------------
+[METHODOLOGY: KADANE'S ALGORITHM / DYNAMIC PROGRAMMING (O(N))]
+-------------------------------------------------------------------
+
+A brute-force solution checks all possible subarrays in O(N^2) or O(N^3) time, which 
+results in Time Limit Exceeded (TLE) for N = 10^5. We optimize to single-pass linear 
+time using Kadane's Algorithm:
+
+1. LOCAL VS GLOBAL STATE TRACKING:
+   - 'currentSum': Represents the maximum contiguous sum ending at the current position.
+   - 'maxSum': Tracks the global maximum contiguous subarray sum observed so far.
+   - Initialized to 'currentSum = 0' and 'maxSum = INT_MIN'.
+
+2. NEGATIVE PREFIX RESET RULE:
+   - As we scan each element 'val' in 'nums', we accumulate it into 'currentSum += val'.
+   - We update 'maxSum = max(maxSum, currentSum)'.
+   - CRITICAL GUARD: If 'currentSum < 0', carrying this accumulated total into the next 
+     index would reduce the potential sum of any future subarray. Therefore, we reset 
+     'currentSum = 0' to begin evaluating a fresh contiguous subarray starting at the 
+     next element.
+
+-------------------------------------------------------------------
+[DIVIDE AND CONQUER FOLLOW-UP CONCEPT (O(N LOG N))]
+-------------------------------------------------------------------
+For a range [left, right] with midpoint 'mid':
+1. Recursively find max subarray sum in left half: [left, mid].
+2. Recursively find max subarray sum in right half: [mid + 1, right].
+3. Find maximum subarray sum crossing the midpoint: left-suffix max + right-prefix max.
+4. Return max of (left_max, right_max, cross_max).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+
+- val = -2: currentSum = -2 | maxSum = -2 | currentSum < 0 -> reset currentSum = 0
+- val =  1: currentSum =  1 | maxSum =  1
+- val = -3: currentSum = -2 | maxSum =  1 | currentSum < 0 -> reset currentSum = 0
+- val =  4: currentSum =  4 | maxSum =  4
+- val = -1: currentSum =  3 | maxSum =  4
+- val =  2: currentSum =  5 | maxSum =  5
+- val =  1: currentSum =  6 | maxSum =  6
+- val = -5: currentSum =  1 | maxSum =  6
+- val =  4: currentSum =  5 | maxSum =  6
+
+Returns 6 (corresponding to subarray [4, -1, 2, 1]).
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs a single 
+  linear pass through the array, spending O(1) time per element.
+
+Space Complexity: O(1)
+- Explanation: Uses only two scalar tracking registers ('currentSum', 'maxSum') on 
+  the stack frame, running with zero dynamic auxiliary space.
+===================================================================

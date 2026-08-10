@@ -1,0 +1,70 @@
+===================================================================
+LEETCODE 229: MAJORITY ELEMENT II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' of size 'n', find all elements that appear more than 
+⌊n / 3⌋ times.
+
+Constraints:
+- 1 <= nums.length <= 5 * 10^4
+- -10^9 <= nums[i] <= 10^9
+- Follow-up: Solve in linear O(N) time and O(1) auxiliary space.
+
+-------------------------------------------------------------------
+[METHODOLOGY: EXTENDED BOYER-MOORE MAJORITY VOTE (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A hash map approach requires O(N) space. To achieve O(1) space, we apply the 
+Extended Boyer-Moore Majority Vote algorithm:
+
+1. MATHEMATICAL INVARIANT:
+   - Any element appearing > ⌊n / 3⌋ times occupies strictly more than 1/3 of the array.
+   - Therefore, there can be AT MOST 2 such majority elements in any array.
+
+2. PASS 1 (CANDIDATE SELECTION):
+   - We track two potential candidates ('cand1', 'cand2') and their respective counts 
+     ('count1 = 0', 'count2 = 0').
+   - For each 'num' in 'nums':
+     * IF 'num == cand1': increment 'count1++'.
+     * ELSE IF 'num == cand2': increment 'count2++'.
+     * ELSE IF 'count1 == 0': assign 'cand1 = num', 'count1 = 1'.
+     * ELSE IF 'count2 == 0': assign 'cand2 = num', 'count2 = 1'.
+     * ELSE (num matches neither candidate and both counts > 0): decrement both 
+       'count1--' and 'count2--'.
+
+3. PASS 2 (FREQUENCY VALIDATION):
+   - The candidates chosen in Pass 1 are merely potential majority elements.
+   - We make a second pass over 'nums' to count the exact frequencies of 'cand1' 
+     and 'cand2'.
+   - If a candidate's actual count exceeds 'n / 3', we append it to the result vector.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 2, 3] | n = 3, threshold = n / 3 = 1
+
+- Pass 1 (Candidate Selection):
+  * num = 3: count1 == 0 -> cand1 = 3, count1 = 1
+  * num = 2: count2 == 0 -> cand2 = 2, count2 = 1
+  * num = 3: matches cand1 -> count1 = 2
+  * Candidates selected: cand1 = 3, cand2 = 2
+
+- Pass 2 (Validation):
+  * Frequency of 3 is 2 -> 2 > 1 -> Add 3 to result.
+  * Frequency of 2 is 1 -> 1 is not > 1 -> Skip 2.
+
+Returns [3].
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs two sequential 
+  linear passes over the array, using constant-time scalar comparisons.
+
+Space Complexity: O(1)
+- Explanation: Uses only scalar tracking variables ('cand1', 'cand2', 'count1', 'count2') 
+  on the stack frame, meeting the O(1) space follow-up requirement.
+===================================================================

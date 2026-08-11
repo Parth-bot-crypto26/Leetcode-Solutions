@@ -1,0 +1,81 @@
+===================================================================
+LEETCODE 169: MAJORITY ELEMENT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array 'nums' of size 'n', return the majority element.
+The majority element is the element that appears more than ⌊n / 2⌋ times. You may assume that the majority element always exists in the array.
+
+Constraints:
+- n == nums.length
+- 1 <= n <= 5 * 10^4
+- -10^9 <= nums[i] <= 10^9
+- Follow-up: Solve in linear O(N) time and O(1) auxiliary space.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BOYER-MOORE MAJORITY VOTE (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A hash map approach requires O(N) space. Sorting requires O(N log N) time. To achieve O(N) time and O(1) auxiliary space, we apply the Boyer-Moore Majority Vote algorithm:
+
+1. MATHEMATICAL INVARIANT:
+   - Any element appearing > ⌊n / 2⌋ times occupies strictly more than 50% of the array.
+   - Therefore, if we pair up and cancel out different elements, the majority element is guaranteed to survive as the final candidate.
+
+2. CANDIDATE SELECTION (SINGLE PASS):
+   - We track a candidate variable ('ans') and a vote counter ('freq = 0').
+   - For each 'num' in 'nums':
+     * IF 'freq == 0': assign candidate 'ans = num'.
+     * IF 'num == ans': increment 'freq++'.
+     * ELSE (num != ans): decrement 'freq--'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [2, 2, 1, 1, 1, 2, 2] | n = 7, threshold = n / 2 = 3
+
+- Pass 1 (Candidate Selection):
+  * i = 0, num = 2: freq == 0 -> ans = 2, freq = 1
+  * i = 1, num = 2: num == ans -> freq = 2
+  * i = 2, num = 1: num != ans -> freq = 1
+  * i = 3, num = 1: num != ans -> freq = 0
+  * i = 4, num = 1: freq == 0 -> ans = 1, freq = 1
+  * i = 5, num = 2: num != ans -> freq = 0
+  * i = 6, num = 2: freq == 0 -> ans = 2, freq = 1
+
+Returns 2.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        int freq = 0, ans = 0;
+        for(int i = 0; i < nums.size(); i++){
+            if(freq == 0){
+                ans = nums[i];
+            }
+            if(ans == nums[i]){
+                freq++;
+            }else{
+                freq--;
+            }
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs a single 
+  linear pass over the array with constant-time O(1) operations per element.
+
+Space Complexity: O(1)
+- Explanation: Uses only scalar tracking variables ('freq' and 'ans') on the stack 
+  frame, meeting the O(1) space follow-up requirement.
+===================================================================

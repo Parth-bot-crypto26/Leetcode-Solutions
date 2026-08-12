@@ -1,0 +1,73 @@
+===================================================================
+LEETCODE 50: POW(X, N)
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Implement pow(x, n), which calculates x raised to the power n (i.e., x^n).
+
+Constraints:
+- -100.0 < x < 100.0
+- -2^31 <= n <= 2^31 - 1
+- n is an integer.
+- Either x is not zero or n > 0.
+- -10^4 <= x^n <= 10^4
+
+-------------------------------------------------------------------
+[METHODOLOGY: BINARY EXPONENTIATION / FAST POWER (O(LOG N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A naive repeated multiplication approach takes O(N) time, which leads to Time Limit Exceeded (TLE) for large values like n = 2^31 - 1. To achieve O(log N) time, we apply Binary Exponentiation (Fast Power):
+
+1. BASE AND EDGE CASE HANDLING:
+   - If 'n == 0', return 1.0.
+   - If 'x == 0', return 0.0.
+   - If 'x == 1', return 1.0.
+   - If 'x == -1', return 1.0 if 'n' is even, or -1.0 if 'n' is odd.
+   - Convert 'n' to a 64-bit integer ('binForm = n') to avoid integer overflow when 'n = -2^31'.
+   - If 'n < 0', invert the base ('x = 1 / x') and make the exponent positive ('binForm = -binForm').
+
+2. BINARY EXPONENTIATION (ITERATIVE LOGIC):
+   - Maintain a running product variable 'ans = 1.0'.
+   - While 'binForm > 0':
+     * IF current bit is set ('binForm % 2 == 1'): multiply 'ans' by 'x' ('ans *= x').
+     * Square the base ('x *= x') to represent x^(2^k) for the next bit position.
+     * Divide exponent by 2 ('binForm /= 2').
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: x = 2.00000, n = 10 | binForm = 10, ans = 1.0
+
+- Iteration 1:
+  * binForm = 10 (even) -> ans remains 1.0
+  * x becomes 2.0 * 2.0 = 4.0
+  * binForm becomes 10 / 2 = 5
+
+- Iteration 2:
+  * binForm = 5 (odd)  -> ans = 1.0 * 4.0 = 4.0
+  * x becomes 4.0 * 4.0 = 16.0
+  * binForm becomes 5 / 2 = 2
+
+- Iteration 3:
+  * binForm = 2 (even) -> ans remains 4.0
+  * x becomes 16.0 * 16.0 = 256.0
+  * binForm becomes 2 / 2 = 1
+
+- Iteration 4:
+  * binForm = 1 (odd)  -> ans = 4.0 * 256.0 = 1024.0
+  * x becomes 256.0 * 256.0 = 65536.0
+  * binForm becomes 1 / 2 = 0
+
+Loop terminates (binForm == 0).
+Returns 1024.00000.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: The exponent 'n' is divided by 2 in each iteration of the loop, reducing the execution steps to logarithmic time complexity.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar variables ('binForm', 'ans', 'x') on the stack.
+===================================================================

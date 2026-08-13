@@ -1,0 +1,54 @@
+===================================================================
+LEETCODE 121: BEST TIME TO BUY AND SELL STOCK
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an array 'prices' where 'prices[i]' is the price of a given stock on the 'i-th' day.
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
+
+Constraints:
+- 1 <= prices.length <= 10^5
+- 0 <= prices[i] <= 10^4
+
+-------------------------------------------------------------------
+[METHODOLOGY: ONE-PASS / GREEDY (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To maximize profit from a single transaction, we need to buy at the minimum price encountered so far and evaluate the profit if we were to sell on the current day.
+
+1. TRACKING MINIMUM PRICE AND MAXIMUM PROFIT:
+   - Maintain a running minimum variable 'bestBuy = prices[0]' representing the lowest stock price seen prior to or on the current day.
+   - Maintain a running maximum variable 'maxProfit = 0' to keep track of the maximum profit found.
+
+2. SINGLE PASS ITERATION:
+   - Iterate through 'prices' from index 1 to 'n - 1':
+     * IF 'prices[i] > bestBuy': compute potential profit ('prices[i] - bestBuy') and update 'maxProfit = max(maxProfit, prices[i] - bestBuy)'.
+     * Update 'bestBuy = min(bestBuy, prices[i])' to ensure subsequent selling days compare against the lowest preceding buying price.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: prices = [7, 1, 5, 3, 6, 4] | n = 6
+
+- Initial state: bestBuy = 7, maxProfit = 0
+
+- Iteration Steps (i = 1 to 5):
+  * i = 1, price = 1: price <= bestBuy (1 <= 7) -> maxProfit remains 0 | bestBuy = min(7, 1) = 1
+  * i = 2, price = 5: price > bestBuy (5 > 1)   -> maxProfit = max(0, 5 - 1) = 4 | bestBuy = min(1, 5) = 1
+  * i = 3, price = 3: price > bestBuy (3 > 1)   -> maxProfit = max(4, 3 - 1) = 4 | bestBuy = min(1, 3) = 1
+  * i = 4, price = 6: price > bestBuy (6 > 1)   -> maxProfit = max(4, 6 - 1) = 5 | bestBuy = min(1, 6) = 1
+  * i = 5, price = 4: price > bestBuy (4 > 1)   -> maxProfit = max(5, 4 - 1) = 5 | bestBuy = min(1, 4) = 1
+
+Returns 5.
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'prices'. The algorithm traverses the array in a single linear pass using O(1) scalar updates per iteration.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar variables ('maxProfit', 'bestBuy', 'n').
+===================================================================

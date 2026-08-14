@@ -1,0 +1,86 @@
+===================================================================
+LEETCODE 238: PRODUCT OF ARRAY EXCEPT SELF
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', return an array 'answer' such that 'answer[i]' is equal to the product of all the elements of 'nums' except 'nums[i]'.
+The product of any prefix or suffix of 'nums' is guaranteed to fit in a 32-bit integer.
+You must write an algorithm that runs in O(N) time and without using the division operation.
+
+Constraints:
+- 2 <= nums.length <= 10^5
+- -30 <= nums[i] <= 30
+- Follow-up: Solve in O(1) extra space complexity (the output array does not count as extra space).
+
+-------------------------------------------------------------------
+[METHODOLOGY: PREFIX AND SUFFIX PRODUCT ACCUMULATION (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To calculate the product of all elements except 'nums[i]' without using division, we compute prefix products (all elements to the left) and suffix products (all elements to the right).
+
+1. PREFIX PRODUCT PASS (FORWARD PASS):
+   - Initialize output array 'ans' of size 'n' with 1s.
+   - Iterate from index 1 to 'n - 1':
+     * Set 'ans[i] = ans[i - 1] * nums[i - 1]'.
+     * This stores the cumulative product of all elements preceding index 'i' into 'ans[i]'.
+
+2. SUFFIX PRODUCT PASS (BACKWARD PASS):
+   - Maintain a running accumulator variable 'suffix = 1'.
+   - Iterate from index 'n - 2' down to 0:
+     * Update 'suffix *= nums[i + 1]' to maintain the cumulative product of all elements following index 'i'.
+     * Multiply 'ans[i]' by 'suffix' ('ans[i] *= suffix') to combine left and right products.
+
+3. O(1) AUXILIARY SPACE OPTIMIZATION:
+   - Reusing the output vector 'ans' to store prefix products and accumulating suffix products on the fly using a single scalar variable eliminates the need for extra array storage.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 3, 4] | n = 4
+
+- Forward Pass (Prefix Products into ans):
+  * Initial ans = [1, 1, 1, 1]
+  * i = 1: ans[1] = ans[0] * nums[0] = 1 * 1 = 1
+  * i = 2: ans[2] = ans[1] * nums[1] = 1 * 2 = 2
+  * i = 3: ans[3] = ans[2] * nums[2] = 2 * 3 = 6
+  * Resulting ans array: [1, 1, 2, 6]
+
+- Backward Pass (Suffix Products multiplied into ans):
+  * Initial suffix = 1
+  * i = 2: suffix = suffix * nums[3] = 1 * 4 = 4  | ans[2] = ans[2] * 4 = 2 * 4 = 8
+  * i = 1: suffix = suffix * nums[2] = 4 * 3 = 12 | ans[1] = ans[1] * 12 = 1 * 12 = 12
+  * i = 0: suffix = suffix * nums[1] = 12 * 2 = 24| ans[0] = ans[0] * 24 = 1 * 24 = 24
+
+Returns [24, 12, 8, 6].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n, 1);
+        for(int i = 1; i < n; i++){
+            ans[i] = ans[i-1]*nums[i-1];
+        }
+        int suffix = 1;
+        for(int i = n-2; i >= 0; i--){
+            suffix *= nums[i+1];
+            ans[i] *= suffix;
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs two sequential linear passes over the array.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Excluding the output array 'ans' (which does not count towards space complexity per problem guidelines), only a single scalar variable ('suffix') is allocated on the stack frame.
+===================================================================

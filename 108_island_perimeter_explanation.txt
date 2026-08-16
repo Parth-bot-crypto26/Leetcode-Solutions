@@ -1,0 +1,98 @@
+===================================================================
+LEETCODE 463: ISLAND PERIMETER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given row x col grid representing a map where grid[i][j] = 1 represents land and grid[i][j] = 0 represents water.
+Grid cells are connected horizontally/vertically (not diagonally). The grid is completely surrounded by water, and there is exactly one island (i.e., one or more connected land cells).
+The island doesn't have "lakes", meaning the water inside isn't connected to the water around the island. One cell is a square with side length 1. The grid is rectangular, width and height don't exceed 100. Determine the perimeter of the island.
+
+Constraints:
+- row == grid.length
+- col == grid[i].length
+- 1 <= row, col <= 100
+- grid[i][j] is 0 or 1.
+- There is exactly one island in grid.
+
+-------------------------------------------------------------------
+[METHODOLOGY: NEIGHBOR DEDUCTION / COUNT AND SUBTRACT (O(ROW * COL) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Each land cell initially contributes 4 edges to the total perimeter. However, when two land cells share a boundary, that shared edge is no longer exposed to water for either cell (reducing the total perimeter by 2).
+
+1. GRID TRAVERSAL:
+   - Iterate through each cell in the grid using row index 'r' and column index 'c'.
+
+2. PERIMETER CALCULATION LOGIC:
+   - For every land cell ('grid[r][c] == 1'):
+     * Add 4 to the running 'perimeter' count.
+     * Check adjacent top cell ('r > 0 && grid[r - 1][c] == 1'): If present, subtract 2 from 'perimeter' to account for the shared horizontal boundary.
+     * Check adjacent left cell ('c > 0 && grid[r][c - 1] == 1'): If present, subtract 2 from 'perimeter' to account for the shared vertical boundary.
+
+3. SINGLE-PASS EDGE DEDUCTION:
+   - Checking only top and left neighbors avoids double-counting shared edges while traversing top-to-bottom, left-to-right.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: grid = [[0, 1, 0, 0],
+               [1, 1, 1, 0],
+               [0, 1, 0, 0],
+               [1, 1, 0, 0]]
+
+- Initial State: perimeter = 0
+
+- Cell Traversal:
+  * (0, 1): Land -> perimeter += 4 (4). Top/Left land neighbors? None.
+  * (1, 0): Land -> perimeter += 4 (8). Top/Left land neighbors? None.
+  * (1, 1): Land -> perimeter += 4 (12).
+    - Top neighbor (0, 1) is land -> perimeter -= 2 (10)
+    - Left neighbor (1, 0) is land -> perimeter -= 2 (8)
+  * (1, 2): Land -> perimeter += 4 (12).
+    - Top neighbor (0, 2) is water.
+    - Left neighbor (1, 1) is land -> perimeter -= 2 (10)
+  * (2, 1): Land -> perimeter += 4 (14).
+    - Top neighbor (1, 1) is land -> perimeter -= 2 (12)
+    - Left neighbor (2, 0) is water.
+  * (3, 0): Land -> perimeter += 4 (16). Top/Left land neighbors? None.
+  * (3, 1): Land -> perimeter += 4 (20).
+    - Top neighbor (2, 1) is land -> perimeter -= 2 (18)
+    - Left neighbor (3, 0) is land -> perimeter -= 2 (16)
+
+Returns 16.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int islandPerimeter(vector<vector<int>>& grid) {
+        int rows = grid.size();
+        int cols = grid[0].size();
+        int perimeter = 0;
+
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                if (grid[r][c] == 1) {
+                    perimeter += 4;
+                    if (r > 0 && grid[r - 1][c] == 1) perimeter -= 2;
+                    if (c > 0 && grid[r][c - 1] == 1) perimeter -= 2;
+                }
+            }
+        }
+
+        return perimeter;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(rows * cols)
+- Explanation: The algorithm traverses every cell in the 2D grid exactly once using nested loops, performing O(1) constant-time neighbor checks per cell.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses only scalar tracking variables ('rows', 'cols', 'perimeter') without allocating extra data structures.
+===================================================================

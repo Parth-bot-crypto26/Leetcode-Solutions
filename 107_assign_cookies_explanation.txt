@@ -1,0 +1,83 @@
+===================================================================
+LEETCODE 455: ASSIGN COOKIES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Assume you are an awesome parent and want to give your children some cookies. But, you should give each child at most one cookie.
+Each child 'i' has a greed factor 'g[i]', which is the minimum size of a cookie that the child will be content with; and each cookie 'j' has a size 's[j]'. If 's[j] >= g[i]', we can assign the cookie 'j' to the child 'i', and the child 'i' will be content. Your goal is to maximize the number of your content children and output the maximum number.
+
+Constraints:
+- 1 <= g.length <= 3 * 10^4
+- 0 <= s.length <= 3 * 10^4
+- 1 <= g[i], s[j] <= 2^31 - 1
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY TWO-POINTER APPROACH (O(N LOG N + M LOG M) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To maximize the total number of content children, we greedily satisfy the child with the smallest greed factor using the smallest available cookie that meets their requirement.
+
+1. SORTING BOTH ARRAYS:
+   - Sort the greed factors array 'g' in ascending order.
+   - Sort the cookie sizes array 's' in ascending order.
+
+2. TWO-POINTER TRAVERSAL:
+   - Maintain two pointers: 'child_i = 0' for array 'g' and 'cookie_j = 0' for array 's'.
+   - While 'child_i < g.size()' and 'cookie_j < s.size()':
+     * IF 's[cookie_j] >= g[child_i]': The current cookie is large enough to satisfy the current child. Increment 'child_i++' to move to the next child.
+     * Increment 'cookie_j++' in every step to move to the next cookie, regardless of whether the current cookie was used or was too small.
+
+3. RESULT:
+   - The value of 'child_i' at termination represents the total count of satisfied children.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: g = [1, 2, 3], s = [1, 1] | n = 3, m = 2
+
+- Initial State: g = [1, 2, 3], s = [1, 1], child_i = 0, cookie_j = 0
+
+- Iteration 1:
+  * child_i = 0 (g[0] = 1), cookie_j = 0 (s[0] = 1)
+  * s[0] >= g[0] (1 >= 1) -> Match found! child_i becomes 1
+  * cookie_j becomes 1
+
+- Iteration 2:
+  * child_i = 1 (g[1] = 2), cookie_j = 1 (s[1] = 1)
+  * s[1] < g[1] (1 < 2) -> Cookie too small! child_i remains 1
+  * cookie_j becomes 2
+
+Loop terminates as cookie_j (2) reaches s.size() (2).
+Returns child_i = 1.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int findContentChildren(vector<int>& g, vector<int>& s) {
+        sort(g.begin(), g.end());
+        sort(s.begin(), s.end());
+        int child_i = 0;
+        int cookie_j = 0;
+        while(child_i < g.size() && cookie_j < s.size()){
+            if(s[cookie_j] >= g[child_i]){
+                child_i++;
+            }
+            cookie_j++;
+        }
+        return child_i;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n log n + m log m)
+- Explanation: Where 'n' is the size of array 'g' and 'm' is the size of array 's'. Sorting both arrays dominates execution time. The subsequent two-pointer traversal takes linear time O(n + m).
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Aside from internal sorting stack frames, only two scalar pointer variables ('child_i' and 'cookie_j') are allocated.
+===================================================================

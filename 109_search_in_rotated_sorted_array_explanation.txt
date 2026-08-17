@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 33: SEARCH IN ROTATED SORTED ARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+There is an integer array 'nums' sorted in ascending order (with distinct values).
+Prior to being passed to your function, 'nums' is possibly left rotated at an unknown index 'k' (1 <= k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed).
+Given the array 'nums' after the possible rotation and an integer 'target', return the index of 'target' if it is in 'nums', or -1 if it is not in 'nums'.
+
+Constraints:
+- 1 <= nums.length <= 5000
+- -10^4 <= nums[i] <= 10^4
+- All values of 'nums' are unique.
+- 'nums' is an ascending array that is possibly rotated.
+- -10^4 <= target <= 10^4
+- Follow-up: You must write an algorithm with O(log n) runtime complexity.
+
+-------------------------------------------------------------------
+[METHODOLOGY: MODIFIED BINARY SEARCH (O(LOG N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A standard binary search relies on a fully sorted array. When an array is rotated at a pivot, splitting it in half will always leave at least one half strictly sorted. We can leverage this invariant to decide which half to search.
+
+1. POINTER INITIALIZATION:
+   - Set 'st = 0' and 'end = nums.size() - 1'.
+
+2. BINARY SEARCH LOOP:
+   - Calculate mid-point 'mid = st + (end - st) / 2'.
+   - IF 'nums[mid] == target': return 'mid'.
+
+3. IDENTIFY SORTED HALF:
+   - Check IF 'nums[st] <= nums[mid]':
+     * The left half ('[st ... mid]') is strictly sorted.
+     * Check IF 'nums[st] <= target' AND 'target <= nums[mid]': 'target' lies in the sorted left half, so search left ('end = mid - 1').
+     * ELSE: 'target' lies in the right half, so search right ('st = mid + 1').
+   - ELSE (Right half '[mid ... end]' is strictly sorted):
+     * Check IF 'nums[mid] <= target' AND 'target <= nums[end]': 'target' lies in the sorted right half, so search right ('st = mid + 1').
+     * ELSE: 'target' lies in the left half, so search left ('end = mid - 1').
+
+4. TERMINATION:
+   - If 'st > end', the target is not present in the array; return -1.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [4, 5, 6, 7, 0, 1, 2], target = 0 | n = 7
+
+- Iteration 1:
+  * st = 0, end = 6 -> mid = 0 + (6 - 0) / 2 = 3 (nums[mid] = 7)
+  * nums[mid] != target (7 != 0)
+  * nums[st] <= nums[mid] (4 <= 7) -> Left half is sorted.
+  * Check range: is 4 <= target <= 7? (4 <= 0 <= 7 is False)
+  * Target is not in left half -> st = mid + 1 = 4
+
+- Iteration 2:
+  * st = 4, end = 6 -> mid = 4 + (6 - 4) / 2 = 5 (nums[mid] = 1)
+  * nums[mid] != target (1 != 0)
+  * nums[st] <= nums[mid] (0 <= 1) -> Left half is sorted.
+  * Check range: is 0 <= target <= 1? (0 <= 0 <= 1 is True)
+  * Target is in left half -> end = mid - 1 = 4
+
+- Iteration 3:
+  * st = 4, end = 4 -> mid = 4 + (4 - 4) / 2 = 4 (nums[mid] = 0)
+  * nums[mid] == target (0 == 0) -> Match found!
+
+Returns 4.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int st = 0, end = nums.size()-1;
+        while(st <= end){
+            int mid = st + (end - st) / 2;
+            if(nums[mid] == target){
+                return mid;
+            }
+            if(nums[st] <= nums[mid]){
+                if(nums[st] <= target && target <= nums[mid]){
+                    end = mid-1;
+                }else{
+                    st = mid+1;
+                }
+            }
+            else{
+                if(nums[mid] <= target && target <= nums[end]){
+                    st = mid+1;
+                }else{
+                    end = mid-1;
+                }
+            }
+        }
+        return -1;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: Where 'n' is the length of 'nums'. The search space is halved in each step of the binary search iteration.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for pointers ('st', 'end', 'mid') on the stack.
+===================================================================

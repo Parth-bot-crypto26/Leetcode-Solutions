@@ -1,0 +1,78 @@
+===================================================================
+LEETCODE 852: PEAK INDEX IN A MOUNTAIN ARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer mountain array 'arr' of length 'n' where the values increase to a peak element and then decrease.
+Return the index of the peak element.
+Your task is to solve it in O(log(n)) time complexity.
+
+Constraints:
+- 3 <= arr.length <= 10^5
+- 0 <= arr[i] <= 10^6
+- 'arr' is guaranteed to be a mountain array.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BINARY SEARCH ON SLOPE (O(LOG N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A linear scan takes O(N) time. Since 'arr' strictly increases to a single peak and then strictly decreases, the array properties allow us to apply Binary Search to locate the peak in O(log N) time:
+
+1. SEARCH BOUNDS:
+   - Since 'arr' is guaranteed to be a mountain array of length at least 3, the peak can never be at index 0 or index 'n - 1'.
+   - Initialize search pointers to 'st = 1' and 'end = arr.size() - 2'.
+
+2. MID-POINT EVALUATION & SLOPE CHECK:
+   - Calculate 'mid = st + (end - st) / 2'.
+   - IF 'arr[mid - 1] < arr[mid]' AND 'arr[mid] > arr[mid + 1]': 'mid' is strictly greater than both adjacent neighbors, meaning we found the peak; return 'mid'.
+   - ELSE IF 'arr[mid - 1] < arr[mid]': We are on the strictly increasing slope (left side of the peak). Shift search range to the right ('st = mid + 1').
+   - ELSE ('arr[mid - 1] > arr[mid]'): We are on the strictly decreasing slope (right side of the peak). Shift search range to the left ('end = mid - 1').
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: arr = [0, 10, 5, 2] | n = 4
+
+- Initial State: st = 1, end = 4 - 2 = 2
+
+- Iteration 1:
+  * mid = 1 + (2 - 1) / 2 = 1 (arr[mid] = 10)
+  * Check neighbors of arr[1]: arr[0] = 0, arr[2] = 5
+  * arr[0] < arr[1] (0 < 10) AND arr[1] > arr[2] (10 > 5) -> True!
+  * Peak condition satisfied at mid = 1.
+
+Returns 1.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int peakIndexInMountainArray(vector<int>& arr) {
+        int st = 1, end = arr.size()-2;
+        while(st <= end){
+            int mid = st + (end-st)/2;
+            if(arr[mid-1] < arr[mid] && arr[mid] > arr[mid+1]){
+                return mid;
+            }
+            if(arr[mid-1] < arr[mid]){
+                st = mid+1;
+            }else{
+                end = mid-1;
+            }
+        }
+        return -1;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: Where 'n' is the length of 'arr'. The search space is halved in each step of the binary search iteration.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for pointers ('st', 'end', 'mid') on the stack frame.
+===================================================================

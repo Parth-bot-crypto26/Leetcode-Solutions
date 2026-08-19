@@ -1,0 +1,85 @@
+===================================================================
+LEETCODE 3959: CHECK GOOD INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a positive integer 'n'.
+Let 'digitSum' be the sum of the digits of 'n', and let 'squareSum' be the sum of the squares of the digits of 'n'.
+An integer is called good if 'squareSum - digitSum >= 50'.
+Return true if 'n' is good. Otherwise, return false.
+
+Constraints:
+- 1 <= n <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: DIGIT EXTRACTION & ACCUMULATION (O(LOG N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+The problem requires extracting individual digits of an integer to compute both the sum of its digits and the sum of its squared digits.
+
+1. DIGIT EXTRACTION (WHILE LOOP):
+   - Maintain two accumulators: 'digitSum = 0' and 'squareSum = 0'.
+   - While 'n > 0':
+     * Extract the last digit using modulo arithmetic: 'digit = n % 10'.
+     * Accumulate to digit sum: 'digitSum += digit'.
+     * Accumulate to squared digit sum: 'squareSum += digit * digit'.
+     * Truncate the last digit using integer division: 'n /= 10'.
+
+2. CONDITION VALIDATION:
+   - Evaluate whether 'squareSum - digitSum >= 50'.
+   - Return 'true' if the inequality holds; otherwise, return 'false'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 19 | Target Condition: squareSum - digitSum >= 50
+
+- Initial State: digitSum = 0, squareSum = 0
+
+- Iteration 1:
+  * digit = 19 % 10 = 9
+  * digitSum = 0 + 9 = 9
+  * squareSum = 0 + (9 * 9) = 81
+  * n = 19 / 10 = 1
+
+- Iteration 2:
+  * digit = 1 % 10 = 1
+  * digitSum = 9 + 1 = 10
+  * squareSum = 81 + (1 * 1) = 82
+  * n = 1 / 10 = 0
+
+- Final Check:
+  * squareSum - digitSum = 82 - 10 = 72
+  * Is 72 >= 50? True.
+
+Returns true.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    bool checkGoodInteger(int n) {
+        int digitSum = 0;
+        int squareSum = 0;
+        while(n > 0){
+            int digit = n % 10;
+            digitSum += digit;
+            squareSum += digit*digit;
+            n /= 10;
+        }
+        return squareSum - digitSum >= 50 ? true : false;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log10 n)
+- Explanation: Where 'n' is the given integer. The number of iterations in the loop is directly proportional to the number of digits in 'n', which is ⌊log10(n)⌋ + 1. For n <= 10^9, it runs in at most 10 steps.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar tracking variables ('digitSum', 'squareSum', 'digit') on the stack frame.
+===================================================================

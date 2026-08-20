@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 75: SORT COLORS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an array 'nums' with 'n' objects colored red, white, or blue, sort them in-place so that objects of the same color are adjacent, with the colors in the order red, white, and blue.
+We will use the integers 0, 1, and 2 to represent the color red, white, and blue, respectively.
+You must solve this problem without using the library's sort function.
+
+Constraints:
+- n == nums.length
+- 1 <= n <= 300
+- nums[i] is either 0, 1, or 2.
+- Follow-up: Could you come up with a one-pass algorithm using only constant extra space?
+
+-------------------------------------------------------------------
+[METHODOLOGY: DUTCH NATIONAL FLAG ALGORITHM (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+A counting sort or two-pass approach counts occurrences and overwrites the array. To achieve a single-pass in-place solution with O(1) space, we apply Dijkstra's Dutch National Flag algorithm using three pointers:
+
+1. POINTER ROLES & INVARIANTS:
+   - 'low': Tracks the boundary for placing 0s. Everything strictly to the left of 'low' is 0.
+   - 'mid': The current element under examination. Everything between 'low' and 'mid - 1' is 1.
+   - 'high': Tracks the boundary for placing 2s. Everything strictly to the right of 'high' is 2.
+
+2. THREE-POINTER TRAVERSAL LOGIC:
+   - Initialize 'low = 0', 'mid = 0', and 'high = n - 1'.
+   - While 'mid <= high':
+     * IF 'nums[mid] == 0': Swap 'nums[low]' and 'nums[mid]', then increment both 'low++' and 'mid++'.
+     * IF 'nums[mid] == 1': Element is in its correct relative section, increment 'mid++'.
+     * IF 'nums[mid] == 2': Swap 'nums[mid]' and 'nums[high]', then decrement 'high--'. (Do NOT increment 'mid' because the swapped element from 'high' must be inspected).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [2, 0, 2, 1, 1, 0] | n = 6
+
+- Initial State: low = 0, mid = 0, high = 5
+
+- Iteration 1:
+  * mid = 0, nums[mid] = 2 -> Swap nums[0] & nums[5] -> nums = [0, 0, 2, 1, 1, 2]
+  * high becomes 4 | low = 0, mid = 0
+
+- Iteration 2:
+  * mid = 0, nums[mid] = 0 -> Swap nums[0] & nums[0] -> nums = [0, 0, 2, 1, 1, 2]
+  * low becomes 1, mid becomes 1
+
+- Iteration 3:
+  * mid = 1, nums[mid] = 0 -> Swap nums[1] & nums[1] -> nums = [0, 0, 2, 1, 1, 2]
+  * low becomes 2, mid becomes 2
+
+- Iteration 4:
+  * mid = 2, nums[mid] = 2 -> Swap nums[2] & nums[4] -> nums = [0, 0, 1, 1, 2, 2]
+  * high becomes 3 | low = 2, mid = 2
+
+- Iteration 5:
+  * mid = 2, nums[mid] = 1 -> Element is 1, mid becomes 3
+  * low = 2, high = 3
+
+- Iteration 6:
+  * mid = 3, nums[mid] = 1 -> Element is 1, mid becomes 4
+  * low = 2, high = 3
+
+Loop terminates (mid > high: 4 > 3).
+Resulting array: [0, 0, 1, 1, 2, 2].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void sortColors(vector<int>& nums) {
+        int n = nums.size();
+        int low = 0, mid = 0, high = n-1;
+        while(mid <= high){
+            if(nums[mid] == 0){
+                swap(nums[low], nums[mid]);
+                low++;
+                mid++;
+            }else if(nums[mid] == 1){
+                mid++;
+            }else{
+                swap(nums[mid], nums[high]);
+                high--;
+            }
+        }
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'nums'. The algorithm performs a single pass over the array, with each element inspected or swapped at most twice.
+
+Space Complexity: O(1)
+- Explanation: Performs sorting strictly in-place, using constant extra space for pointers ('low', 'mid', 'high').
+===================================================================

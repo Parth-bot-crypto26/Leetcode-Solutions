@@ -1,0 +1,78 @@
+===================================================================
+LEETCODE 1344: ANGLE BETWEEN HANDS OF A CLOCK
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two numbers, 'hour' and 'minutes', return the smaller angle (in degrees) formed between the hour and the minute hand.
+Answers within 10^-5 of the actual value will be accepted as correct.
+
+Constraints:
+- 1 <= hour <= 12
+- 0 <= minutes <= 59
+
+-------------------------------------------------------------------
+[METHODOLOGY: MATHEMATICAL ANGLE COMPUTATION (O(1) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To find the angle between the clock hands, calculate the absolute position of each hand in degrees relative to the 12 o'clock position (0°).
+
+1. MINUTE HAND ANGLE:
+   - The clock face has 360° divided into 60 minutes.
+   - Rate per minute = 360° / 60 = 6°/min.
+   - Formula: minAngle = minutes * 6.0
+
+2. HOUR HAND ANGLE:
+   - The clock face has 360° divided into 12 hours.
+   - Rate per hour = 360° / 12 = 30°/hr.
+   - Continuous movement per minute = 30° / 60 = 0.5°/min.
+   - Note: Map hour 12 to 0° using 'hour % 12'.
+   - Formula: hrAngle = (hour % 12) * 30.0 + minutes * 0.5
+
+3. ABSOLUTE DIFFERENCE & MINIMUM ANGLE:
+   - Difference = abs(hrAngle - minAngle)
+   - Since a clock forms two angles that sum to 360°, if the absolute difference exceeds 180°, return '360.0 - angle' to ensure the smaller angle is returned.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: hour = 12, minutes = 30
+
+- Hour Hand Angle:
+  * (12 % 12) * 30.0 + 30 * 0.5 = 0 + 15.0 = 15.0°
+
+- Minute Hand Angle:
+  * 30 * 6.0 = 180.0°
+
+- Angle Calculation:
+  * abs(15.0 - 180.0) = 165.0°
+  * Is 165.0 > 180.0? False.
+
+Returns 165.0.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    double angleClock(int hour, int minutes) {
+        double hrAngle = (hour % 12) * 30.0 + minutes * 0.5;
+        double minAngle = minutes * 6.0;
+        double angle = abs(hrAngle - minAngle);
+        if (angle > 180.0) {
+            angle = 360.0 - angle;
+        }
+        return angle;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: Performs a fixed sequence of basic arithmetic operations regardless of input parameters.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar double variables ('hrAngle', 'minAngle', 'angle').
+===================================================================

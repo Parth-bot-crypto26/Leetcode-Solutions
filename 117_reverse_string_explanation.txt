@@ -1,0 +1,75 @@
+===================================================================
+LEETCODE 344: REVERSE STRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a function that reverses a string. The input string is given as an array of characters 's'.
+You must do this by modifying the input array in-place with O(1) extra memory.
+
+Constraints:
+- 1 <= s.length <= 10^5
+- 's[i]' is a printable ASCII character.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER IN-PLACE SWAP (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To reverse the array in-place without auxiliary memory allocation:
+
+1. TWO-POINTER SET UP:
+   - 'st = 0': Points to the first element (left boundary).
+   - 'end = s.size() - 1': Points to the last element (right boundary).
+
+2. CONVERGING SWAP LOOP:
+   - Run a while loop while 'st < end'.
+   - Swap the characters at 's[st]' and 's[end]'.
+   - Increment 'st++' to move rightward.
+   - Decrement 'end--' to move leftward.
+   - Stop when pointers meet or cross in the middle.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = ["h", "e", "l", "l", "o"] | length = 5
+
+- Initial State: st = 0 ('h'), end = 4 ('o')
+
+- Iteration 1:
+  * Swap s[0] ('h') and s[4] ('o') -> s = ["o", "e", "l", "l", "h"]
+  * st = 1, end = 3
+
+- Iteration 2:
+  * Swap s[1] ('e') and s[3] ('l') -> s = ["o", "l", "l", "e", "h"]
+  * st = 2, end = 2
+
+- Loop condition check:
+  * st < end (2 < 2) is False.
+
+Resulting array: ["o", "l", "l", "e", "h"].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void reverseString(vector<char>& s) {
+        int st = 0, end = s.size()-1;
+        while(st < end){
+            swap(s[st], s[end]);
+            st++;
+            end--;
+        }
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of array 's'. The algorithm performs ⌊n/2⌋ swaps, which executes in linear time.
+
+Space Complexity: O(1)
+- Explanation: The reversal modifies the character array directly in-place using constant auxiliary variables ('st', 'end').
+===================================================================

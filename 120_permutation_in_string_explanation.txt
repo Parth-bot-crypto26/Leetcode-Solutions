@@ -1,0 +1,136 @@
+===================================================================
+LEETCODE 567: PERMUTATION IN STRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two strings 's1' and 's2', return true if 's2' contains a permutation of 's1', or false otherwise.
+In other words, return true if one of 's1''s permutations is a substring of 's2'.
+
+Constraints:
+- 1 <= s1.length, s2.length <= 10^4
+- 's1' and 's2' consist of lowercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: NAIVE SLIDING WINDOW VS. OPTIMAL SLIDING WINDOW]
+-------------------------------------------------------------------
+
+1. NAIVE SLIDING WINDOW (SUBMITTED APPROACH):
+   - For every starting position in 's2', recompute the frequency array of size 's1.length()' from scratch.
+   - Compare the recomputed window frequency array with 's1''s frequency array.
+   - Time Complexity: O(N * M) where N = s2.length() and M = s1.length().
+   - With N, M up to 10^4, this approach does unnecessary repeated work and can approach O(N * M) time.
+
+2. OPTIMAL FIXED-SIZE SLIDING WINDOW (O(N) TIME, O(1) SPACE):
+   - Base Check: If 's1.length() > s2.length()', return false immediately.
+   - Build a target frequency array 'freq1' for 's1' and an initial window frequency array 'freq2' for the first 'windowSize' characters of 's2'.
+   - Slide the window across 's2' one character at a time:
+     * Add the new character entering the right side of the window: 'freq2[s2[i] - 'a']++'.
+     * Remove the old character leaving the left side of the window: 'freq2[s2[i - windowSize] - 'a']--'.
+     * Compare 'freq1' and 'freq2' after each shift.
+   - Time Complexity: O(26 * N) = O(N).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s1 = "ab", s2 = "eidbaooo" | windowSize = 2
+
+- Initial Target Frequencies (s1 = "ab"):
+  * freq1['a'] = 1, freq1['b'] = 1 (all others 0)
+
+- First Window (s2[0..1] = "ei"):
+  * freq2['e'] = 1, freq2['i'] = 1 -> freq1 != freq2
+
+- Slide Window (i = 2, character 'd', remove 'e'):
+  * Window = "id" -> freq2['d'] = 1, freq2['i'] = 1 -> freq1 != freq2
+
+- Slide Window (i = 3, character 'b', remove 'i'):
+  * Window = "db" -> freq2['d'] = 1, freq2['b'] = 1 -> freq1 != freq2
+
+- Slide Window (i = 4, character 'a', remove 'd'):
+  * Window = "ba" -> freq2['b'] = 1, freq2['a'] = 1
+  * Compare: freq1 == freq2 -> Match found!
+
+Returns true.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Approach 1: Submitted Code (O(N * M) Worst-Case)
+class Solution {
+public:
+    bool isFreqSame(int freq1[], int freq2[]){
+        for(int i = 0; i < 26; i++){
+            if(freq1[i] != freq2[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+    bool checkInclusion(string s1, string s2) {
+        int freq[26] = {0};
+        for(int i = 0; i < s1.length(); i++){
+            int idx = s1[i]-'a';
+            freq[idx]++;
+        }
+        int windowSize = s1.length();
+        for(int i = 0; i < s2.length(); i++){
+            int windowIdx = 0, idx = i;
+            int windowFreq[26] = {0};
+            while(windowIdx < windowSize && idx < s2.length()){
+                windowFreq[s2[idx]-'a']++;
+                windowIdx++; idx++;
+            }
+            if(isFreqSame(freq, windowFreq)){
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+// Approach 2: Optimal Sliding Window (O(N) Time, O(1) Space)
+class SolutionOptimal {
+private:
+    bool isFreqSame(const vector<int>& f1, const vector<int>& f2) {
+        for (int i = 0; i < 26; i++) {
+            if (f1[i] != f2[i]) return false;
+        }
+        return true;
+    }
+public:
+    bool checkInclusion(string s1, string s2) {
+        int n1 = s1.length(), n2 = s2.length();
+        if (n1 > n2) return false;
+
+        vector<int> freq1(26, 0), freq2(26, 0);
+        for (int i = 0; i < n1; i++) {
+            freq1[s1[i] - 'a']++;
+            freq2[s2[i] - 'a']++;
+        }
+
+        if (isFreqSame(freq1, freq2)) return true;
+
+        for (int i = n1; i < n2; i++) {
+            freq2[s2[i] - 'a']++;
+            freq2[s2[i - n1] - 'a']--;
+
+            if (isFreqSame(freq1, freq2)) return true;
+        }
+
+        return false;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Submitted Code:
+- Time Complexity: O(N * M) — Re-populates a frequency array of length 'M' for each of the 'N' starting positions in 's2'.
+- Space Complexity: O(1) — Uses fixed size frequency arrays of size 26.
+
+Optimal Sliding Window:
+- Time Complexity: O(N) — Where N = s2.length(). Advances two window pointers across 's2' once, doing 26-element comparisons per step.
+- Space Complexity: O(1) — Uses constant auxiliary space for two 26-element frequency vectors.
+===================================================================

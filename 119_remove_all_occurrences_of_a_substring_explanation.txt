@@ -1,0 +1,97 @@
+===================================================================
+LEETCODE 1910: REMOVE ALL OCCURRENCES OF A SUBSTRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two strings 's' and 'part', perform the following operation on 's' until all occurrences of the substring 'part' are removed:
+Find the leftmost occurrence of the substring 'part' and remove it from 's'.
+Return 's' after removing all occurrences of 'part'.
+
+Constraints:
+- 1 <= s.length <= 1000
+- 1 <= part.length <= 1000
+- 's' and 'part' consist of lowercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: ITERATIVE STRING SEARCH & ERASE VS. STACK / KMP]
+-------------------------------------------------------------------
+
+1. ITERATIVE STRING SEARCH & ERASE (SUBMITTED APPROACH):
+   - Repeatedly find the first occurrence of 'part' in 's' using 's.find(part)'.
+   - Erase 'part.length()' characters starting at the found index using 's.erase()'.
+   - Continue until 's.find(part)' returns 'string::npos' (or index >= s.length()).
+   - While simple to implement, repeatedly performing string searches and shifting characters in string erasure can take O(N^2 / M) time in the worst case.
+
+2. STACK-BASED SIMULATION (O(N * M) OPTIMAL):
+   - Push characters of 's' onto a result string/stack one by one.
+   - When the stack length is at least 'part.length()', check if the suffix matches 'part'.
+   - If it matches, pop 'part.length()' characters from the end of the stack.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "daabcbaabcbc", part = "abc"
+
+- Initial State: s = "daabcbaabcbc"
+
+- Iteration 1:
+  * s.find("abc") returns index 2.
+  * s.erase(2, 3) -> s becomes "dabaabcbc"
+
+- Iteration 2:
+  * s.find("abc") returns index 4.
+  * s.erase(4, 3) -> s becomes "dababc"
+
+- Iteration 3:
+  * s.find("abc") returns index 3.
+  * s.erase(3, 3) -> s becomes "dab"
+
+- Iteration 4:
+  * s.find("abc") returns npos (>= s.length()).
+  * Loop terminates.
+
+Returns "dab".
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Approach 1: Submitted Iterative Search & Erase Code
+class Solution {
+public:
+    string removeOccurrences(string s, string part) {
+        while(s.length() > 0 && s.find(part) < s.length()){
+            s.erase(s.find(part), part.length());
+        }
+        return s;
+    }
+};
+
+// Approach 2: Stack-Based Optimization
+class SolutionStack {
+public:
+    string removeOccurrences(string s, string part) {
+        string res = "";
+        int m = part.length();
+        for (char c : s) {
+            res.push_back(c);
+            if (res.length() >= m && res.substr(res.length() - m) == part) {
+                res.erase(res.length() - m);
+            }
+        }
+        return res;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Submitted Code (Iterative Erase):
+- Time Complexity: O(N^2 / M) worst-case — where 'N' is the length of 's' and 'M' is the length of 'part'. Repeated searching and erasing causes substring creation and character shifting.
+- Space Complexity: O(1) Auxiliary Space — String operations are performed directly on the string object.
+
+Stack-Based Code:
+- Time Complexity: O(N * M) — Pushes each character once and performs at most N suffix comparisons of length M.
+- Space Complexity: O(N) Auxiliary Space — Uses an auxiliary string to store the resultant character stack frame.
+===================================================================

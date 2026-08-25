@@ -1,0 +1,87 @@
+===================================================================
+LEETCODE 1732: FIND THE HIGHEST ALTITUDE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+There is a biker going on a road trip. The road trip consists of n + 1 points at various altitudes. The biker starts his trip on point 0 with altitude equal to 0.
+You are given an integer array 'gain' of length 'n' where 'gain[i]' is the net gain in altitude between points 'i' and 'i + 1' for all (0 <= i < n). Return the highest altitude of a point.
+
+Constraints:
+- n == gain.length
+- 1 <= n <= 100
+- -100 <= gain[i] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: PREFIX SUM / RUNNING TOTAL (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+The problem asks for the maximum altitude reached during the trip. This is equivalent to tracking the running sum (prefix sum) of the 'gain' array and keeping track of its maximum value:
+
+1. INITIALIZATION:
+   - 'maxAltitude = 0': The biker starts at point 0 with altitude 0.
+   - 'currAltitude = 0': Tracks the biker's current altitude.
+
+2. RUNNING SUM PASS:
+   - Iterate through each element in 'gain'.
+   - Add 'gain[i]' to 'currAltitude'.
+   - Update 'maxAltitude = max(maxAltitude, currAltitude)'.
+
+3. CONCLUSION:
+   - Return 'maxAltitude' after processing all gain values.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: gain = [-5, 1, 5, 0, -7]
+
+- Initial State: currAltitude = 0, maxAltitude = 0
+
+- Iteration 1 (gain[0] = -5):
+  * currAltitude = 0 + (-5) = -5
+  * maxAltitude = max(0, -5) = 0
+
+- Iteration 2 (gain[1] = 1):
+  * currAltitude = -5 + 1 = -4
+  * maxAltitude = max(0, -4) = 0
+
+- Iteration 3 (gain[2] = 5):
+  * currAltitude = -4 + 5 = 1
+  * maxAltitude = max(0, 1) = 1
+
+- Iteration 4 (gain[3] = 0):
+  * currAltitude = 1 + 0 = 1
+  * maxAltitude = max(1, 1) = 1
+
+- Iteration 5 (gain[4] = -7):
+  * currAltitude = 1 + (-7) = -6
+  * maxAltitude = max(1, -6) = 1
+
+Returns 1.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int largestAltitude(vector<int>& gain) {
+        int maxAltitude = 0;
+        int currAltitude = 0;
+        for(int i = 0; i < gain.size(); i++){
+            currAltitude += gain[i];
+            maxAltitude = max(maxAltitude, currAltitude);
+        }
+        return maxAltitude;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of the 'gain' array. The algorithm performs a single pass over the array updating two variables per element.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar integer variables ('maxAltitude', 'currAltitude').
+===================================================================

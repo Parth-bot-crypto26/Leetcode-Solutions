@@ -1,0 +1,111 @@
+===================================================================
+LEETCODE 205: ISOMORPHIC STRINGS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two strings 's' and 't', determine if they are isomorphic.
+Two strings 's' and 't' are isomorphic if the characters in 's' can be replaced to get 't'.
+All occurrences of a character must be replaced with another character while preserving the order of characters. No two characters may map to the same character, but a character may map to itself.
+
+Constraints:
+- 1 <= s.length <= 5 * 10^4
+- t.length == s.length
+- 's' and 't' consist of any valid ASCII character.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LAST SEEN INDEX MAPPING (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To verify a strict 1-to-1 bijection (two-way mapping) between characters in 's' and 't', we track the last index position where each character appeared in its respective string.
+
+1. BINDING CHARACTERS BY LAST SEEN INDEX:
+   - Instead of explicitly building character-to-character maps, record the most recent 1-based index (or 0-based with default offset) where characters 's[i]' and 't[i]' were seen.
+   - If 's[i]' was last seen at index 'lastPosS' and 't[i]' was last seen at index 'lastPosT':
+     * IF 'lastPosS != lastPosT', the mapping consistency is violated; return false.
+   - Update the last seen positions of 's[i]' and 't[i]' to the current index 'i'.
+
+2. MAP VS. FIXED-SIZE ARRAY (OPTIMIZATION):
+   - Using 'unordered_map<char, int>' introduces hashing overhead and heap allocations.
+   - Since strings consist of printable ASCII characters (256 possible values), fixed-size lookup arrays ('int mapS[256]' and 'int mapT[256]') initialized to 0 provide O(1) direct access.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "egg", t = "add" | length = 3
+
+- Initial State: mapS filled with 0, mapT filled with 0
+
+- Iteration 0 (i = 0):
+  * s[0] = 'e', t[0] = 'a'
+  * mapS['e'] = 0, mapT['a'] = 0 -> Equal (0 == 0)
+  * Update last seen (use 1-based index to distinguish from unvisited default 0):
+    mapS['e'] = 1, mapT['a'] = 1
+
+- Iteration 1 (i = 1):
+  * s[1] = 'g', t[1] = 'd'
+  * mapS['g'] = 0, mapT['d'] = 0 -> Equal (0 == 0)
+  * Update: mapS['g'] = 2, mapT['d'] = 2
+
+- Iteration 2 (i = 2):
+  * s[2] = 'g', t[2] = 'd'
+  * mapS['g'] = 2, mapT['d'] = 2 -> Equal (2 == 2)
+  * Update: mapS['g'] = 3, mapT['d'] = 3
+
+Loop completes successfully.
+
+Returns true.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Approach 1: Submitted Code (Unordered Map)
+class Solution {
+public:
+    bool isIsomorphic(string s, string t) {
+        unordered_map<char, int> mapS;
+        unordered_map<char, int> mapT;
+        for(int i = 0; i < s.length(); i++){
+            char charS = s[i];
+            char charT = t[i];
+            int lastPosS = mapS.count(charS) ? mapS[charS] : -1;
+            int lastPosT = mapT.count(charT) ? mapT[charT] : -1;
+            if(lastPosS != lastPosT){
+                return false;
+            }
+            mapS[charS] = i;
+            mapT[charT] = i;
+        }
+        return true;
+    }
+};
+
+// Approach 2: Optimal Fixed Array Lookup (Zero Overhead)
+class SolutionOptimal {
+public:
+    bool isIsomorphic(string s, string t) {
+        int mapS[256] = {0};
+        int mapT[256] = {0};
+        
+        for (int i = 0; i < s.length(); i++) {
+            if (mapS[(unsigned char)s[i]] != mapT[(unsigned char)t[i]]) {
+                return false;
+            }
+            // Store 1-based index to avoid conflict with initial default value 0
+            mapS[(unsigned char)s[i]] = i + 1;
+            mapT[(unsigned char)t[i]] = i + 1;
+        }
+        return true;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of string 's'. The algorithm traverses the strings once. Fixed array access operates in constant O(1) time per character.
+
+Space Complexity: O(1)
+- Explanation: Uses fixed-size arrays of size 256 for ASCII character lookup, taking constant auxiliary memory independent of string length.
+===================================================================

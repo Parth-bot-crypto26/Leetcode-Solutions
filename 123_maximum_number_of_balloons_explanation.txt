@@ -1,0 +1,85 @@
+===================================================================
+LEETCODE 1189: MAXIMUM NUMBER OF BALLOONS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 'text', you want to use the characters of 'text' to form as many instances of the word "balloon" as possible.
+You can use each character in 'text' at most once. Return the maximum number of instances that can be formed.
+
+Constraints:
+- 1 <= text.length <= 10^4
+- 'text' consists of lowercase English letters only.
+
+-------------------------------------------------------------------
+[METHODOLOGY: CHARACTER FREQUENCY COUNTER (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To form one instance of the word "balloon", we need:
+- 'b': 1
+- 'a': 1
+- 'l': 2
+- 'o': 2
+- 'n': 1
+
+1. FREQUENCY COUNTING:
+   - Iterate through 'text' and count the frequencies of characters 'b', 'a', 'l', 'o', and 'n'.
+
+2. BOTTLENECK EVALUATION:
+   - Since 'l' and 'o' each appear twice in "balloon", divide their counts by 2 (using integer division: 'l / 2' and 'o / 2').
+   - The maximum number of complete "balloon" words we can form is determined by the minimum available count among all required components: 'min({b, a, l / 2, o / 2, n})'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: text = "loonbalxballpoon"
+
+- Count character frequencies:
+  * 'b': 2
+  * 'a': 2
+  * 'l': 4
+  * 'o': 4
+  * 'n': 2
+
+- Adjust required double-character frequencies:
+  * 'l' count = 4 / 2 = 2
+  * 'o' count = 4 / 2 = 2
+
+- Compute minimum bottleneck:
+  * min(2, 2, 2, 2, 2) = 2
+
+Returns 2.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int maxNumberOfBalloons(string text) {
+        int b = 0, a = 0, l = 0, o = 0, n = 0;
+        
+        for (char c : text) {
+            if (c == 'b') b++;
+            else if (c == 'a') a++;
+            else if (c == 'l') l++;
+            else if (c == 'o') o++;
+            else if (c == 'n') n++;
+        }
+        
+        l /= 2;
+        o /= 2;
+        
+        return min({b, a, l, o, n});
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of string 'text'. The algorithm performs a single pass over 'text' to accumulate frequencies.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar integer count variables ('b', 'a', 'l', 'o', 'n').
+===================================================================

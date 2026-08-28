@@ -1,0 +1,94 @@
+===================================================================
+LEETCODE 257: BINARY TREE PATHS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the root of a binary tree, return all root-to-leaf paths in any order.
+A leaf is a node with no children.
+
+Constraints:
+- The number of nodes in the tree is in the range [1, 100].
+- -100 <= Node.val <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: DEPTH-FIRST SEARCH / BACKTRACKING (O(N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+To find all root-to-leaf paths, traverse the binary tree using Depth-First Search (DFS) while accumulating the path history:
+
+1. RECURSIVE TRAVERSAL:
+   - Base Case: If 'node' is null, terminate the recursive branch.
+   - Append the delimiter "->" if 'current_path' is non-empty, then append 'to_string(node->val)'.
+
+2. LEAF NODE EVALUATION:
+   - Check if the current node is a leaf node ('!node->left && !node->right').
+   - If true, add 'current_path' to 'result' and return.
+
+3. RECURSIVE EXPLORATION:
+   - Recursively traverse the left child if 'node->left' exists.
+   - Recursively traverse the right child if 'node->right' exists.
+   - Note: Passing 'current_path' by value automatically preserves path states across recursive call frames without requiring explicit manual string pop/backtracking operations.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: root = [1, 2, 3, null, 5]
+
+- Initial Call: dfs(node=1, current_path="", result=[])
+  * current_path becomes "1"
+  * Not a leaf -> Call dfs(node=2) and dfs(node=3)
+
+- Branch Left (dfs(node=2, current_path="1", result=[])):
+  * current_path becomes "1->2"
+  * Not a leaf -> Call dfs(node=5)
+
+- Deep Sub-branch Left (dfs(node=5, current_path="1->2", result=[])):
+  * current_path becomes "1->2->5"
+  * Leaf node reached ('!node->left && !node->right') -> result.push_back("1->2->5")
+
+- Branch Right (dfs(node=3, current_path="1", result=["1->2->5"])):
+  * current_path becomes "1->3"
+  * Leaf node reached ('!node->left && !node->right') -> result.push_back("1->3")
+
+Returns ["1->2->5", "1->3"].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void dfs(TreeNode* node, string current_path, vector<string>& result) {
+        if (!node) return;
+        
+        if (!current_path.empty()) {
+            current_path += "->";
+        }
+        current_path += to_string(node->val);
+        
+        if (!node->left && !node->right) {
+            result.push_back(current_path);
+            return;
+        }
+        
+        if (node->left) dfs(node->left, current_path, result);
+        if (node->right) dfs(node->right, current_path, result);
+    }
+
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> result;
+        dfs(root, "", result);
+        return result;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * h) or O(n^2) worst-case
+- Explanation: Where 'n' is the number of nodes and 'h' is the height of the tree. String copying takes time proportional to the length of the path at each node.
+
+Space Complexity: O(h) Auxiliary Stack Space
+- Explanation: The recursion call stack uses space proportional to the tree height 'h' (up to O(n) for a completely skewed tree).
+===================================================================

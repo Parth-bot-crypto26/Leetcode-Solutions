@@ -1,0 +1,134 @@
+===================================================================
+LEETCODE 3737: COUNT SUBARRAYS WITH MAJORITY ELEMENT I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' and an integer 'target', return the number of subarrays of 'nums' in which 'target' is the majority element.
+The majority element of a subarray is the element that appears strictly more than half of the times in that subarray.
+
+Constraints:
+- 1 <= nums.length <= 1000
+- 1 <= nums[i] <= 10^9
+- 1 <= target <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: PREFIX SUM & NESTED LOOP SIMULATION]
+-------------------------------------------------------------------
+
+1. PROBLEM TRANSFORMATION:
+   - To make 'target' the majority element in a subarray of length 'L', 'target' must appear strictly more than 'L / 2' times.
+   - Alternatively, assign a weight to each element:
+     * If 'nums[i] == target', weight = +1
+     * If 'nums[i] != target', weight = -1
+   - A subarray has 'target' as the majority element if and only if the sum of its transformed weights is strictly greater than 0.
+
+2. SUBMITTED APPROACH (O(N^2) TIME, O(1) SPACE):
+   - For every starting index 'i', iterate through ending indices 'j' from 'i' to 'n - 1'.
+   - Track 'target_count' and total length 'total_count'.
+   - Increment answer when 'target_count > total_count / 2'.
+   - Fits comfortably within the given constraints (N <= 1000, N^2 <= 10^6 operations).
+
+3. OPTIMAL APPROACH FOR LARGE N (O(N) TIME USING FENWICK TREE / MAP):
+   - Convert 'nums' into a binary array where 'target' becomes +1 and others -1.
+   - Compute prefix sums. Finding subarrays with sum > 0 reduces to counting previous prefix sums smaller than the current prefix sum using a Binary Indexed Tree (BIT) / Fenwick Tree or Segment Tree.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 2, 3], target = 2 | n = 4
+
+- Outer Loop i = 0 (Starting at index 0):
+  * j = 0: nums[0] = 1 -> target_count = 0, total = 1 -> 0 > 0 (False)
+  * j = 1: nums[1] = 2 -> target_count = 1, total = 2 -> 1 > 1 (False)
+  * j = 2: nums[2] = 2 -> target_count = 2, total = 3 -> 2 > 1 (True) -> ans = 1 [1,2,2]
+  * j = 3: nums[3] = 3 -> target_count = 2, total = 4 -> 2 > 2 (False)
+
+- Outer Loop i = 1 (Starting at index 1):
+  * j = 1: nums[1] = 2 -> target_count = 1, total = 1 -> 1 > 0 (True) -> ans = 2 [2]
+  * j = 2: nums[2] = 2 -> target_count = 2, total = 2 -> 2 > 1 (True) -> ans = 3 [2,2]
+  * j = 3: nums[3] = 3 -> target_count = 2, total = 3 -> 2 > 1 (True) -> ans = 4 [2,2,3]
+
+- Outer Loop i = 2 (Starting at index 2):
+  * j = 2: nums[2] = 2 -> target_count = 1, total = 1 -> 1 > 0 (True) -> ans = 5 [2]
+  * j = 3: nums[3] = 3 -> target_count = 1, total = 2 -> 1 > 1 (False)
+
+- Outer Loop i = 3 (Starting at index 3):
+  * j = 3: nums[3] = 3 -> target_count = 0, total = 1 -> 0 > 0 (False)
+
+Returns 5.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Approach 1: Submitted Nested Loop (O(N^2) Time, O(1) Space)
+class Solution {
+public:
+    int countMajoritySubarrays(vector<int>& nums, int target) {
+        int n = nums.size();
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            int target_count = 0;
+            int total_count = 0;
+            for (int j = i; j < n; j++) {
+                if (nums[j] == target) {
+                    target_count++;
+                }
+                total_count++;
+                if (target_count > total_count / 2) {
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+// Approach 2: Optimal Transformation via Fenwick Tree (O(N log N) Time, O(N) Space)
+class SolutionOptimal {
+public:
+    int countMajoritySubarrays(vector<int>& nums, int target) {
+        int n = nums.size();
+        vector<int> pref(n + 1, 0);
+        for (int i = 0; i < n; i++) {
+            pref[i + 1] = pref[i] + (nums[i] == target ? 1 : -1);
+        }
+        
+        // Offset prefix sums to guarantee non-negative indices for Fenwick Tree
+        int offset = n + 1;
+        vector<int> tree(2 * n + 3, 0);
+        
+        auto add = [&](int idx, int val) {
+            for (; idx < tree.size(); idx += idx & -idx) tree[idx] += val;
+        };
+        
+        auto query = [&](int idx) {
+            int sum = 0;
+            for (; idx > 0; idx -= idx & -idx) sum += tree[idx];
+            return sum;
+        };
+        
+        int ans = 0;
+        add(0 + offset, 1);
+        
+        for (int i = 1; i <= n; i++) {
+            ans += query(pref[i] + offset - 1);
+            add(pref[i] + offset, 1);
+        }
+        
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Submitted Code (Nested Loops):
+- Time Complexity: O(N^2) — Two nested loops iterating over all pairs of indices (i, j).
+- Space Complexity: O(1) — Uses constant scalar counter variables.
+
+Optimal Approach (Fenwick Tree):
+- Time Complexity: O(N log N) — Performs single prefix pass and N point-updates/range-queries on a Fenwick Tree.
+- Space Complexity: O(N) — Stores prefix array and Fenwick Tree of size O(N).
+===================================================================

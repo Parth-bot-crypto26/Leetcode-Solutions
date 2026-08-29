@@ -1,0 +1,123 @@
+===================================================================
+LEETCODE 151: REVERSE WORDS IN A STRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an input string 's', reverse the order of the words.
+A word is defined as a sequence of non-space characters. The words in 's' will be separated by at least one space.
+Return a string of the words in reverse order concatenated by a single space.
+Note that 's' may contain leading or trailing spaces or multiple spaces between two words. The returned string should only have a single space separating the words. Do not include any extra spaces.
+
+Constraints:
+- 1 <= s.length <= 10^4
+- 's' contains English letters, digits, and spaces ' '.
+- There is at least one word in 's'.
+
+-------------------------------------------------------------------
+[METHODOLOGY: REVERSE ENTIRE STRING & INDIVIDUAL WORDS]
+-------------------------------------------------------------------
+
+1. SUBMITTED APPROACH (O(N) TIME, O(N) SPACE):
+   - Reverse the entire string 's'. This places all words in reversed order, but each word's characters are flipped backwards.
+   - Iterate through the reversed string to extract contiguous non-space substrings (words).
+   - Reverse each extracted word to restore its original character order.
+   - Append each restored word to a result string separated by single spaces, trimming the initial leading space at the end.
+
+2. IN-PLACE OPTIMAL APPROACH FOR C++ (O(N) TIME, O(1) SPACE):
+   - To achieve O(1) auxiliary space:
+     1. Reverse the entire string 's'.
+     2. Use two pointers ('i' and 'j') to clean up spaces and shift valid words to the front of 's' in-place.
+     3. Reverse each word in-place as it is copied.
+     4. Resize 's' to remove trailing garbage characters.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "  hello world  "
+
+- Step 1: Reverse entire string:
+  * s = "  dlrow olleh  "
+
+- Step 2: Iterate and extract words:
+  * Skip leading spaces.
+  * Extract word 1: "dlrow" -> Reverse -> "world"
+  * Append to ans: " world"
+  * Extract word 2: "olleh" -> Reverse -> "hello"
+  * Append to ans: " world hello"
+
+- Step 3: Trim leading space ('ans.substr(1)'):
+  * "world hello"
+
+Returns "world hello".
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Approach 1: Submitted Code (O(N) Extra Space)
+class Solution {
+public:
+    string reverseWords(string s) {
+        reverse(s.begin(), s.end());
+        int n = s.length();
+        string ans = "";
+        for(int i = 0; i < n; i++){
+            string word = "";
+            while(i < n && s[i] != ' '){
+                word += s[i];
+                i++;
+            }
+            reverse(word.begin(), word.end());
+            if(word.length() > 0){
+                ans += " " + word;
+            }
+        }
+        return ans.substr(1);
+    }
+};
+
+// Approach 2: Optimal In-Place Reversal (O(1) Extra Space)
+class SolutionInPlace {
+public:
+    string reverseWords(string s) {
+        // 1. Reverse entire string
+        reverse(s.begin(), s.end());
+        
+        int n = s.length();
+        int idx = 0;
+        
+        for (int start = 0; start < n; ++start) {
+            if (s[start] != ' ') {
+                // Add space delimiter before words (except the first word)
+                if (idx != 0) s[idx++] = ' ';
+                
+                int end = start;
+                while (end < n && s[end] != ' ') {
+                    s[idx++] = s[end++];
+                }
+                
+                // Reverse the word back to correct order
+                reverse(s.begin() + idx - (end - start), s.begin() + idx);
+                
+                // Move start pointer to end of current word
+                start = end;
+            }
+        }
+        
+        s.resize(idx);
+        return s;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Submitted Code:
+- Time Complexity: O(N) — Passes over the string 's' once to reverse and extract words, and reverses each character twice overall.
+- Space Complexity: O(N) — Creates new string allocations ('word' and 'ans') proportional to the length of 's'.
+
+Optimal In-Place Code:
+- Time Complexity: O(N) — Reverses the string and individual words in a single linear pass.
+- Space Complexity: O(1) Auxiliary Space — Modifies the string 's' directly in-place without allocating dynamic memory.
+===================================================================

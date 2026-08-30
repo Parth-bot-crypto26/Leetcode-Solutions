@@ -1,0 +1,100 @@
+===================================================================
+LEETCODE 3020: FIND THE MAXIMUM NUMBER OF ELEMENTS IN SUBSET
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an array of positive integers 'nums'. You need to select a subset of 'nums' that satisfies the following pattern when arranged in an array:
+[x, x^2, x^4, ..., x^(k/2), x^k, x^(k/2), ..., x^4, x^2, x] (where k is a power of 2).
+
+Return the maximum number of elements in a valid subset.
+
+Constraints:
+- 2 <= nums.length <= 10^5
+- 1 <= nums[i] <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: MAP FREQUENCY & SQUARE CHAIN TRAVERSAL]
+-------------------------------------------------------------------
+
+1. SPECIAL CASE FOR 1:
+   - Since $1^2 = 1$, the value 1 generates a sequence composed entirely of 1s.
+   - Any valid symmetric subset of length $L$ requires an odd number of elements. Thus, if there are $C$ ones, we can use at most $C$ ones if $C$ is odd, or $C - 1$ ones if $C$ is even.
+
+2. NUMBERS GREATER THAN 1:
+   - For any base $x > 1$, to extend the chain to $x^2$, we must have at least two occurrences of $x$ (one for the left side, one for the right side).
+   - We traverse each unique $x > 1$:
+     * While 'counts[x] >= 2', add 2 to 'current_len' and advance to $x = x \cdot x$.
+     * When we reach an $x$ where 'counts[x] == 1', this value forms the single middle peak element of the mountain pattern. We add 1 to 'current_len' and terminate the chain.
+     * If the chain ends because $x$ is not present at all ('counts[x] == 0'), the last element added was a duplicate that lacks a peak. We subtract 1 from 'current_len' to make the length odd.
+   - Update 'max_len' with 'max(max_len, current_len)'.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [5, 4, 1, 2, 2]
+
+- Frequency map: counts = {1: 1, 2: 2, 4: 1, 5: 1}
+- Initial max_len = 1
+
+- Processing 1:
+  * ones = 1 (odd) -> max_len = max(1, 1) = 1
+
+- Processing 2:
+  * x = 2: count[2] = 2 >= 2 -> current_len = 2, x becomes 2^2 = 4
+  * x = 4: count[4] = 1 >= 1 -> current_len = 2 + 1 = 3 (peak element found)
+  * max_len = max(1, 3) = 3
+
+- Processing 4 & 5:
+  * Chains starting at 4 and 5 yield length 1.
+
+Returns 3 (Subset: [2, 4, 2]).
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int maximumLength(vector<int>& nums) {
+        unordered_map<long long, int> counts;
+        for (int x : nums) {
+            counts[x]++;
+        }
+        int max_len = 1;
+        if (counts.count(1)) {
+            int ones = counts[1];
+            if (ones % 2 == 0) {
+                max_len = max(max_len, ones - 1);
+            } else {
+                max_len = max(max_len, ones);
+            }
+        }
+        for (auto& [val, count] : counts) {
+            if (val == 1) continue;
+            long long current = val;
+            int current_len = 0;
+            while (counts.count(current) && counts[current] >= 2) {
+                current_len += 2;
+                current = current * current;
+            }  
+            if (counts.count(current) && counts[current] >= 1) {
+                current_len += 1;
+            } else {
+                current_len -= 1;
+            }     
+            max_len = max(max_len, current_len);
+        }
+        return max_len;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N log(log(M)))
+- Explanation: Populating the map takes O(N) time. For each number $x > 1$, squaring it ($x \to x^2 \to x^4 \dots$) grows exponentially, bounding the chain depth to at most $O(\log(\log M))$ steps where $M = 10^9$.
+
+Space Complexity: O(N)
+- Explanation: The hash map stores at most $N$ unique elements.
+===================================================================

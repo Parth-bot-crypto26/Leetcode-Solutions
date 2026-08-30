@@ -1,0 +1,108 @@
+===================================================================
+LEETCODE 443: STRING COMPRESSION
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of characters 'chars', compress it using the following algorithm:
+Begin with an empty string 's'. For each group of consecutive repeating characters in 'chars':
+- If the group's length is 1, append the character to 's'.
+- Otherwise, append the character followed by the group's length.
+
+The compressed string should not be returned separately, but instead be stored inside the input character array 'chars'.
+After modifying the input array in-place, return the new length of the array. You must write an algorithm that uses only constant extra space.
+
+Constraints:
+- 1 <= chars.length <= 2000
+- 'chars[i]' is a lowercase English letter, uppercase English letter, digit, or symbol.
+
+-------------------------------------------------------------------
+[METHODOLOGY: TWO-POINTER IN-PLACE WRITE (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To compress the string in-place without auxiliary memory:
+
+1. READ AND WRITE POINTER SET UP:
+   - 'idx = 0': Points to the write position in 'chars'.
+   - 'i = 0': Reads through the array to locate group boundaries.
+
+2. RUN-LENGTH ENCODING PASS:
+   - For each iteration, store the character 'ch = chars[i]'.
+   - Count consecutive occurrences of 'ch' using an inner while loop.
+   - Write 'ch' to 'chars[idx++]'.
+   - If 'count > 1', convert 'count' to string digits and write each digit into 'chars[idx++]'.
+
+3. INDEX ADJUSTMENT:
+   - Because the outer 'for' loop also increments 'i', decrement 'i--' at the end of the outer block to keep pointer tracking aligned.
+   - Return 'idx' as the new compressed length.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: chars = ["a", "a", "b", "b", "c", "c", "c"] | n = 7
+
+- Initial State: idx = 0, i = 0
+
+- Group 1 (ch = 'a'):
+  * Count consecutive 'a's -> count = 2, i advances to 2.
+  * Write character: chars[0] = 'a' | idx = 1
+  * Write count: '2' -> chars[1] = '2' | idx = 2
+  * Loop decrement: i = 1 (outer loop increments to 2)
+
+- Group 2 (ch = 'b'):
+  * Count consecutive 'b's -> count = 2, i advances to 4.
+  * Write character: chars[2] = 'b' | idx = 3
+  * Write count: '2' -> chars[3] = '2' | idx = 4
+  * Loop decrement: i = 3 (outer loop increments to 4)
+
+- Group 3 (ch = 'c'):
+  * Count consecutive 'c's -> count = 3, i advances to 7.
+  * Write character: chars[4] = 'c' | idx = 5
+  * Write count: '3' -> chars[5] = '3' | idx = 6
+  * Loop decrement: i = 6 (outer loop increments to 7)
+
+- Outer loop ends (i = 7 >= n).
+
+Returns idx = 6 with chars modified to ["a", "2", "b", "2", "c", "3"].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int compress(vector<char>& chars) {
+        int idx = 0;
+        int n = chars.size();
+        for(int i = 0; i < n; i++){
+            char ch = chars[i];
+            int count = 0;
+            while(i < n && chars[i] == ch){
+                count++; 
+                i++;
+            }
+            if(count == 1){
+                chars[idx++] = ch;
+            }else{
+                chars[idx++] = ch;
+                string str = to_string(count);
+                for(char dig : str){
+                    chars[idx++] = dig; 
+                }
+            }
+            i--;
+        }
+        chars.resize(idx);
+        return idx;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of 'chars'. Every character is read once by the pointer 'i' and written at most twice (character + digits).
+
+Space Complexity: O(1)
+- Explanation: Modifies 'chars' in-place. The auxiliary memory needed for digit string conversion ('to_string(count)') takes O(1) memory since 'count <= 2000' has at most 4 digits.
+===================================================================

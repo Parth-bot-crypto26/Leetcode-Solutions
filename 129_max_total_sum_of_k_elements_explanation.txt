@@ -1,0 +1,73 @@
+===================================================================
+LEETCODE 3974: MAXIMUM TOTAL SUM OF K SELECTED ELEMENTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'nums' and two integers 'k' and 'mul'.
+Select exactly 'k' elements from 'nums' and process them sequentially in any order.
+For each selected element, choose to either add its value directly or multiply it by the current 'mul' value and add the result.
+After processing each element, 'mul' decreases by 1. 'mul' can become 0 or negative.
+Return the maximum possible total sum.
+
+Constraints:
+- 1 <= nums.length <= 10^5
+- 1 <= nums[i] <= 10^5
+- 1 <= k <= nums.length
+- 1 <= mul <= 10^5
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY CHOICE WITH SORTING (O(N LOG N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+1. OPTIMAL MULTIPLIER CHOICE:
+   - For any element, the decision between adding directly ($1 \times \text{element}$) or multiplying ($m \times \text{element}$) depends on whether $m \ge 1$.
+   - Since 'mul' decreases by 1 after each step ($mul, mul-1, mul-2, \dots$), the multiplier factor at step $i$ ($0 \le i < k$) is $\max(1, mul - i)$.
+
+2. GREEDY ELEMENT MATCHING (REARRANGEMENT INEQUALITY):
+   - To maximize the sum $\sum \text{nums}[i] \times \text{factor}_i$, the largest available numbers in 'nums' must be paired with the largest available multiplier factors.
+   - The effective sequence of multipliers over $k$ steps is strictly non-increasing:
+     $\max(1, mul) \ge \max(1, mul - 1) \ge \max(1, mul - 2) \dots$
+   - Sort 'nums' in descending order and greedily match the top $k$ elements with the corresponding multiplier $\max(1, mul - i)$.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [6, 1, 2, 9], k = 3, mul = 2
+
+- Step 1: Sort 'nums' in descending order:
+  * nums = [9, 6, 2, 1]
+
+- Step 2: Iterate $i$ from 0 to $k-1$ ($k = 3$):
+  * i = 0: element = 9, currentMul = max(1, 2 - 0) = 2 -> total += 9 * 2 = 18
+  * i = 1: element = 6, currentMul = max(1, 2 - 1) = 1 -> total += 6 * 1 = 24
+  * i = 2: element = 2, currentMul = max(1, 2 - 2) = 1 -> total += 2 * 1 = 26
+
+Returns 26.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    long long maxSum(vector<int>& nums, int k, int mul) {
+        sort(nums.rbegin(), nums.rend());
+        long long total = 0;
+        for (int i = 0; i < k; ++i) {
+            long long currentMul = max(1, mul - i);
+            total += (long long)nums[i] * currentMul;
+        }
+        return total;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N log N)
+- Explanation: Where 'N' is the size of 'nums'. Sorting the array takes O(N log N) time, followed by an O(k) linear loop to compute the total sum.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Sorting is performed in-place (or O(log N) stack space depending on `std::sort` implementation) without allocating dynamic arrays.
+===================================================================

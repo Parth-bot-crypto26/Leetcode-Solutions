@@ -1,0 +1,87 @@
+===================================================================
+LEETCODE 7: REVERSE INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a signed 32-bit integer 'x', return 'x' with its digits reversed. If reversing 'x' causes the value to go outside the signed 32-bit integer range [-2^31, 2^31 - 1], then return 0.
+
+Assume the environment does not allow you to store 64-bit integers (signed or unsigned).
+
+Constraints:
+- -2^31 <= x <= 2^31 - 1
+
+-------------------------------------------------------------------
+[METHODOLOGY: MATHEMATICAL DIGIT EXTRACTION & OVERFLOW CHECK]
+-------------------------------------------------------------------
+
+To reverse the integer without using 64-bit data types (`long` or `long long`):
+
+1. DIGIT EXTRACTION:
+   - Extract the last digit of `x` using modulo: `digit = x % 10`.
+   - Truncate the last digit of `x` using division: `x /= 10`.
+
+2. OVERFLOW / UNDERFLOW BOUNDARY CHECK:
+   - Before performing `reverseNum = reverseNum * 10 + digit`, verify if `reverseNum * 10` will exceed 32-bit signed limits (`INT_MAX = 2147483647` or `INT_MIN = -2147483648`):
+     * If `reverseNum > INT_MAX / 10`, then multiplying by 10 will definitely overflow.
+     * If `reverseNum < INT_MIN / 10`, then multiplying by 10 will definitely underflow.
+   - Note: In 32-bit integers, checking `reverseNum == INT_MAX / 10` for `digit > 7` (or `digit < -8`) is not strictly necessary for standard inputs because no valid 32-bit signed input `x` can start with a digit greater than 2 when reversed. Thus, `reverseNum > INT_MAX / 10` and `reverseNum < INT_MIN / 10` sufficiently guard against overflow.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: x = -123 | INT_MAX / 10 = 214748364, INT_MIN / 10 = -214748364
+
+- Initial State: reverseNum = 0, x = -123
+
+- Iteration 1:
+  * digit = -123 % 10 = -3
+  * Boundary Check: 0 is within bounds.
+  * reverseNum = 0 * 10 + (-3) = -3
+  * x = -123 / 10 = -12
+
+- Iteration 2:
+  * digit = -12 % 10 = -2
+  * Boundary Check: -3 is within bounds.
+  * reverseNum = -3 * 10 + (-2) = -32
+  * x = -12 / 10 = -1
+
+- Iteration 3:
+  * digit = -1 % 10 = -1
+  * Boundary Check: -32 is within bounds.
+  * reverseNum = -32 * 10 + (-1) = -321
+  * x = -1 / 10 = 0
+
+- Loop terminates (x == 0).
+
+Returns -321.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int reverse(int x) {
+        int reverseNum = 0;
+        while(x != 0){
+            int digit = x % 10;
+            if(reverseNum > INT_MAX/10 || reverseNum < INT_MIN/10){
+                return 0;
+            }
+            reverseNum = (reverseNum * 10) + digit;
+            x /= 10;
+        }
+        return reverseNum;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log10(|x|))
+- Explanation: The loop executes once per decimal digit of `x`. For a 32-bit integer, there are at most 10 digits.
+
+Space Complexity: O(1)
+- Explanation: Uses constant auxiliary space for scalar integer variables (`reverseNum`, `digit`).
+===================================================================

@@ -1,0 +1,89 @@
+===================================================================
+LEETCODE 1358: NUMBER OF SUBSTRINGS CONTAINING ALL THREE CHARACTERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 's' consisting only of characters 'a', 'b', and 'c'.
+Return the number of substrings containing at least one occurrence of all these characters 'a', 'b', and 'c'.
+
+Constraints:
+- 3 <= s.length <= 5 * 10^4
+- 's' only consists of 'a', 'b', or 'c' characters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: SLIDING WINDOW / TWO POINTERS (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+1. SLIDING WINDOW OBSERVATION:
+   - Expand the right pointer `right` across the string, incrementing the frequency count of the current character.
+   - When the current window `[left, right]` contains at least one 'a', 'b', and 'c' (`counts[0] > 0 && counts[1] > 0 && counts[2] > 0`):
+     * Any substring starting at index `left` and ending at or after index `right` (i.e., `[left, right]`, `[left, right+1]`, ..., `[left, n-1]`) will validly contain all three characters.
+     * Therefore, there are `n - right` valid substrings starting at `left`.
+   - Add `n - right` to `result` and shrink the window from the left (`counts[s[left] - 'a']--`, `left++`) to check if the smaller window remains valid.
+
+2. SYNTAX BUG FIX:
+   - In the submitted code, the variable returned at the end is misspelled as `resul` instead of `result`. Correcting this compilation error makes the solution completely valid.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "abcabc", n = 6
+
+- Initial State: left = 0, result = 0, counts = [0, 0, 0]
+
+- right = 0 ('a'): counts = [1, 0, 0]
+- right = 1 ('b'): counts = [1, 1, 0]
+- right = 2 ('c'): counts = [1, 1, 1]
+  * Window contains all 3 characters!
+  * result += 6 - 2 = 4 (Substrings: "abc", "abca", "abcab", "abcabc")
+  * Shrink left: decrement s[0] ('a'), left = 1 -> counts = [0, 1, 1] (loop ends)
+
+- right = 3 ('a'): counts = [1, 1, 1]
+  * Window contains all 3 characters!
+  * result += 6 - 3 = 3 -> result = 7
+  * Shrink left: decrement s[1] ('b'), left = 2 -> counts = [1, 0, 1] (loop ends)
+
+- right = 4 ('b'): counts = [1, 1, 1]
+  * Window contains all 3 characters!
+  * result += 6 - 4 = 2 -> result = 9
+  * Shrink left: decrement s[2] ('c'), left = 3 -> counts = [1, 1, 0] (loop ends)
+
+- right = 5 ('c'): counts = [1, 1, 1]
+  * Window contains all 3 characters!
+  * result += 6 - 5 = 1 -> result = 10
+  * Shrink left: decrement s[3] ('a'), left = 4 -> counts = [0, 1, 1] (loop ends)
+
+Returns 10.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    int numberOfSubstrings(string s) {
+        int counts[3] = {0};
+        int left = 0, result = 0;
+        int n = s.length();
+        for (int right = 0; right < n; ++right) {
+            counts[s[right] - 'a']++;
+            while (counts[0] > 0 && counts[1] > 0 && counts[2] > 0) {
+                result += n - right;
+                counts[s[left] - 'a']--;
+                left++;
+            }  
+        }
+        return result;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Where 'n' is the length of string `s`. Both `left` and `right` pointers move forward linearly at most `n` times.
+
+Space Complexity: O(1)
+- Explanation: Uses a fixed-size integer array of size 3 to track character counts.
+===================================================================

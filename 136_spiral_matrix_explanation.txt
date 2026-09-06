@@ -1,0 +1,114 @@
+===================================================================
+LEETCODE 54: SPIRAL MATRIX
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an 'm x n' matrix, return all elements of the matrix in spiral order (top row right, right column down, bottom row left, left column up).
+
+Constraints:
+- m == matrix.length
+- n == matrix[i].length
+- 1 <= m, n <= 10
+- -100 <= matrix[i][j] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: FOUR BOUNDARY SHRINKING (O(M * N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your boundary-based traversal approach is correct!
+
+To implement this clearly and minimize duplicate checks inside loops:
+
+1. MAINTAIN BOUNDARY POINTERS:
+   - `stRow = 0`, `endRow = m - 1`
+   - `stCol = 0`, `endCol = n - 1`
+
+2. TRAVERSE IN FOUR PHASES PER LAYER:
+   - Traverse Top Row: from `stCol` to `endCol` at `stRow`. Increment `stRow++`.
+   - Traverse Right Column: from `stRow` to `endRow` at `endCol`. Decrement `endCol--`.
+   - Traverse Bottom Row: Check if `stRow <= endRow` first. Traverse from `endCol` down to `stCol` at `endRow`. Decrement `endRow--`.
+   - Traverse Left Column: Check if `stCol <= endCol` first. Traverse from `endRow` down to `stRow` at `stCol`. Increment `stCol++`.
+
+3. REPEAT UNTIL BOUNDARIES CROSS:
+   - Terminate when `stRow > endRow` or `stCol > endCol`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+m = 3, n = 3 | stRow = 0, endRow = 2, stCol = 0, endCol = 2
+
+- Layer 1:
+  * Top Row (stRow = 0): Push 1, 2, 3. Update stRow = 1.
+  * Right Col (endCol = 2): Push 6, 9. Update endCol = 1.
+  * Bottom Row (stRow <= endRow is 1 <= 2): Push 8, 7. Update endRow = 1.
+  * Left Col (stCol <= endCol is 0 <= 1): Push 4. Update stCol = 1.
+
+- Layer 2 (stRow = 1, endRow = 1, stCol = 1, endCol = 1):
+  * Top Row (stRow = 1): Push 5. Update stRow = 2.
+  * Right Col (endCol = 1): Loop range 2 to 1 (invalid). Update endCol = 0.
+  * Bottom Row check (stRow <= endRow is 2 <= 1 -> false): Skip.
+  * Left Col check (stCol <= endCol is 1 <= 0 -> false): Skip.
+
+- Loop terminates (stRow > endRow).
+
+Returns [1, 2, 3, 6, 9, 8, 7, 4, 5].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+        int stRow = 0, endRow = m - 1;
+        int stCol = 0, endCol = n - 1;
+        
+        vector<int> ans;
+        
+        while (stRow <= endRow && stCol <= endCol) {
+            // Traverse Top Row
+            for (int j = stCol; j <= endCol; ++j) {
+                ans.push_back(matrix[stRow][j]);
+            }
+            stRow++;
+
+            // Traverse Right Column
+            for (int i = stRow; i <= endRow; ++i) {
+                ans.push_back(matrix[i][endCol]);
+            }
+            endCol--;
+
+            // Traverse Bottom Row (Check if row still exists)
+            if (stRow <= endRow) {
+                for (int j = endCol; j >= stCol; --j) {
+                    ans.push_back(matrix[endRow][j]);
+                }
+                endRow--;
+            }
+
+            // Traverse Left Column (Check if column still exists)
+            if (stCol <= endCol) {
+                for (int i = endRow; i >= stRow; --i) {
+                    ans.push_back(matrix[i][stCol]);
+                }
+                stCol++;
+            }
+        }
+        
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(m * n)
+- Explanation: Every cell in the $m \times n$ matrix is visited and added to the output array exactly once.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses constant extra space excluding the output vector required to return the result.
+===================================================================

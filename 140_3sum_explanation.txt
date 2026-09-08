@@ -1,0 +1,102 @@
+===================================================================
+LEETCODE 15: 3SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums', return all the triplets [nums[i], nums[j], nums[k]] 
+such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+Notice that the solution set must not contain duplicate triplets.
+
+Constraints:
+- 3 <= nums.length <= 3000
+- -10^5 <= nums[i] <= 10^5
+
+-------------------------------------------------------------------
+[METHODOLOGY: SORTING + TWO POINTERS (O(N^2) TIME, O(1) AUXILIARY SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. SORTING & DUP SKIPPING:
+   - Sort the array in non-decreasing order: `sort(nums.begin(), nums.end())`.
+   - Iterate index `i` from `0` to `n - 1`. If `nums[i] > 0`, terminate early because adding positive values can never sum to zero.
+   - Skip duplicate values for `i`: `if (i > 0 && nums[i] == nums[i - 1]) continue;`.
+
+2. TWO-POINTER SEARCH:
+   - For each fixed `i`, initialize `j = i + 1` and `k = n - 1`.
+   - Compute `sum = nums[i] + nums[j] + nums[k]`:
+     * If `sum < 0`: Increment `j++` to increase the total sum.
+     * If `sum > 0`: Decrement `k--` to decrease the total sum.
+     * If `sum == 0`: Found a valid triplet! Push `{nums[i], nums[j], nums[k]}` to the output list.
+     * Increment `j++` and decrement `k--`.
+     * Skip duplicate values for `j` using a `while` loop: `while (j < k && nums[j] == nums[j - 1]) j++;`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [-1, 0, 1, 2, -1, -4]
+Sorted nums = [-4, -1, -1, 0, 1, 2] | n = 6
+
+- i = 0 (nums[0] = -4):
+  * j = 1 (-1), k = 5 (2) -> sum = -3 < 0 -> j = 2
+  * j = 2 (-1), k = 5 (2) -> sum = -3 < 0 -> j = 3
+  * j = 3 (0),  k = 5 (2) -> sum = -2 < 0 -> j = 4
+  * j = 4 (1),  k = 5 (2) -> sum = -1 < 0 -> j = 5 (loop ends)
+
+- i = 1 (nums[1] = -1):
+  * j = 2 (-1), k = 5 (2) -> sum = 0 -> Push [-1, -1, 2]. j=3, k=4. Skip dupes for j.
+  * j = 3 (0),  k = 4 (1) -> sum = 0 -> Push [-1, 0, 1]. j=4, k=3 (loop ends).
+
+- i = 2 (nums[2] = -1):
+  * nums[2] == nums[1] -> Skip (continue).
+
+- i = 3 (nums[3] = 0):
+  * j = 4 (1), k = 5 (2) -> sum = 3 > 0 -> k = 4 (loop ends).
+
+Returns [[-1, -1, 2], [-1, 0, 1]].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        int n = nums.size();
+        vector<vector<int>> ans;
+
+        for (int i = 0; i < n; i++) {
+            if (nums[i] > 0) break; // Optimization: First element can't be > 0
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            int j = i + 1, k = n - 1;
+            while (j < k) {
+                int sum = nums[i] + nums[j] + nums[k];
+                if (sum < 0) {
+                    j++;
+                } else if (sum > 0) {
+                    k--;
+                } else {
+                    ans.push_back({nums[i], nums[j], nums[k]});
+                    j++; 
+                    k--;
+                    while (j < k && nums[j] == nums[j - 1]) j++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n^2)
+- Explanation: Sorting takes $O(n \log n)$. The outer loop runs $n$ times, and the inner two-pointer search takes $O(n)$ time per outer iteration. Total time complexity is $O(n^2)$.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Excluding the memory required for output storage (`ans`), the algorithm uses constant extra space $O(1)$ (ignoring space used by `std::sort`, which takes $O(\log n)$).
+===================================================================

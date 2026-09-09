@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 18: 4SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array 'nums' of 'n' integers and an integer 'target', return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:
+1. 0 <= a, b, c, d < n
+2. a, b, c, and d are distinct.
+3. nums[a] + nums[b] + nums[c] + nums[d] == target
+
+You may return the answer in any order.
+
+Constraints:
+- 1 <= nums.length <= 200
+- -10^9 <= nums[i] <= 10^9
+- -10^9 <= target <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: SORTING + TWO NESTED LOOPS + TWO POINTERS (O(N^3) TIME, O(1) AUXILIARY SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. SORTING & OVERFLOW PREVENTION:
+   - Sort the array: `sort(nums.begin(), nums.end())`.
+   - Cast array values to `long long` before computing `sum` to avoid 32-bit signed integer overflow when summing four large values.
+
+2. TWO OUTER LOOPS WITH DUPLICATE SKIPPING:
+   - Loop `i` from `0` to `n - 1`, skipping duplicates: `if (i > 0 && nums[i] == nums[i - 1]) continue;`.
+   - Loop `j` from `i + 1` to `n - 1`, skipping duplicates: `while (j < n && nums[j] == nums[j - 1]) j++;`.
+
+3. TWO POINTERS (`p` AND `q`):
+   - For a fixed pair `(i, j)`, initialize `p = j + 1` and `q = n - 1`.
+   - Compute `sum = (long long)nums[i] + nums[j] + nums[p] + nums[q]`:
+     * If `sum < target`: Move left pointer `p++`.
+     * If `sum > target`: Move right pointer `q--`.
+     * If `sum == target`: Record quadruplet `{nums[i], nums[j], nums[p], nums[q]}`. Advance `p++`, `q--`, and skip duplicates for `p`: `while (p < q && nums[p] == nums[p - 1]) p++;`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 0, -1, 0, -2, 2], target = 0
+Sorted nums = [-2, -1, 0, 0, 1, 2] | n = 6
+
+- i = 0 (nums[0] = -2):
+  * j = 1 (nums[1] = -1):
+    - p = 2 (0), q = 5 (2) -> sum = -2 + -1 + 0 + 2 = -1 < 0 -> p = 3 (0)
+    - p = 3 (0), q = 5 (2) -> sum = -2 + -1 + 0 + 2 = -1 < 0 -> p = 4 (1)
+    - p = 4 (1), q = 5 (2) -> sum = -2 + -1 + 1 + 2 = 0 == target!
+      * Push [-2, -1, 1, 2]. Increment p=5, decrement q=4 (loop ends).
+  * j = 2 (nums[2] = 0):
+    - p = 3 (0), q = 5 (2) -> sum = -2 + 0 + 0 + 2 = 0 == target!
+      * Push [-2, 0, 0, 2]. Increment p=4, decrement q=4 (loop ends).
+  * j = 3 (nums[3] = 0) -> Duplicate of nums[2], skipped.
+
+- i = 1 (nums[1] = -1):
+  * j = 2 (nums[2] = 0):
+    - p = 3 (0), q = 4 (1) -> sum = -1 + 0 + 0 + 1 = 0 == target!
+      * Push [-1, 0, 0, 1].
+
+Returns [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]].
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        int n = nums.size();
+        vector<vector<int>> ans;
+        sort(nums.begin(), nums.end());
+        
+        for (int i = 0; i < n; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            
+            for (int j = i + 1; j < n; ) {
+                int p = j + 1, q = n - 1;
+                while (p < q) {
+                    long long sum = (long long)nums[i] + (long long)nums[j] + (long long)nums[p] + (long long)nums[q];
+                    if (sum < target) {
+                        p++;
+                    } else if (sum > target) {
+                        q--;
+                    } else {
+                        ans.push_back({nums[i], nums[j], nums[p], nums[q]});
+                        p++; 
+                        q--;
+                        while (p < q && nums[p] == nums[p - 1]) p++;
+                    }
+                }
+                j++;
+                while (j < n && nums[j] == nums[j - 1]) j++;
+            }
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n^3)
+- Explanation: Sorting takes $O(n \log n)$. Two outer nested loops combined with the two-pointer inner search result in $O(n \cdot n \cdot n) = O(n^3)$ operations.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Operates in-place using scalar pointer variables without allocating extra heap memory (excluding space for the output vector `ans`).
+===================================================================

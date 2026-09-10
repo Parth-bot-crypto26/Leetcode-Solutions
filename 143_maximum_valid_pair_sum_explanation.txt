@@ -1,0 +1,105 @@
+===================================================================
+LEETCODE 3979: MAXIMUM VALID PAIR SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'nums' of length 'n' and an integer 'k'.
+A pair of indices (i, j) is called valid if:
+1. 0 <= i < j < n
+2. j - i >= k
+
+Return the maximum value of nums[i] + nums[j] among all valid pairs.
+
+Constraints:
+- 2 <= n == nums.length <= 10^5
+- 1 <= nums[i] <= 10^9
+- 1 <= k <= n - 1
+
+-------------------------------------------------------------------
+[METHODOLOGY: RUNNING PREFIX MAXIMUM (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your Python implementation is optimal!
+
+1. OBSERVATION & REWRITING THE CONDITION:
+   - For a fixed right index `j`, the valid left indices `i` must satisfy `0 <= i <= j - k`.
+   - To maximize `nums[i] + nums[j]` for a fixed `j`, we need to maximize `nums[i]` over all valid `i`.
+   - Thus, the best pair ending at `j` uses $\max_{0 \le i \le j - k} \{\text{nums}[i]\}$.
+
+2. ONE-PASS DYNAMIC PREFIX MAXIMUM:
+   - Iterate index `j` from `k` to `n - 1`.
+   - Maintain a running variable `maxPref` representing the maximum value in `nums[0 ... j - k]`.
+   - At step `j`, update `maxPref = max(maxPref, nums[j - k])`.
+   - Compute `currentSum = maxPref + nums[j]` and update the global maximum `maxSum`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 3, 5, 2, 8], k = 2 | n = 5
+
+- Initialize: maxSum = -inf, maxPref = -inf
+
+- Iteration j = 2 (k = 2):
+  * Update maxPref = max(-inf, nums[2 - 2]) = max(-inf, nums[0]) = 1
+  * currentSum = maxPref + nums[2] = 1 + 5 = 6
+  * maxSum = max(-inf, 6) = 6
+
+- Iteration j = 3:
+  * Update maxPref = max(1, nums[3 - 2]) = max(1, nums[1]) = max(1, 3) = 3
+  * currentSum = maxPref + nums[3] = 3 + 2 = 5
+  * maxSum = max(6, 5) = 6
+
+- Iteration j = 4:
+  * Update maxPref = max(3, nums[4 - 2]) = max(3, nums[2]) = max(3, 5) = 5
+  * currentSum = maxPref + nums[4] = 5 + 8 = 13
+  * maxSum = max(6, 13) = 13
+
+Returns 13.
+
+-------------------------------------------------------------------
+[PYTHON & C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+# Python Implementation (Your Code)
+class Solution:
+    def maxValidPairSum(self, nums: list[int], k: int) -> int:
+        n = len(nums)
+        maxSum = float('-inf')
+        maxPref = float('-inf')
+        
+        for j in range(k, n):
+            maxPref = max(maxPref, nums[j - k])
+            currentSum = maxPref + nums[j]
+            maxSum = max(maxSum, currentSum)
+            
+        return maxSum
+
+
+// C++ Implementation
+class Solution {
+public:
+    long long maxValidPairSum(vector<int>& nums, int k) {
+        int n = nums.size();
+        long long maxSum = LLONG_MIN;
+        long long maxPref = LLONG_MIN;
+        
+        for (int j = k; j < n; j++) {
+            maxPref = max(maxPref, (long long)nums[j - k]);
+            long long currentSum = maxPref + nums[j];
+            maxSum = max(maxSum, currentSum);
+        }
+        
+        return maxSum;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Iterates through array 'nums' once from index `k` to `n - 1`. Each step performs constant-time scalar comparisons.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses only scalar variables (`maxSum`, `maxPref`, `currentSum`) requiring $O(1)$ extra space.
+===================================================================

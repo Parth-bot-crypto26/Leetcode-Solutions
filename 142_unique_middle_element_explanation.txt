@@ -1,0 +1,75 @@
+===================================================================
+LEETCODE 3978: UNIQUE MIDDLE ELEMENT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'nums' of odd length 'n'.
+Return true if the middle element of nums appears exactly once in the array. Otherwise return false.
+
+Constraints:
+- 1 <= n == nums.length <= 100
+- n is odd.
+- 1 <= nums[i] <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: ARRAY TRAVERSAL / FREQUENCY COUNTING (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. IDENTIFY MIDDLE ELEMENT:
+   - Since array length `n` is odd, the middle element is located at index `n / 2` (0-indexed integer division).
+   - Store target value: `midVal = nums[n / 2]`.
+
+2. FREQUENCY COUNTING:
+   - Iterate through array `nums` and count occurrences of `midVal`.
+   - If count is strictly equal to 1 (`cnt == 1`), return `true`; otherwise, return `false`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 2] | n = 3
+
+- Middle Index: 3 / 2 = 1 -> midVal = nums[1] = 2
+- Initialize cnt = 0
+
+- Loop Traversal:
+  * i = 0: nums[0] = 1 != 2 -> cnt = 0
+  * i = 1: nums[1] = 2 == 2 -> cnt = 1
+  * i = 2: nums[2] = 2 == 2 -> cnt = 2
+
+- Condition Check: cnt == 1 (2 == 1 -> false)
+
+Returns false.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    bool isMiddleElementUnique(vector<int>& nums) {
+        int n = nums.size();
+        int midVal = nums[n / 2];
+        int cnt = 0;
+        
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == midVal) {
+                cnt++;
+            }
+        }
+        
+        return cnt == 1;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n)
+- Explanation: Single pass over array of size `n` to count occurrences of the middle element.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses only scalar variables (`midVal`, `cnt`, `n`) without extra data structures.
+===================================================================

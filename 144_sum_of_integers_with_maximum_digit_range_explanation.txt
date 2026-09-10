@@ -1,0 +1,123 @@
+===================================================================
+LEETCODE 3982: SUM OF INTEGERS WITH MAXIMUM DIGIT RANGE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array 'nums'.
+The digit range of an integer is defined as the difference between its largest digit and smallest digit.
+Return the sum of all integers in nums whose digit range is equal to the maximum digit range among all integers in the array.
+
+Constraints:
+- 1 <= nums.length <= 100
+- 10 <= nums[i] <= 10^5
+
+-------------------------------------------------------------------
+[METHODOLOGY: STRING CONVERSION / SINGLE PASS TRACKING (O(N * D) TIME, O(D) SPACE)]
+-------------------------------------------------------------------
+
+Your Python implementation is optimal!
+
+1. DIGIT RANGE COMPUTATION:
+   - For each number `num`, convert it to a string representation `s = str(abs(num))`.
+   - The largest digit character is `max(s)` and the smallest is `min(s)`.
+   - Calculate `dRange = int(max(s)) - int(min(s))`.
+
+2. ONE-PASS MAXIMUM RANGE TRACKING:
+   - Maintain `maxRange` (initialized to -1) and running total `total_sum`.
+   - If `dRange > maxRange`:
+     * Found a strictly larger digit range.
+     * Reset `maxRange = dRange` and reset total sum to the current number: `total_sum = num`.
+   - If `dRange == maxRange`:
+     * Found another number with the same maximum digit range.
+     * Add `num` to running total: `total_sum += num`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [5724, 111, 350]
+
+- Initialize: maxRange = -1, total_sum = 0
+
+- Processing num = 5724:
+  * Strnum = "5724", maxCh = '7', minCh = '2'
+  * dRange = 7 - 2 = 5
+  * dRange (5) > maxRange (-1) -> maxRange = 5, total_sum = 5724
+
+- Processing num = 111:
+  * Strnum = "111", maxCh = '1', minCh = '1'
+  * dRange = 1 - 1 = 0
+  * dRange (0) < maxRange (5) -> ignore
+
+- Processing num = 350:
+  * Strnum = "350", maxCh = '5', minCh = '0'
+  * dRange = 5 - 0 = 5
+  * dRange (5) == maxRange (5) -> total_sum = 5724 + 350 = 6074
+
+Returns 6074.
+
+-------------------------------------------------------------------
+[PYTHON & C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+# Python Implementation (Your Code)
+class Solution:
+    def maxDigitRange(self, nums: list[int]) -> int:
+        maxRange = -1
+        total_sum = 0
+        
+        for num in nums:
+            Strnum = str(abs(num))
+            maxCh = max(Strnum)
+            minCh = min(Strnum)
+            dRange = int(maxCh) - int(minCh)
+            
+            if dRange > maxRange:
+                maxRange = dRange
+                total_sum = num
+            elif dRange == maxRange:
+                total_sum += num
+                
+        return total_sum
+
+
+// C++ Implementation
+class Solution {
+public:
+    int maxDigitRange(vector<int>& nums) {
+        int maxRange = -1;
+        int totalSum = 0;
+        
+        for (int num : nums) {
+            int temp = abs(num);
+            int minDigit = 9, maxDigit = 0;
+            
+            while (temp > 0) {
+                int digit = temp % 10;
+                minDigit = min(minDigit, digit);
+                maxDigit = max(maxDigit, digit);
+                temp /= 10;
+            }
+            
+            int dRange = maxDigit - minDigit;
+            if (dRange > maxRange) {
+                maxRange = dRange;
+                totalSum = num;
+            } else if (dRange == maxRange) {
+                totalSum += num;
+            }
+        }
+        
+        return totalSum;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(n * d)
+- Explanation: Iterates through `n` numbers. For each number, inspecting digits takes $O(d)$ time where $d \le 6$ (since $nums[i] \le 10^5$). Total time complexity is effectively linear $O(n)$.
+
+Space Complexity: O(d) Auxiliary Space
+- Explanation: String conversion allocates memory proportional to digit count $d \le 6$, which requires $O(1)$ constant space.
+===================================================================

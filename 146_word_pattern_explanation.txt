@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 290: WORD PATTERN
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a pattern and a string s, find if s follows the same pattern.
+Here follow means a full match, such that there is a bijection between a letter in pattern and a non-empty word in s.
+- Each letter in pattern maps to exactly one unique word in s.
+- Each unique word in s maps to exactly one letter in pattern.
+- No two letters map to the same word, and no two words map to the same letter.
+
+Constraints:
+- 1 <= pattern.length <= 300
+- pattern contains only lower-case English letters.
+- 1 <= s.length <= 3000
+- s contains only lowercase English letters and spaces ' '.
+- s does not contain any leading or trailing spaces.
+- All the words in s are separated by a single space.
+
+-------------------------------------------------------------------
+[METHODOLOGY: HASH MAP + HASH SET FOR BIJECTION (O(N + M) TIME, O(N + M) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. WORD TOKENIZATION:
+   - Use `stringstream` to split string `s` into individual words.
+   - If `pattern.length() != words.size()`, return `false` immediately since a 1-to-1 bijection is impossible.
+
+2. BIJECTION VERIFICATION:
+   - Use an `unordered_map<char, string>` (`m`) to maintain mapping from `char` -> `string`.
+   - Use an `unordered_set<string>` (`st`) to ensure no two different characters map to the same word (bijective property).
+   - Iterate through character-word pairs `(ch, curr)`:
+     * If `ch` is already mapped in `m`: Check if `m[ch] == curr`. If not, return `false`.
+     * If `ch` is NOT mapped: Check if `curr` is already mapped to another character (`st.count(curr)`). If so, return `false`. Otherwise, store `m[ch] = curr` and `st.insert(curr)`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: pattern = "abba", s = "dog cat cat dog"
+
+- Tokenize: words = ["dog", "cat", "cat", "dog"]
+- Check length: pattern.length() == 4, words.size() == 4 (Match)
+
+- Initialize: m = {}, st = {}
+
+- i = 0 ('a', "dog"):
+  * 'a' not in m, "dog" not in st -> m['a'] = "dog", st.insert("dog")
+- i = 1 ('b', "cat"):
+  * 'b' not in m, "cat" not in st -> m['b'] = "cat", st.insert("cat")
+- i = 2 ('b', "cat"):
+  * 'b' in m -> m['b'] == "cat" (Valid match)
+- i = 3 ('a', "dog"):
+  * 'a' in m -> m['a'] == "dog" (Valid match)
+
+Returns true.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    bool wordPattern(string pattern, string s) {
+        vector<string> words;
+        stringstream ss(s);
+        string word;
+        while (ss >> word) {
+            words.push_back(word);
+        }
+        
+        if (pattern.length() != words.size()) {
+            return false;
+        }
+        
+        unordered_map<char, string> m;
+        unordered_set<string> st;
+        
+        for (int i = 0; i < pattern.length(); i++) {
+            char ch = pattern[i];
+            string curr = words[i];
+            
+            if (m.count(ch)) {
+                if (m[ch] != curr) {
+                    return false;
+                }
+            } else {
+                if (st.count(curr)) {
+                    return false;
+                }
+                m[ch] = curr;
+                st.insert(curr);
+            }
+        }
+        
+        return true;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N + M)
+- Explanation: Splitting $s$ into words takes $O(M)$ time where $M$ is the length of $s$. Iterating through $N$ characters of pattern takes $O(N)$ time, performing $O(1)$ average hash map and hash set operations.
+
+Space Complexity: O(N + M)
+- Explanation: Storing words array and hash map/set requires $O(N + M)$ extra space.
+===================================================================

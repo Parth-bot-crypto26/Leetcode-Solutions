@@ -1,0 +1,89 @@
+===================================================================
+LEETCODE 704: BINARY SEARCH
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of integers 'nums' which is sorted in ascending order, and an integer 'target', write a function to search target in nums.
+If target exists, return its index. Otherwise, return -1.
+You must write an algorithm with O(log n) runtime complexity.
+
+Constraints:
+- 1 <= nums.length <= 10^4
+- -10^4 < nums[i], target < 10^4
+- All integers in nums are unique.
+- nums is sorted in ascending order.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BINARY SEARCH (ITERATIVE / RECURSIVE) (O(LOG N) TIME, O(1) AUXILIARY SPACE)]
+-------------------------------------------------------------------
+
+Your recursive implementation is logically correct and satisfies O(log n) time complexity!
+
+1. RECURSIVE VS. ITERATIVE COMPARISON:
+   - Your Recursive Solution: Correctly calculates `mid = st + (end - st) / 2` to avoid integer overflow. Uses $O(\log n)$ auxiliary stack space due to recursive calls.
+   - Optimal Iterative Solution: Eliminates call stack overhead entirely, reducing auxiliary space complexity from $O(\log n)$ to strictly $O(1)$.
+
+2. ITERATIVE BINARY SEARCH ALGORITHM:
+   - Maintain two pointers: `st = 0` and `end = nums.size() - 1`.
+   - While `st <= end`:
+     * Compute `mid = st + (end - st) / 2`.
+     * If `nums[mid] == target`, return `mid`.
+     * If `nums[mid] < target`, narrow search space to right half: `st = mid + 1`.
+     * If `nums[mid] > target`, narrow search space to left half: `end = mid - 1`.
+   - Return `-1` if search space is exhausted without finding `target`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [-1, 0, 3, 5, 9, 12], target = 9
+
+- Initialize: st = 0, end = 5
+
+- Iteration 1:
+  * mid = 0 + (5 - 0) / 2 = 2
+  * nums[2] = 3 < 9 -> target is in right half
+  * Update: st = mid + 1 = 3
+
+- Iteration 2:
+  * mid = 3 + (5 - 3) / 2 = 4
+  * nums[4] = 9 == 9 -> Target found!
+
+Returns 4.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+// Optimal Iterative Approach (O(log n) Time, O(1) Auxiliary Space)
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int st = 0;
+        int end = nums.size() - 1;
+        
+        while (st <= end) {
+            int mid = st + (end - st) / 2;
+            
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                st = mid + 1;
+            } else {
+                end = mid - 1;
+            }
+        }
+        
+        return -1;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(log n)
+- Explanation: The search range `[st, end]` is halved at each comparison step, requiring at most $\lfloor\log_2 n\rfloor + 1$ iterations.
+
+Space Complexity: O(1) Auxiliary Space (Iterative) / O(log n) (Recursive)
+- Explanation: The iterative version uses only scalar variables (`st`, `end`, `mid`), requiring $O(1)$ auxiliary space. The recursive version uses $O(\log n)$ memory for call stack frames.
+===================================================================

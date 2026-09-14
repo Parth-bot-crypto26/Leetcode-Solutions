@@ -1,0 +1,118 @@
+===================================================================
+LEETCODE 242: VALID ANAGRAM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given two strings 's' and 't', return true if 't' is an anagram of 's', and false otherwise.
+An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once.
+
+Constraints:
+- 1 <= s.length, t.length <= 5 * 10^4
+- s and t consist of lowercase English letters.
+
+Follow up: What if the inputs contain Unicode characters? How would you adapt your solution to such a case?
+
+-------------------------------------------------------------------
+[METHODOLOGY: FIXED-SIZE FREQUENCY ARRAY (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your sorting approach is correct and produces O(N log N) time complexity. However, we can optimize it to linear O(N) time using frequency counting.
+
+1. LENGTH CHECK:
+   - If `s.length() != t.length()`, return `false` immediately because strings of different lengths cannot be anagrams.
+
+2. FIXED-SIZE FREQUENCY ARRAY:
+   - Since inputs consist of lowercase English letters, maintain a single integer array `freq` of size 26 initialized to 0.
+   - Iterate through strings simultaneously:
+     * Increment `freq[s[i] - 'a']`.
+     * Decrement `freq[t[i] - 'a']`.
+
+3. VERIFICATION:
+   - Check if all 26 entries in `freq` are 0. If any count is non-zero, return `false`.
+
+4. FOLLOW-UP (UNICODE CHARACTERS):
+   - Replace the fixed-size array `freq[26]` with an `unordered_map<wchar_t, int>` or `unordered_map<u32string, int>` (or equivalent hash map depending on language) to dynamically count frequencies across the unicode spectrum.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "anagram", t = "nagaram"
+
+- Check length: s.length() == 7, t.length() == 7 (Match)
+- Initialize freq array of size 26 with zeros
+
+- Single Pass Updates:
+  * i = 0 ('a', 'n'): freq['a'-'a']++ (1), freq['n'-'a']-- (-1)
+  * i = 1 ('n', 'a'): freq['n'-'a']++ (0), freq['a'-'a']-- (0)
+  * i = 2 ('a', 'g'): freq['a'-'a']++ (1), freq['g'-'a']-- (-1)
+  * i = 3 ('g', 'a'): freq['g'-'a']++ (0), freq['a'-'a']-- (0)
+  * i = 4 ('r', 'r'): freq['r'-'a']++ (1), freq['r'-'a']-- (0)
+  * i = 5 ('a', 'a'): freq['a'-'a']++ (1), freq['a'-'a']-- (0)
+  * i = 6 ('m', 'm'): freq['m'-'a']++ (1), freq['m'-'a']-- (0)
+
+- Final check: All values in `freq` are 0.
+
+Returns true.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// Primary Approach: Frequency Array (O(N) Time, O(1) Space)
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length()) {
+            return false;
+        }
+        
+        vector<int> freq(26, 0);
+        for (int i = 0; i < s.length(); i++) {
+            freq[s[i] - 'a']++;
+            freq[t[i] - 'a']--;
+        }
+        
+        for (int count : freq) {
+            if (count != 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+};
+
+// Follow-up Solution: Hash Map for Unicode Characters
+class SolutionUnicode {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length()) {
+            return false;
+        }
+        
+        unordered_map<char, int> freq;
+        for (int i = 0; i < s.length(); i++) {
+            freq[s[i]]++;
+            freq[t[i]]--;
+        }
+        
+        for (const auto& pair : freq) {
+            if (pair.second != 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N)
+- Explanation: Iterates through strings of length $N$ once. Checking the 26-element array takes constant $O(1)$ time. (Your sorting solution took $O(N \log N)$ time).
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Frequency array size is strictly fixed to 26 regardless of input size $N$. For Unicode inputs, space complexity becomes $O(K)$ where $K$ is the number of distinct unique characters in the strings.
+===================================================================

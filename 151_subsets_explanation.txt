@@ -1,0 +1,95 @@
+===================================================================
+LEETCODE 78: SUBSETS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' of unique elements, return all possible subsets (the power set).
+The solution set must not contain duplicate subsets. Return the solution in any order.
+
+Constraints:
+- 1 <= nums.length <= 10
+- -10 <= nums[i] <= 10
+- All numbers in nums are unique.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BACKTRACKING / RECURSION (O(N * 2^N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. RECURSIVE BACKTRACKING PATTERN (INCLUDE / EXCLUDE):
+   - At each index `i`, we make a binary choice for element `nums[i]`:
+     * Choice 1 (Include): Add `nums[i]` to path `ans`, recurse to `i + 1`, then backtrack by removing `nums[i]`.
+     * Choice 2 (Exclude): Recurse to `i + 1` without adding `nums[i]`.
+
+2. BASE CASE:
+   - When index `i == nums.size()`, a full decision path from index 0 to $N-1$ is complete.
+   - Append a copy of `ans` to `allSubsets` and return.
+
+3. ALTERNATIVE APPROACH (BITMASKING):
+   - Since $N \le 10$, total subsets equal $2^N$.
+   - Iterating integer $M$ from $0$ to $2^N - 1$: if bit $k$ in $M$ is set to 1, include `nums[k]`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2]
+
+- Call getAllSubsets(nums, ans=[], i=0):
+  * Include 1: ans = [1]
+    - Call getAllSubsets(i=1):
+      * Include 2: ans = [1, 2]
+        - Call getAllSubsets(i=2): Base case -> Add [1, 2] to allSubsets
+      * Backtrack: ans = [1]
+      * Exclude 2: ans = [1]
+        - Call getAllSubsets(i=2): Base case -> Add [1] to allSubsets
+  * Backtrack: ans = []
+  * Exclude 1: ans = []
+    - Call getAllSubsets(i=1):
+      * Include 2: ans = [2]
+        - Call getAllSubsets(i=2): Base case -> Add [2] to allSubsets
+      * Backtrack: ans = []
+      * Exclude 2: ans = []
+        - Call getAllSubsets(i=2): Base case -> Add [] to allSubsets
+
+Resulting allSubsets: [[1, 2], [1], [2], []]
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void getAllSubsets(vector<int>& nums, vector<int>& ans, int i, vector<vector<int>>& allSubsets) {
+        if (i == nums.size()) {
+            allSubsets.push_back(ans);
+            return;
+        }
+        
+        // Include element at index i
+        ans.push_back(nums[i]);
+        getAllSubsets(nums, ans, i + 1, allSubsets);
+        
+        // Backtrack and Exclude element at index i
+        ans.pop_back();
+        getAllSubsets(nums, ans, i + 1, allSubsets);
+    }
+
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> allSubsets;
+        vector<int> ans;
+        getAllSubsets(nums, ans, 0, allSubsets);
+        return allSubsets;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N * 2^N)
+- Explanation: There are $2^N$ total subsets. For each leaf state in the recursion tree, copying path `ans` of average size $N/2$ into `allSubsets` takes $O(N)$ time.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: Stack depth of recursion tree is at most $N$. Path vector `ans` holds at most $N$ elements at any given time.
+===================================================================

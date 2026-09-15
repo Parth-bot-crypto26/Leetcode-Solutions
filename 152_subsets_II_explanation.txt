@@ -1,0 +1,99 @@
+===================================================================
+LEETCODE 90: SUBSETS II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array 'nums' that may contain duplicates, return all possible subsets (the power set).
+The solution set must not contain duplicate subsets. Return the solution in any order.
+
+Constraints:
+- 1 <= nums.length <= 10
+- -10 <= nums[i] <= 10
+
+-------------------------------------------------------------------
+[METHODOLOGY: BACKTRACKING WITH DUPLICATE SKIPPING (O(N * 2^N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is optimal!
+
+1. SORTING PREPARATION:
+   - Sort `nums` in ascending order. Grouping duplicate elements together allows us to skip identical branches cleanly during backtracking.
+
+2. DUPLICATE AVOIDANCE PATTERN:
+   - At each step `i`:
+     * Choice 1 (Include): Add `nums[i]` to `ans`, recurse to `i + 1`, and backtrack.
+     * Choice 2 (Exclude & Skip): To avoid duplicate subsets, if we choose NOT to include `nums[i]`, we must also skip all subsequent occurrences of the same value.
+     * Advance `idx` past all duplicate elements (`nums[idx] == nums[idx - 1]`) before making the exclude recursive call `getAllSubsets(nums, ans, idx, allSubsets)`.
+
+3. BASE CASE:
+   - When index `i == nums.size()`, append `ans` to `allSubsets` and return.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 2]
+
+- Sort: nums = [1, 2, 2]
+- Call getAllSubsets(i=0, ans=[]):
+  * Include 1: ans = [1]
+    - Call (i=1, ans=[1]):
+      * Include 2 (first 2): ans = [1, 2]
+        - Call (i=2, ans=[1, 2]):
+          * Include 2 (second 2): ans = [1, 2, 2]
+            - Call (i=3): Base case -> Add [1, 2, 2]
+          * Exclude 2: Skip duplicates -> idx becomes 3. Call (i=3): Base case -> Add [1, 2]
+      * Exclude 2: Skip duplicate 2s starting at index 1 -> idx becomes 3. Call (i=3): Base case -> Add [1]
+  * Exclude 1: idx becomes 1. Call (i=1, ans=[]):
+    * Include 2: ans = [2]
+      - Call (i=2, ans=[2]):
+        * Include 2: ans = [2, 2]
+          - Call (i=3): Base case -> Add [2, 2]
+        * Exclude 2: Skip duplicate 2s -> idx becomes 3. Call (i=3): Base case -> Add [2]
+    * Exclude 2: Skip duplicate 2s -> idx becomes 3. Call (i=3): Base case -> Add []
+
+Resulting allSubsets: [[1, 2, 2], [1, 2], [1], [2, 2], [2], []]
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void getAllSubsets(vector<int>& nums, vector<int>& ans, int i, vector<vector<int>>& allSubsets) {
+        if (i == nums.size()) {
+            allSubsets.push_back(ans);
+            return;
+        }
+        
+        // Include current element
+        ans.push_back(nums[i]);
+        getAllSubsets(nums, ans, i + 1, allSubsets);
+        ans.pop_back();
+        
+        // Exclude current element and skip all duplicate values
+        int idx = i + 1;
+        while (idx < nums.size() && nums[idx] == nums[idx - 1]) {
+            idx++;
+        }
+        getAllSubsets(nums, ans, idx, allSubsets);
+    }
+
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        vector<vector<int>> allSubsets;
+        vector<int> ans;
+        getAllSubsets(nums, ans, 0, allSubsets);
+        return allSubsets;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N * 2^N)
+- Explanation: Sorting takes $O(N \log N)$ time. Generating all unique subsets explores at most $2^N$ states, and copying vector `ans` at each leaf node takes $O(N)$ time.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: Recursion depth reaches at most $N$. Path vector `ans` requires $O(N)$ auxiliary space.
+===================================================================

@@ -1,0 +1,95 @@
+===================================================================
+LEETCODE 3986: NUMBER OF ELAPSED SECONDS BETWEEN TWO TIMES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two valid times 'startTime' and 'endTime', each represented as a string in the format "HH:MM:SS".
+Return the number of seconds that have elapsed from startTime to endTime.
+
+Constraints:
+- startTime.length == 8, endTime.length == 8
+- startTime and endTime are valid times in the format "HH:MM:SS"
+- 00 <= HH <= 23, 00 <= MM <= 59, 00 <= SS <= 59
+- endTime is not earlier than startTime
+
+-------------------------------------------------------------------
+[METHODOLOGY: TOTAL SECONDS CONVERSION (O(1) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your Python implementation is optimal!
+
+1. TIME TO SECONDS CONVERSION:
+   - Convert both `startTime` and `endTime` into total seconds from midnight (00:00:00).
+   - Formula: $\text{Total Seconds} = (\text{HH} \times 3600) + (\text{MM} \times 60) + \text{SS}$
+
+2. STRING SLICING & PARSING:
+   - Hours: `int(time[0:2])`
+   - Minutes: `int(time[3:5])`
+   - Seconds: `int(time[6:8])`
+
+3. ELAPSED TIME COMPUTATION:
+   - Subtract total start seconds from total end seconds: `endSec - startSec`.
+   - Since `endTime` is guaranteed not to be earlier than `startTime`, no midnight wraparound calculation is required.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: startTime = "12:34:56", endTime = "13:00:00"
+
+- startSec:
+  * HH = 12 -> 12 * 3600 = 43200
+  * MM = 34 -> 34 * 60   = 2040
+  * SS = 56 -> 56
+  * Total startSec = 43200 + 2040 + 56 = 45296
+
+- endSec:
+  * HH = 13 -> 13 * 3600 = 46800
+  * MM = 00 -> 0 * 60    = 0
+  * SS = 00 -> 0
+  * Total endSec = 46800 + 0 + 0 = 46800
+
+- Result: 46800 - 45296 = 1504
+
+Returns 1504.
+
+-------------------------------------------------------------------
+[PYTHON & C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+# Python Implementation (O(1) Time, O(1) Space)
+class Solution:
+    def secondsBetweenTimes(self, startTime: str, endTime: str) -> int:
+        def toSeconds(t: str) -> int:
+            hh = int(t[0:2])
+            mm = int(t[3:5])
+            ss = int(t[6:8])
+            return hh * 3600 + mm * 60 + ss
+        
+        return toSeconds(endTime) - toSeconds(startTime)
+
+
+// C++ Implementation (O(1) Time, O(1) Space)
+class SolutionCPP {
+public:
+    int secondsBetweenTimes(string startTime, string endTime) {
+        auto toSeconds = [](const string& t) {
+            int hh = stoi(t.substr(0, 2));
+            int mm = stoi(t.substr(3, 2));
+            int ss = stoi(t.substr(6, 2));
+            return hh * 3600 + mm * 60 + ss;
+        };
+        
+        return toSeconds(endTime) - toSeconds(startTime);
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: String parsing and arithmetic calculations operate on fixed-length strings of 8 characters, taking constant time.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses only primitive integer variables for total seconds calculations.
+===================================================================

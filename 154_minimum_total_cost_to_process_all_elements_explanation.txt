@@ -1,0 +1,121 @@
+===================================================================
+LEETCODE 3987: MINIMUM TOTAL COST TO PROCESS ALL ELEMENTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array nums and an integer k representing initial resources.
+Process elements from left to right. Processing the i-th element requires nums[i] resources.
+If available resources are less than nums[i], perform operations that each add k resources.
+- The 1st operation costs 1, the 2nd costs 2, ..., the m-th overall operation costs m.
+- After processing nums[i], resources decrease by nums[i].
+Return the total cost required modulo 10^9 + 7.
+
+Constraints:
+- 1 <= nums.length <= 10^5
+- 1 <= nums[i] <= 10^9
+- 1 <= k <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY RESOURCE TRACKING + ARITHMETIC PROGRESSION (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your Python solution is optimal and mathematically sound!
+
+1. TRACKING REQUIRED OPERATIONS:
+   - Maintain remaining resources `r` initialized to `k`, and total operations count `ops` initialized to `0`.
+   - Iterate through each `num` in `nums`:
+     * If current resources `r < num`, calculate additional resources needed: `needed = num - r`.
+     * Calculate operations required for this step using ceiling division: `m = (needed + k - 1) // k`.
+     * Increment total operations count: `ops += m`.
+     * Refill available resources: `r += m * k`.
+     * Process element: `r -= num`.
+
+2. COST CALCULATION (SUM OF FIRST N NATURAL NUMBERS):
+   - Since operations cost 1, 2, 3, ..., `ops`, the total cost is the sum of the first `ops` integers:
+     $$\text{Total Cost} = \frac{\text{ops} \times (\text{ops} + 1)}{2}$$
+   - Apply modulo $10^9 + 7$ at the very end to prevent intermediate overflow or precision issues.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 1, 7, 14], k = 4
+
+- Initialize: r = 4, ops = 0
+
+- Processing nums[0] = 1:
+  * r (4) >= 1 -> r = 4 - 1 = 3
+- Processing nums[1] = 1:
+  * r (3) >= 1 -> r = 3 - 1 = 2
+- Processing nums[2] = 7:
+  * r (2) < 7 -> needed = 7 - 2 = 5
+  * m = (5 + 4 - 1) // 4 = 2 operations
+  * ops = 0 + 2 = 2
+  * r = 2 + (2 * 4) - 7 = 3
+- Processing nums[3] = 14:
+  * r (3) < 14 -> needed = 14 - 3 = 11
+  * m = (11 + 4 - 1) // 4 = 3 operations
+  * ops = 2 + 3 = 5
+  * r = 3 + (3 * 4) - 14 = 1
+
+- Total Cost Calculation:
+  * totalCost = (5 * 6) // 2 = 15
+  * 15 % (10^9 + 7) = 15
+
+Returns 15.
+
+-------------------------------------------------------------------
+[PYTHON & C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+# Python Implementation (O(N) Time, O(1) Space)
+class Solution:
+    def minimumCost(self, nums: list[int], k: int) -> int:
+        MOD = 10**9 + 7
+        r = k
+        ops = 0
+        
+        for num in nums:
+            if r < num:
+                needed = num - r
+                m = (needed + k - 1) // k
+                r += m * k
+                ops += m
+            r -= num
+            
+        total_cost = ops * (ops + 1) // 2
+        return total_cost % MOD
+
+
+// C++ Implementation (O(N) Time, O(1) Space)
+class SolutionCPP {
+public:
+    int minimumCost(vector<int>& nums, int k) {
+        long long MOD = 1e9 + 7;
+        long long r = k;
+        long long ops = 0;
+        
+        for (int num : nums) {
+            if (r < num) {
+                long long needed = num - r;
+                long long m = (needed + k - 1) / k;
+                r += m * k;
+                ops += m;
+            }
+            r -= num;
+        }
+        
+        long long totalCost = (ops % MOD) * ((ops + 1) % MOD) / 2;
+        return totalCost % MOD;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N)
+- Explanation: Performs a single linear pass over array `nums` of length $N$, executing constant time $O(1)$ math operations per element.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses scalar variables (`r`, `ops`, `needed`, `m`) requiring $O(1)$ auxiliary memory.
+===================================================================

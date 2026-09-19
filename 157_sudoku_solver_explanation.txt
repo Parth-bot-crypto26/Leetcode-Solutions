@@ -1,0 +1,117 @@
+===================================================================
+LEETCODE 37: SUDOKU SOLVER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a program to solve a Sudoku puzzle by filling empty cells denoted by '.'.
+A valid solution must satisfy:
+- Each digit 1-9 must occur exactly once in each row.
+- Each digit 1-9 must occur exactly once in each column.
+- Each digit 1-9 must occur exactly once in each of the 9 3x3 sub-boxes.
+
+Constraints:
+- board.length == 9, board[i].length == 9
+- board[i][j] is a digit ('1'-'9') or '.'.
+- It is guaranteed that the input board has only one solution.
+
+-------------------------------------------------------------------
+[METHODOLOGY: RECURSIVE BACKTRACKING (O(9^N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is clean, optimal, and correct!
+
+1. RECURSIVE SEARCH PATTERN:
+   - Traverse the board cell by cell from top-left `(0, 0)` to bottom-right `(8, 8)`.
+   - If the current cell already contains a digit, skip it and advance to the next cell `(nextRow, nextCol)`.
+   - If the cell is empty (`'.'`), attempt to place digits `'1'` through `'9'`.
+
+2. VALIDITY CHECK (`isSafe`):
+   - Row Check: Ensure `dig` does not appear in row `row`.
+   - Column Check: Ensure `dig` does not appear in column `col`.
+   - 3x3 Box Check: Identify top-left corner of current 3x3 box via `(row / 3) * 3` and `(col / 3) * 3`, then verify `dig` is not present within the box.
+
+3. EARLY TERMINATION & BACKTRACKING:
+   - Return `true` immediately when the board is fully filled (`row == 9`).
+   - If a placed digit leads to a solution down the recursion tree, propagate `true` back up.
+   - Otherwise, backtrack by resetting the cell back to `'.'`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Cell: (0, 2), board[0][2] = '.'
+
+- Loop dig from '1' to '9':
+  * Try dig = '1': Check row 0, col 2, and 3x3 box (0..2, 0..2).
+    - '1' present in col 2 or row 0 -> isSafe returns false.
+  * Try dig = '2':
+    - '2' present in box -> isSafe returns false.
+  * Try dig = '4':
+    - isSafe returns true.
+    - Set board[0][2] = '4'.
+    - Recurse helper(row=0, col=3):
+      * If sub-search succeeds -> Return true.
+      * If sub-search fails -> Backtrack: board[0][2] = '.', try next digit '5'.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    bool isSafe(vector<vector<char>>& board, int row, int col, char dig) {
+        int stRow = (row / 3) * 3;
+        int stCol = (col / 3) * 3;
+
+        for (int i = 0; i < 9; i++) {
+            // Row check
+            if (board[row][i] == dig) return false;
+            // Column check
+            if (board[i][col] == dig) return false;
+            // 3x3 Grid check
+            if (board[stRow + i / 3][stCol + i % 3] == dig) return false;
+        }
+        return true;
+    }
+
+    bool helper(vector<vector<char>>& board, int row, int col) {
+        if (row == 9) {
+            return true;
+        }
+
+        int nextRow = row, nextCol = col + 1;
+        if (nextCol == 9) {
+            nextRow = row + 1;
+            nextCol = 0;
+        }
+
+        if (board[row][col] != '.') {
+            return helper(board, nextRow, nextCol);
+        }
+
+        for (char dig = '1'; dig <= '9'; dig++) {
+            if (isSafe(board, row, col, dig)) {
+                board[row][col] = dig;
+                if (helper(board, nextRow, nextCol)) {
+                    return true;
+                }
+                board[row][col] = '.'; // Backtrack
+            }
+        }
+        return false;
+    }
+
+    void solveSudoku(vector<vector<char>>& board) {
+        helper(board, 0, 0);
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(9^N)
+- Explanation: Where $N$ is the number of empty cells (at most 81). For each empty cell, there are at most 9 possibilities to explore. Since the board size is fixed at $9 \times 9$, execution time is practically $O(1)$.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Recursion stack depth is bounded by $9 \times 9 = 81$ levels. Modifying board in-place uses no additional space.
+===================================================================

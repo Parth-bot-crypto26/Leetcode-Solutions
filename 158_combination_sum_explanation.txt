@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 39: COMBINATION SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of distinct integers 'candidates' and a target integer 'target', return a list of all unique combinations of candidates where the chosen numbers sum to target.
+- The same number may be chosen from candidates an unlimited number of times.
+- Two combinations are unique if the frequency of at least one of the chosen numbers is different.
+- Return combinations in any order.
+
+Constraints:
+- 1 <= candidates.length <= 30
+- 2 <= candidates[i] <= 40
+- All elements of candidates are distinct.
+- 1 <= target <= 40
+
+-------------------------------------------------------------------
+[METHODOLOGY: RECURSIVE BACKTRACKING (O(2^T) TIME, O(T) SPACE)]
+-------------------------------------------------------------------
+
+Your code works logically, but can be significantly optimized!
+
+1. REMOVING REDUNDANT SEARCH BRANCHES AND SET LOOKUPS:
+   - Since all elements in `candidates` are distinct and we process them sequentially without going backward in indices, duplicate combinations will **never** be generated naturally. The `std::set<vector<int>> s` overhead can be removed entirely.
+   - Calling `getAllComb(nums, idx+1, target-nums[idx]...)` AND `getAllComb(nums, idx, target-nums[idx]...)` creates redundant branches because staying at index `idx` already covers choosing `nums[idx]` then moving to `idx+1` in subsequent calls.
+
+2. CLEAN TWO-CHOICE BRANCHING (INCLUDE OR EXCLUDE):
+   At index `idx`:
+   - Choice 1 (Include): If `nums[idx] <= target`, push `nums[idx]` to `combination`, recurse at index `idx` (allowing re-use), and backtrack.
+   - Choice 2 (Exclude): Recurse to index `idx + 1` without adding `nums[idx]`.
+
+3. BASE CASES:
+   - If `target == 0`: Found a valid combination! Add `combination` to `ans` and return.
+   - If `idx == nums.size()` or `target < 0`: Invalid branch, return.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: candidates = [2, 3, 6, 7], target = 7
+
+- Call helper(idx=0, target=7, comb=[]):
+  * Include 2: comb = [2]
+    - Call helper(idx=0, target=5, comb=[2]):
+      * Include 2: comb = [2, 2]
+        - Call helper(idx=0, target=3, comb=[2, 2]):
+          * Include 2: comb = [2, 2, 2]
+            - Call helper(idx=0, target=1): Include 2 -> target -1 < 0 (Return)
+            - Exclude 2 -> Call helper(idx=1, target=1): All branch attempts fail.
+            - Backtrack: comb = [2, 2]
+          * Exclude 2: Call helper(idx=1, target=3, comb=[2, 2]):
+            - Include 3: comb = [2, 2, 3] -> target 0 reached! Add [2, 2, 3].
+            - Backtrack: comb = [2, 2]
+  * Exclude 2... moves through remaining indices until idx=3 (7):
+    - Include 7: comb = [7] -> target 0 reached! Add [7].
+
+Resulting ans: [[2, 2, 3], [7]]
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    void getAllComb(vector<int>& candidates, int idx, int target, vector<vector<int>>& ans, vector<int>& combination) {
+        if (target == 0) {
+            ans.push_back(combination);
+            return;
+        }
+        if (idx == candidates.size() || target < 0) {
+            return;
+        }
+
+        // Choice 1: Include current element (can be reused, stay at idx)
+        if (candidates[idx] <= target) {
+            combination.push_back(candidates[idx]);
+            getAllComb(candidates, idx, target - candidates[idx], ans, combination);
+            combination.pop_back(); // Backtrack
+        }
+
+        // Choice 2: Exclude current element (move to idx + 1)
+        getAllComb(candidates, idx + 1, target, ans, combination);
+    }
+
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<int>> ans;
+        vector<int> combination;
+        getAllComb(candidates, 0, target, ans, combination);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(2^T) or O(N^(T/M))
+- Explanation: Where $T$ is the target value and $M$ is the minimum element in `candidates`. In the worst-case scenario, decision tree depth reaches $T/M$, with exponential combinations evaluated.
+
+Space Complexity: O(T / M) Auxiliary Space
+- Explanation: Stack depth and maximum size of `combination` vector are bounded by $T / M$ (the maximum number of elements needed to form target).
+===================================================================

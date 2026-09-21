@@ -1,0 +1,103 @@
+===================================================================
+LEETCODE 131: PALINDROME PARTITIONING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitionings of s.
+
+Constraints:
+- 1 <= s.length <= 16
+- s contains only lowercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY: BACKTRACKING WITH SUBSTRING PARTITIONING (O(N * 2^(N-1)) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is correct, elegant, and fully optimal for the given constraints ($N \le 16$)!
+
+1. RECURSIVE BACKTRACKING PATTERN:
+   - At each recursion level, iterate through possible prefix lengths `i` from `0` to `s.size() - 1`.
+   - Extract the prefix substring `part = s.substr(0, i + 1)`.
+   - Check if `part` is a palindrome using `isPalindrome`.
+
+2. FORWARD RECURSION & BACKTRACKING:
+   - If `part` is a palindrome, push it into the current `partitions` path vector and recursively process the remaining suffix `s.substr(i + 1)`.
+   - After the recursive call returns, pop the last element (`partitions.pop_back()`) to backtrack and explore alternative partition boundaries.
+
+3. BASE CASE:
+   - When the remaining string becomes empty (`s.size() == 0`), a complete valid partition set is found. Push a copy of `partitions` into `ans` and return.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "aab"
+
+- Call getAllParts("aab", partitions = []):
+  * i = 0: part = "a" (Palindrome)
+    - partitions = ["a"]
+    - Call getAllParts("ab"):
+      * i = 0: part = "a" (Palindrome)
+        - partitions = ["a", "a"]
+        - Call getAllParts("b"):
+          * i = 0: part = "b" (Palindrome)
+            - partitions = ["a", "a", "b"]
+            - Call getAllParts(""): Base case reached -> Add ["a", "a", "b"] to ans.
+          * Backtrack: partitions = ["a", "a"]
+      * i = 1: part = "ab" (Not a palindrome)
+    - Backtrack: partitions = ["a"]
+  * i = 1: part = "aa" (Palindrome)
+    - partitions = ["aa"]
+    - Call getAllParts("b"):
+      * i = 0: part = "b" (Palindrome)
+        - partitions = ["aa", "b"]
+        - Call getAllParts(""): Base case reached -> Add ["aa", "b"] to ans.
+  * i = 2: part = "aab" (Not a palindrome)
+
+Resulting ans: [["a", "a", "b"], ["aa", "b"]]
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        string s2 = s;
+        reverse(s2.begin(), s2.end());
+        return s == s2;
+    }
+
+    void getAllParts(string s, vector<string>& partitions, vector<vector<string>>& ans) {
+        if (s.empty()) {
+            ans.push_back(partitions);
+            return;
+        }
+
+        for (int i = 0; i < s.size(); i++) {
+            string part = s.substr(0, i + 1);
+            if (isPalindrome(part)) {
+                partitions.push_back(part);
+                getAllParts(s.substr(i + 1), partitions, ans);
+                partitions.pop_back(); // Backtrack
+            }
+        }
+    }
+
+    vector<vector<string>> partition(string s) {
+        vector<vector<string>> ans;
+        vector<string> partitions;
+        getAllParts(s, partitions, ans);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N * 2^(N-1))
+- Explanation: There are $2^{N-1}$ possible partition configurations for a string of length $N$. For each configuration, checking palindromes and constructing substrings takes $O(N)$ time.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: Recursion call stack depth reaches at most $N$. Path vector `partitions` holds at most $N$ elements at any given time.
+===================================================================

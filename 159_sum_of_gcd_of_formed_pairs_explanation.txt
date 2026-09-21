@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 3867: SUM OF GCD OF FORMED PAIRS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array `nums` of length `n`:
+1. Construct array `prefixGcd` where `prefixGcd[i] = gcd(nums[i], max(nums[0]...nums[i]))`.
+2. Sort `prefixGcd` in non-decreasing order.
+3. Form pairs by matching the smallest and largest remaining unpaired elements (two-pointer approach).
+4. Compute `gcd(prefixGcd[left], prefixGcd[right])` for each pair and sum them up.
+5. If `n` is odd, ignore the single middle element.
+
+Constraints:
+- 1 <= n == nums.length <= 10^5
+- 1 <= nums[i] <= 10^9
+
+-------------------------------------------------------------------
+[METHODOLOGY: PREFIX MAXIMUM + TWO POINTERS (O(N log N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is clean, optimal, and completely correct!
+
+1. PREFIX MAXIMUM & GCD COMPUTATION:
+   - Track `currentMax = max(currentMax, nums[i])` dynamically in a single pass.
+   - Compute `prefixGcd[i] = gcd(nums[i], currentMax)`.
+   - C++ standard library provides `std::gcd` from `<numeric>`, which can replace a manual implementation.
+
+2. SORTING & PAIRING:
+   - Sort `prefixGcd` array in $O(N \log N)$ time.
+   - Use two pointers `left = 0` and `right = n - 1`:
+     * Pair the smallest element `prefixGcd[left]` with the largest element `prefixGcd[right]`.
+     * Accumulate `gcd(prefixGcd[left], prefixGcd[right])` into `totalSum`.
+     * Advance pointers: `left++`, `right--`.
+     * The `left < right` loop condition automatically ignores the middle unpaired element when `n` is odd.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 6, 2, 8]
+
+- Compute prefixGcd:
+  * i = 0: currentMax = 3, prefixGcd[0] = gcd(3, 3) = 3
+  * i = 1: currentMax = 6, prefixGcd[1] = gcd(6, 6) = 6
+  * i = 2: currentMax = 6, prefixGcd[2] = gcd(2, 6) = 2
+  * i = 3: currentMax = 8, prefixGcd[3] = gcd(8, 8) = 8
+  * prefixGcd = [3, 6, 2, 8]
+
+- Sort: prefixGcd = [2, 3, 6, 8]
+
+- Two-Pointer Pairing:
+  * left = 0, right = 3: gcd(2, 8) = 2 -> totalSum = 2
+  * left = 1, right = 2: gcd(3, 6) = 3 -> totalSum = 2 + 3 = 5
+  * left = 2, right = 1: Loop terminates (left >= right)
+
+Returns 5.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+#include <vector>
+#include <numeric>
+#include <algorithm>
+
+class Solution {
+public:
+    long long gcdSum(std::vector<int>& nums) {
+        int n = nums.size();
+        std::vector<int> prefixGcd(n);
+        int currentMax = 0;
+
+        for (int i = 0; i < n; ++i) {
+            currentMax = std::max(currentMax, nums[i]);
+            prefixGcd[i] = std::gcd(nums[i], currentMax);
+        }
+
+        std::sort(prefixGcd.begin(), prefixGcd.end());
+
+        long long totalSum = 0;
+        int left = 0, right = n - 1;
+
+        while (left < right) {
+            totalSum += std::gcd(prefixGcd[left], prefixGcd[right]);
+            left++;
+            right--;
+        }
+
+        return totalSum;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N log N)
+- Explanation: Prefix GCD computation takes $O(N \log(\text{max\_val}))$. Sorting `prefixGcd` array takes $O(N \log N)$ time, which dominates overall execution time. Two-pointer processing takes $O(N \log(\text{max\_val}))$.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: The `prefixGcd` array requires $O(N)$ extra space to store transformed values prior to sorting.
+===================================================================

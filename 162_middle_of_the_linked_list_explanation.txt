@@ -1,0 +1,76 @@
+===================================================================
+LEETCODE 876: MIDDLE OF THE LINKED LIST
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the head of a singly linked list, return the middle node of the linked list.
+If there are two middle nodes, return the second middle node.
+
+Constraints:
+- The number of nodes in the list is in the range [1, 100].
+- 1 <= Node.val <= 100
+
+-------------------------------------------------------------------
+[METHODOLOGY: FAST & SLOW POINTERS / FLOYD'S TORTOISE & HARE (O(N) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is completely optimal and correct!
+
+1. FAST & SLOW POINTER APPROACH:
+   - Initialize two pointers, `slow` and `fast`, both starting at `head`.
+   - Traverse the linked list:
+     * `slow` moves one step at a time (`slow = slow->next`).
+     * `fast` moves two steps at a time (`fast = fast->next->next`).
+   - By moving at twice the speed, when `fast` reaches the end of the list (or `nullptr`), `slow` will be positioned exactly at the middle node.
+
+2. HANDLING ODD VS. EVEN LENGTHS:
+   - Odd Length (e.g., 5 nodes): `fast` lands on the last node (`fast->next == nullptr`), and `slow` points to the exact middle node (3rd node).
+   - Even Length (e.g., 6 nodes): `fast` moves beyond the last node (`fast == nullptr`), and `slow` points to the second middle node (4th node), satisfying the problem statement requirements.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Example 1: head = [1, 2, 3, 4, 5] (Odd Length)
+- Initial: slow = 1, fast = 1
+- Step 1: slow = 2, fast = 3
+- Step 2: slow = 3, fast = 5
+- Condition check: fast->next == nullptr -> Loop terminates.
+- Return slow (node with value 3).
+
+Example 2: head = [1, 2, 3, 4, 5, 6] (Even Length)
+- Initial: slow = 1, fast = 1
+- Step 1: slow = 2, fast = 3
+- Step 2: slow = 3, fast = 5
+- Step 3: slow = 4, fast = nullptr
+- Condition check: fast == nullptr -> Loop terminates.
+- Return slow (node with value 4).
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    ListNode* middleNode(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+
+        return slow;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N)
+- Explanation: A single pass through the linked list requires $N/2$ iterations, resulting in $O(N)$ linear time complexity.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: Uses only two pointer variables (`slow` and `fast`), taking $O(1)$ constant extra space.
+===================================================================

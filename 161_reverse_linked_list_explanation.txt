@@ -1,0 +1,106 @@
+===================================================================
+LEETCODE 206: REVERSE LINKED LIST
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the head of a singly linked list, reverse the list, and return the reversed list.
+
+Constraints:
+- The number of nodes in the list is in the range [0, 5000].
+- -5000 <= Node.val <= 5000
+
+Follow-up:
+Implement both iterative and recursive solutions.
+
+-------------------------------------------------------------------
+[METHODOLOGY]
+-------------------------------------------------------------------
+
+Your iterative C++ implementation is completely optimal and correct!
+
+1. ITERATIVE APPROACH (O(N) TIME, O(1) SPACE):
+   - Maintain three pointers: `prev` (initialized to `nullptr`), `curr` (initialized to `head`), and `next` (to store the next node).
+   - In each iteration:
+     * Store `next = curr->next` to avoid losing the rest of the list.
+     * Reverse the pointer: `curr->next = prev`.
+     * Move `prev` forward to `curr`.
+     * Move `curr` forward to `next`.
+   - When `curr` becomes `nullptr`, `prev` points to the new head of the reversed list.
+
+2. RECURSIVE APPROACH (O(N) TIME, O(N) SPACE):
+   - Base Case: If `head == nullptr` or `head->next == nullptr`, return `head`.
+   - Divide: Recursively reverse the rest of the list starting from `head->next`. Let this returned head be `newHead`.
+   - Conquer/Re-link: `head->next->next = head` reverses the link between the current node and the next node.
+   - Clean up: `head->next = nullptr` disconnects the original forward link to prevent cycles.
+   - Return `newHead`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [1, 2, 3]
+
+1. Iterative Execution:
+   - Initial: prev = null, curr = 1
+   - Step 1: next = 2, 1->next = null, prev = 1, curr = 2
+   - Step 2: next = 3, 2->next = 1,    prev = 2, curr = 3
+   - Step 3: next = null, 3->next = 2, prev = 3, curr = null
+   - Loop ends. Return prev (3 -> 2 -> 1 -> null).
+
+2. Recursive Execution:
+   - reverseList(1): calls reverseList(2)
+     * reverseList(2): calls reverseList(3)
+       - reverseList(3): base case reached -> returns node 3
+     * Back to node 2: 2->next->next = 2 (makes 3 point to 2), 2->next = null, returns node 3
+   * Back to node 1: 1->next->next = 1 (makes 2 point to 1), 1->next = null, returns node 3
+   - Returns node 3 (3 -> 2 -> 1 -> null).
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// Approach 1: Iterative (Optimal O(1) Auxiliary Space)
+class SolutionIterative {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* prev = nullptr;
+        ListNode* curr = head;
+        ListNode* next = nullptr;
+
+        while (curr != nullptr) {
+            next = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = next;
+        }
+        return prev;
+    }
+};
+
+// Approach 2: Recursive (Satisfies Follow-up Requirement)
+class SolutionRecursive {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return head;
+        }
+
+        ListNode* newHead = reverseList(head->next);
+        head->next->next = head;
+        head->next = nullptr;
+
+        return newHead;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Iterative Approach:
+- Time Complexity: O(N) — Single traversal over N nodes.
+- Space Complexity: O(1) Auxiliary Space — Uses only 3 pointer variables.
+
+Recursive Approach:
+- Time Complexity: O(N) — Each node is visited once.
+- Space Complexity: O(N) Auxiliary Space — Recursion stack depth reaches N.
+===================================================================

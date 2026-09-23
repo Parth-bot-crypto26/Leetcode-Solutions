@@ -1,0 +1,90 @@
+===================================================================
+LEETCODE 3992: REARRANGE STRING TO AVOID CHARACTER PAIR
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string 's' and two distinct lowercase letters 'x' and 'y', rearrange 's' into a new string 't' such that:
+- 't' is a permutation of 's'.
+- Every occurrence of 'y' appears before every occurrence of 'x' in 't'.
+Return any valid string 't'.
+
+Constraints:
+- 1 <= s.length <= 100
+- s consists of lowercase English letters.
+- x and y are lowercase English letters, x != y.
+
+-------------------------------------------------------------------
+[METHODOLOGY: THREE-PARTITIONING STRATEGY (O(N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is clean, optimal, and 100% correct!
+
+1. CORE INSIGHT:
+   - To guarantee that all occurrences of `y` appear before all occurrences of `x`, partition the characters into three distinct categories:
+     * Category 1 (`yChars`): All occurrences of character `y`.
+     * Category 2 (`others`): All characters that are neither `x` nor `y`.
+     * Category 3 (`xChars`): All occurrences of character `x`.
+   - Concatenating them in the order `yChars + others + xChars` guarantees:
+     * Every `y` comes before every `x` (with `others` in between or seamlessly connected).
+     * The resulting string remains a valid permutation of `s`.
+
+2. EDGE CASE HANDLING:
+   - If `x` or `y` (or both) are missing from `s`, `xChars` or `yChars` will simply be empty strings (`""`), and the concatenated result remains valid without special branch conditions.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "aabc", x = 'a', y = 'c'
+
+- Iterate over string 's':
+  * 'a': matches x -> xChars = "a"
+  * 'a': matches x -> xChars = "aa"
+  * 'b': other    -> others = "b"
+  * 'c': matches y -> yChars = "c"
+
+- Partition Results:
+  * yChars = "c"
+  * others = "b"
+  * xChars = "aa"
+
+- Concatenation: yChars + others + xChars = "c" + "b" + "aa" = "cbaa"
+
+Result: "cbaa" (Valid since 'c' appears before both 'a's)
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+#include <string>
+
+class Solution {
+public:
+    std::string rearrangeString(std::string s, char x, char y) {
+        std::string yChars = "";
+        std::string xChars = "";
+        std::string others = "";
+
+        for (char c : s) {
+            if (c == y) {
+                yChars += c;
+            } else if (c == x) {
+                xChars += c;
+            } else {
+                others += c;
+            }
+        }
+
+        return yChars + others + xChars;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N)
+- Explanation: Iterating through `s` of length $N$ takes $O(N)$ time. String concatenation for strings totaling length $N$ also takes $O(N)$ time.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: The total memory allocated across `yChars`, `xChars`, and `others` equals $N$ characters for constructing the return string.
+===================================================================

@@ -1,0 +1,75 @@
+===================================================================
+LEETCODE 3996: EVEN NUMBER OF KNIGHT MOVES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two integer arrays `start` and `target`, where each array is of the form `[x, y]` representing a cell on a standard 8x8 chessboard.
+Return `true` if a knight can move from `start` to `target` in an even number of moves. Otherwise, return `false`.
+
+Constraints:
+- start.length == target.length == 2
+- 0 <= start[i], target[i] <= 7
+
+-------------------------------------------------------------------
+[METHODOLOGY: CHESSBOARD PARITY / BPARTITE GRAPH PROPERTY (O(1) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is completely optimal and 100% correct!
+
+1. CHESSBOARD COLOR / PARITY PROPERTY:
+   - On a standard chessboard, color parity of a square `(x, y)` can be determined by `(x + y) % 2`.
+     * If `(x + y) % 2 == 0`, the cell is on one color (e.g., black).
+     * If `(x + y) % 2 == 1`, the cell is on the opposite color (e.g., white).
+   
+2. KNIGHT MOVE INVARIANT:
+   - A knight's move is always `(±1, ±2)` or `(±2, ±1)`.
+   - The change in `(x + y)` after any single move is always odd:
+     * `(±1 + ±2) = ±3` or `±1` (both are odd).
+   - Therefore, **every single knight move changes the color/parity of the cell**:
+     * 1 move (odd): Opposite color parity.
+     * 2 moves (even): Same color parity.
+     * 3 moves (odd): Opposite color parity.
+     * 4 moves (even): Same color parity.
+
+3. DEDUCTION:
+   - A knight can reach `target` from `start` in an **even number of moves** if and only if `start` and `target` share the **same color parity**:
+     `((start[0] + start[1]) % 2) == ((target[0] + target[1]) % 2)`
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Example 1: start = [1, 1], target = [2, 2]
+- start parity = (1 + 1) % 2 = 0
+- target parity = (2 + 2) % 2 = 0
+- Parities match (0 == 0) -> Returns true.
+
+Example 2: start = [4, 5], target = [6, 6]
+- start parity = (4 + 5) % 2 = 1
+- target parity = (6 + 6) % 2 = 0
+- Parities differ (1 != 0) -> Returns false.
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+#include <vector>
+
+class Solution {
+public:
+    bool canReach(std::vector<int>& start, std::vector<int>& target) {
+        int startParity = (start[0] + start[1]) % 2;
+        int targetParity = (target[0] + target[1]) % 2;
+        return startParity == targetParity;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: Evaluates simple arithmetic additions and modulo operations in constant time.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: No additional memory or dynamic structures required.
+===================================================================

@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 3993: MAXIMUM VALUE OF AN ALTERNATING SEQUENCE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given three integers n, s, and m.
+A sequence `seq` of length `n` is valid if:
+- `seq[0] = s`
+- The sequence alternates directions: `seq[0] < seq[1] > seq[2] < ...` OR `seq[0] > seq[1] < seq[2] > ...`
+- For every adjacent pair, `1 <= |seq[i] - seq[i - 1]| <= m` (or non-zero differences bounded by `m`).
+
+Return the maximum possible element that can appear in any valid sequence.
+
+Constraints:
+- 1 <= n, s <= 10^9
+- 1 <= m <= 10^5
+
+-------------------------------------------------------------------
+[METHODOLOGY: GREEDY MAXIMIZATION & PATTERN ANALYSIS (O(1) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+To maximize the peak value in an alternating sequence, we want to jump **UP** as much as possible (+m) and jump **DOWN** as little as possible (-1).
+
+There are two alternating pattern strategies:
+
+1. UP-FIRST STRATEGY (`seq[0] < seq[1] > seq[2] < seq[3]...`):
+   - First step is UP: $seq[1] = s + m$
+   - Next step is DOWN: $seq[2] = seq[1] - 1 = s + m - 1$
+   - Next step is UP: $seq[3] = seq[2] + m = s + 2m - 1$
+   - Each pair of moves (DOWN then UP) increases the peak value by $(m - 1)$.
+   - For an index `k` that is an odd peak (1, 3, 5...), if there are `p` total UP steps along this pattern, the max value reached is:
+     $$\text{upVal} = s + m + (p - 1) \cdot (m - 1)$$
+     where $p = \lfloor n / 2 \rfloor$.
+
+2. DOWN-FIRST STRATEGY (`seq[0] > seq[1] < seq[2] > seq[3]...`):
+   - First step is DOWN: $seq[1] = s - 1$
+   - Next step is UP: $seq[2] = seq[1] + m = s + m - 1$
+   - Next step is DOWN: $seq[3] = seq[2] - 1 = s + m - 2$
+   - Next step is UP: $seq[4] = seq[3] + m = s + 2m - 2$
+   - Each pair of moves (DOWN then UP) increases the peak value by $(m - 1)$.
+   - Here, UP steps occur at even indices (2, 4, 6...). The number of UP steps is $q - 1$, where $q = \lfloor (n + 1) / 2 \rfloor$.
+   - The max value reached is:
+     $$\text{downVal} = s + (q - 1) \cdot (m - 1)$$
+
+3. SPECIAL BASE CASES:
+   - When $n = 1$: The sequence has only 1 element, so the answer is always $s$.
+   - When $m = 1$: Jumps up are $+1$ and jumps down are $-1$, meaning the maximum reachable element is bounded by $s + 1$ (for $n \ge 2$).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 4, s = 3, m = 5
+
+- n = 4:
+  * p = n / 2 = 2
+  * upVal = s + m + (p - 1) * (m - 1)
+          = 3 + 5 + (2 - 1) * (5 - 1)
+          = 8 + 1 * 4 = 12
+    (Sequence: [3, 8, 7, 12])
+
+  * q = (n + 1) / 2 = 2
+  * downVal = s + (q - 1) * (m - 1)
+            = 3 + (2 - 1) * (5 - 1)
+            = 3 + 1 * 4 = 7
+    (Sequence: [3, 2, 7, 6])
+
+- Result: max(12, 7) = 12
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+class Solution {
+public:
+    long long maximumValue(int n, int s, int m) {
+        if (n == 1) return s;
+
+        long long S = s, M = m, N = n;
+
+        // Up-first pattern: UP by M, DOWN by 1, UP by M...
+        long long p = N / 2; // Number of UP moves
+        long long upVal = S + M + (p - 1) * (M - 1);
+
+        // Down-first pattern: DOWN by 1, UP by M, DOWN by 1...
+        long long q = (N + 1) / 2;
+        long long downVal = S + (q - 1) * (M - 1);
+
+        return std::max(upVal, downVal);
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(1)
+- Explanation: Direct mathematical evaluation using arithmetic formula operations.
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: No additional data structures or dynamic memory required.
+===================================================================

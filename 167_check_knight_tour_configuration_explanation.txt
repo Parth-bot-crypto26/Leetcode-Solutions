@@ -1,0 +1,126 @@
+===================================================================
+LEETCODE 2596: CHECK KNIGHT TOUR CONFIGURATION
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an n x n integer matrix 'grid' where grid[r][c] represents the step number (from 0 to n*n - 1) when the knight visits cell (r, c).
+Return true if 'grid' represents a valid knight's tour starting at the top-left cell (0, 0), otherwise return false.
+
+Constraints:
+- n == grid.length == grid[i].length
+- 3 <= n <= 7
+- 0 <= grid[row][col] < n * n
+- All integers in grid are unique.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your solution uses recursive DFS backtracking to verify if there exists a valid sequence of moves.
+
+1. CRITICAL TOP-LEFT START REQUIREMENT:
+   - The problem states: "the knight starts at the top-left cell (0, 0)".
+   - If `grid[0][0] != 0`, the tour is invalid from the start.
+   - Your function starts with `isValid(grid, 0, 0, n, 0)`, which checks `grid[0][0] != 0` via `grid[row][col] != expVal`. This properly handles the starting condition!
+
+2. ITERATIVE VS. RECURSIVE SOLUTION:
+   - Since all step numbers from `0` to `n*n - 1` are **unique** in `grid`, the position of each step `k` is unique and deterministic!
+   - Instead of checking up to 8 recursive paths at each step, we can store the `(row, col)` position for every step `0` to `n*n - 1` in an array of pairs/positions, then iterate `step` from `0` to `n*n - 2` and check if the move from step `step` to `step + 1` is a valid knight move:
+     $$\Delta r = \vert{}r_{step+1} - r_{step}\vert{}, \quad \Delta c = \vert{}c_{step+1} - c_{step}\vert{}$$
+     $$\text{Valid move if and only if } (\Delta r == 1 \text{ and } \Delta c == 2) \text{ or } (\Delta r == 2 \text{ and } \Delta c == 1)$$
+
+3. RECURSIVE COMPLEXITY CONSIDERATION:
+   - Your recursive approach branches up to 8 paths. However, because each integer in `grid` is unique, at most **one** of the 8 neighbors can equal `expVal + 1`. Thus, the runtime is practically $O(N^2)$ rather than exponential.
+   - However, the direct iterative approach is cleaner, avoids call stack overhead, and is easier to trace.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Example 2: grid = [[0, 3, 6],
+                   [5, 8, 1],
+                   [2, 7, 4]]
+
+Position map for step numbers 0..8:
+Step 0: (0, 0)
+Step 1: (1, 2) -> Delta: |1-0|=1, |2-0|=2 (Valid move)
+Step 2: (2, 0) -> Delta: |2-1|=1, |0-2|=2 (Valid move)
+Step 3: (0, 1) -> Delta: |0-2|=2, |1-0|=1 (Valid move)
+Step 4: (2, 2) -> Delta: |2-0|=2, |2-1|=1 (Valid move)
+Step 5: (1, 0) -> Delta: |1-2|=1, |0-2|=2 (Valid move)
+Step 6: (0, 2) -> Delta: |0-1|=1, |2-0|=2 (Valid move)
+Step 7: (2, 1) -> Delta: |2-0|=2, |1-2|=1 (Valid move)
+Step 8: (1, 1) -> From Step 7 (2, 1) to Step 8 (1, 1):
+                  Delta: |1-2|=1, |1-1|=0 -> INVALID KNIGHT MOVE!
+
+Return: false
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// Approach 1: Your Clean Recursive Implementation (Correct & Optimal)
+class SolutionRecursive {
+public:
+    bool isValid(vector<vector<int>>& grid, int row, int col, int n, int expVal) {
+        if (row < 0 || col < 0 || row >= n || col >= n || grid[row][col] != expVal) {
+            return false;
+        }
+        if (expVal == n * n - 1) {
+            return true;
+        }
+
+        return isValid(grid, row - 2, col + 1, n, expVal + 1) ||
+               isValid(grid, row - 1, col + 2, n, expVal + 1) ||
+               isValid(grid, row + 1, col + 2, n, expVal + 1) ||
+               isValid(grid, row + 2, col + 1, n, expVal + 1) ||
+               isValid(grid, row + 2, col - 1, n, expVal + 1) ||
+               isValid(grid, row + 1, col - 2, n, expVal + 1) ||
+               isValid(grid, row - 1, col - 2, n, expVal + 1) ||
+               isValid(grid, row - 2, col - 1, n, expVal + 1);
+    }
+
+    bool checkValidGrid(vector<vector<int>>& grid) {
+        return isValid(grid, 0, 0, grid.size(), 0);
+    }
+};
+
+// Approach 2: Iterative Coordinate Indexing (O(N^2) Time, O(N^2) Space)
+class SolutionIterative {
+public:
+    bool checkValidGrid(vector<vector<int>>& grid) {
+        if (grid[0][0] != 0) return false;
+        
+        int n = grid.size();
+        vector<pair<int, int>> pos(n * n);
+        
+        for (int r = 0; r < n; r++) {
+            for (int c = 0; c < n; c++) {
+                pos[grid[r][c]] = {r, c};
+            }
+        }
+        
+        for (int step = 0; step < n * n - 1; step++) {
+            int dr = abs(pos[step + 1].first - pos[step].first);
+            int dc = abs(pos[step + 1].second - pos[step].second);
+            
+            if (!((dr == 1 && dc == 2) || (dr == 2 && dc == 1))) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Recursive Approach:
+- Time Complexity: O(N^2) — Since all values in `grid` are distinct, at most 1 direction matches at each step, yielding a linear traversal of length $N^2$.
+- Space Complexity: O(N^2) Auxiliary Space — Call stack depth reaches $N^2$.
+
+Iterative Approach:
+- Time Complexity: O(N^2) — Single pass over the matrix to record positions, followed by $N^2 - 1$ constant-time move verifications.
+- Space Complexity: O(N^2) Auxiliary Space — Array of size $N^2$ to store position pairs for each step.
+===================================================================

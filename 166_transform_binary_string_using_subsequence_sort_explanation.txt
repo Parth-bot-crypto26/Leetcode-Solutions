@@ -1,0 +1,119 @@
+===================================================================
+LEETCODE 3998: TRANSFORM BINARY STRING USING SUBSEQUENCE SORT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a binary string `s` of length `n` and an array of target strings `strs`, where each string may contain '0', '1', or '?'.
+- Any operation allows choosing a subsequence of `s` and sorting it.
+- Reorganizing subsequences by sorting allows moving '1's to the right (or '0's to the left).
+- You can replace each '?' in `strs[i]` with either '0' or '1'.
+- Return a boolean array where `ans[i]` is `true` if `s` can be transformed into `strs[i]` (after replacing '?'), otherwise `false`.
+
+Constraints:
+- 1 <= n == s.length <= 2000
+- 1 <= strs.length <= 2000
+
+-------------------------------------------------------------------
+[METHODOLOGY: SUBSEQUENCE SORT INVARIANT & GREEDY ASSIGNMENT]
+-------------------------------------------------------------------
+
+1. KEY INVARIANT OF SUBSEQUENCE SORTING:
+   - Sorting a subsequence of a binary string never changes the total count of '1's (and '0's).
+   - Crucially, sorting a subsequence allows moving a '1' to any position at or to the right of its original location (and '0's to the left).
+   - Therefore, string `s` can be transformed into string `t` if and only if:
+     1. `total_ones(s) == total_ones(t)`
+     2. For every prefix index `i` (from `0` to `n - 1`), the prefix sum of '1's in `t` must be **less than or equal to** the prefix sum of '1's in `s` (`prefix_ones(t, i) <= prefix_ones(s, i)`). This guarantees no '1' was moved further left than allowed.
+
+2. GREEDY ASSIGNMENT OF '?':
+   - To maximize the chance that `prefix_ones(t, i) <= prefix_ones(s, i)` holds at all indices:
+     * We want '1's in `t` to appear as far to the **right** as possible.
+     * Thus, if `needed` '1's must be assigned among `numQ` question marks, we should assign '0' to the first `numQ - needed` question marks and '1' to the remaining `needed` question marks at the end.
+
+Your Python solution correctly implements both the total count requirement and the prefix sum inequality check in $O(N)$ per query!
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+s = "1100", st = "1?1?"
+
+1. Count '1's in s: total1s = 2
+   Prefix ones of s: [0, 1, 2, 2, 2]
+
+2. Process st = "1?1?":
+   - fixed1s = 2 (at indices 0 and 2)
+   - numQ = 2 (at indices 1 and 3)
+   - needed = total1s - fixed1s = 2 - 2 = 0
+   - Question mark assignment strategy:
+     * 1st '?' (idx 1) -> 0
+     * 2nd '?' (idx 3) -> 0
+   - Constructed string t = "1010"
+
+3. Verify Prefix Sum Condition:
+   - i = 0: t[0]='1', running1s = 1 <= s_prefix[1]=1 (OK)
+   - i = 1: t[1]='0', running1s = 1 <= s_prefix[2]=2 (OK)
+   - i = 2: t[2]='1', running1s = 2 <= s_prefix[3]=2 (OK)
+   - i = 3: t[3]='0', running1s = 2 <= s_prefix[4]=2 (OK)
+
+Result: True
+
+-------------------------------------------------------------------
+[PYTHON CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+from typing import List
+
+class Solution:
+    def transformStr(self, s: str, strs: List[str]) -> List[bool]:
+        n = len(s)
+        
+        # Build prefix sum of '1's for string s
+        oneS = [0] * (n + 1)
+        for i in range(n):
+            oneS[i + 1] = oneS[i] + (1 if s[i] == '1' else 0)
+        total1s = oneS[n]
+        
+        ans = []
+        for st in strs:
+            fixed1s = st.count('1')
+            numQ = st.count('?')
+            needed = total1s - fixed1s
+            
+            # Impossible if total '1's cannot match
+            if needed < 0 or needed > numQ:
+                ans.append(False)
+                continue
+            
+            th = numQ - needed # First 'th' question marks become '0', rest become '1'
+            qIdx = 0
+            running1s = 0
+            ok = True
+            
+            for i in range(n):
+                c = st[i]
+                if c == '?':
+                    val = 1 if qIdx >= th else 0
+                    qIdx += 1
+                else:
+                    val = 1 if c == '1' else 0
+                
+                running1s += val
+                
+                # Invariant: running sum of '1's in target must not exceed prefix sum in s
+                if running1s > oneS[i + 1]:
+                    ok = False
+                    break
+            
+            ans.append(ok)
+            
+        return ans
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(M * N)
+- Explanation: Where $N$ is the length of string `s` and $M$ is the number of strings in `strs`. Calculating prefix sums for `s` takes $O(N)$ time. For each of the $M$ strings, counting characters and checking prefix constraints takes $O(N)$ time, yielding $O(M \times N)$ total time. Given $N, M \le 2000$, total operations are around $4 \times 10^6$, easily passing within time limits.
+
+Space Complexity: O(N) Auxiliary Space
+- Explanation: The `oneS` prefix array requires $O(N)$ space.
+===================================================================

@@ -1,0 +1,99 @@
+===================================================================
+LEETCODE 48: ROTATE IMAGE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an n x n 2D matrix representing an image. Rotate the image by 90 degrees (clockwise) in-place.
+
+Constraints:
+- n == matrix.length == matrix[i].length
+- 1 <= n <= 20
+- -1000 <= matrix[i][j] <= 1000
+
+-------------------------------------------------------------------
+[METHODOLOGY: TRANSPOSE + REVERSE (O(N^2) TIME, O(1) SPACE)]
+-------------------------------------------------------------------
+
+Your C++ implementation is clean, optimal, and 100% correct!
+
+1. TWO-STEP IN-PLACE ROTATION TRANSFORMATION:
+   - A 90-degree clockwise rotation of an $N \times N$ matrix can be achieved through two simple linear algebra transformations:
+     1. **Transpose the matrix**: Swap elements across the main diagonal (`matrix[i][j]` with `matrix[j][i]` for $j > i$).
+     2. **Reverse each row**: Reverse the elements in every row horizontally (`std::reverse(matrix[i].begin(), matrix[i].end())`).
+
+2. WHY IT WORKS:
+   - For any element at position $(i, j)$:
+     * Transposition moves it to $(j, i)$.
+     * Reversing row $j$ moves it from column $i$ to column $N - 1 - i$.
+     * Final position: $(j, N - 1 - i)$, which is precisely the formula for a 90-degree clockwise rotation!
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input matrix:
+[
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
+
+Step 1: Transpose (Swap matrix[i][j] and matrix[j][i]):
+- Swap (0,1) & (1,0): 2 <-> 4
+- Swap (0,2) & (2,0): 3 <-> 7
+- Swap (1,2) & (2,1): 6 <-> 8
+
+Matrix after Transposition:
+[
+  [1, 4, 7],
+  [2, 5, 8],
+  [3, 6, 9]
+]
+
+Step 2: Reverse Each Row:
+- Row 0: [1, 4, 7] -> [7, 4, 1]
+- Row 1: [2, 5, 8] -> [8, 5, 2]
+- Row 2: [3, 6, 9] -> [9, 6, 3]
+
+Final Result:
+[
+  [7, 4, 1],
+  [8, 5, 2],
+  [9, 6, 3]
+]
+
+-------------------------------------------------------------------
+[C++ CODE IMPLEMENTATION]
+-------------------------------------------------------------------
+
+#include <vector>
+#include <algorithm>
+
+class Solution {
+public:
+    void rotate(std::vector<std::vector<int>>& matrix) {
+        int n = matrix.size();
+        
+        // Step 1: Transpose the matrix
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                std::swap(matrix[i][j], matrix[j][i]);
+            }
+        }
+        
+        // Step 2: Reverse each row
+        for (int i = 0; i < n; i++) {
+            std::reverse(matrix[i].begin(), matrix[i].end());
+        }
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Time Complexity: O(N^2)
+- Explanation: Transposing the upper triangle takes $N(N-1)/2$ swaps. Reversing $N$ rows of length $N$ takes $N \times (N/2)$ swaps. Total operations are proportional to $N^2$ (visiting each cell a constant number of times).
+
+Space Complexity: O(1) Auxiliary Space
+- Explanation: All operations are done in-place using standard library reference swaps without allocating any extra 2D matrices.
+===================================================================

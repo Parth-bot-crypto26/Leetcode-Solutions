@@ -1,0 +1,96 @@
+===================================================================
+LEETCODE 175: COMBINE TWO TABLES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to report the first name, last name, city, and state of each person in the Person table.
+If the address of a personId is not present in the Address table, report null instead.
+
+Constraints & Notes:
+- Person table contains personId (Primary Key), lastName, firstName.
+- Address table contains addressId (Primary Key), personId, city, state.
+- Result can be returned in any order.
+
+-------------------------------------------------------------------
+[METHODOLOGY: LEFT OUTER JOIN (O(N) TIME, O(N) SPACE)]
+-------------------------------------------------------------------
+
+Your SQL implementation is completely optimal and 100% correct!
+
+1. WHY LEFT JOIN IS REQUIRED:
+   - An `INNER JOIN` only returns rows where there is a matching key in BOTH tables. If a person does not have an entry in the `Address` table, an `INNER JOIN` would filter them out completely.
+   - The problem explicitly states: *"If the address of a personId is not present in the Address table, report null instead."*
+   - A `LEFT JOIN` (or `LEFT OUTER JOIN`) preserves all rows from the left table (`Person`), placing `NULL` values for columns selected from the right table (`Address`) whenever no matching `personId` is found.
+
+2. JOIN CONDITION:
+   - We join the two tables on their shared foreign key relationship: `ON p.personId = a.personId`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Person Table:
++----------+----------+-----------+
+| personId | lastName | firstName |
++----------+----------+-----------+
+| 1        | Wang     | Allen     |
+| 2        | Alice    | Bob       |
++----------+----------+-----------+
+
+Address Table:
++-----------+----------+---------------+------------+
+| addressId | personId | city          | state      |
++-----------+----------+---------------+------------+
+| 1         | 2        | New York City | New York   |
+| 2         | 3        | Leetcode      | California |
++-----------+----------+---------------+------------+
+
+Execution Step-by-Step:
+1. Row 1 from Person (personId = 1, Allen Wang):
+   - Search Address table for personId = 1.
+   - No match found -> Output (Allen, Wang, NULL, NULL).
+
+2. Row 2 from Person (personId = 2, Bob Alice):
+   - Search Address table for personId = 2.
+   - Match found (addressId = 1) -> Output (Bob, Alice, New York City, New York).
+
+Resulting Output Table:
++-----------+----------+---------------+----------+
+| firstName | lastName | city          | state    |
++-----------+----------+---------------+----------+
+| Allen     | Wang     | NULL          | NULL     |
+| Bob       | Alice    | New York City | New York |
++-----------+----------+---------------+----------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT 
+    p.firstName, 
+    p.lastName, 
+    a.city, 
+    a.state 
+FROM Person p 
+LEFT JOIN Address a 
+    ON p.personId = a.personId;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def combine_two_tables(person: pd.DataFrame, address: pd.DataFrame) -> pd.DataFrame:
+    # Perform left merge on 'personId'
+    result = pd.merge(person, address, on='personId', how='left')
+    
+    # Select only required columns
+    return result[['firstName', 'lastName', 'city', 'state']]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Engine Execution:
+- Time Complexity: O(N + M) where N is the number of rows in Person and M is the number of rows in Address (assuming index on address.personId).
+- Space Complexity: O(N) Auxiliary Space to store the result set of N rows.
+===================================================================

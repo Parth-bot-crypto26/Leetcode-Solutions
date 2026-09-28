@@ -1,0 +1,115 @@
+===================================================================
+LEETCODE 586: CUSTOMER PLACING THE LARGEST NUMBER OF ORDERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find the customer_number for the customer who has placed the largest number of orders.
+The main problem guarantees that exactly one customer has placed more orders than any other customer.
+
+Follow-up: What if more than one customer has the largest number of orders? Can you find all such customer_numbers?
+
+Constraints & Notes:
+- Orders table contains order_number (Primary Key), customer_number.
+- Primary task: Find top 1 customer by count of orders.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct for the primary task!
+
+1. GROUP BY + COUNT + ORDER BY + LIMIT 1:
+   - `GROUP BY customer_number`: Groups orders by each customer.
+   - `ORDER BY COUNT(order_number) DESC`: Sorts the groups so the customer with the highest order count comes first.
+   - `LIMIT 1`: Retrieves only the top customer.
+
+2. ADDRESSING THE FOLLOW-UP QUESTION:
+   - The basic `LIMIT 1` query only returns a single customer, even if there is a tie for the maximum number of orders.
+   - To handle ties (the follow-up), we can use a subquery with `HAVING COUNT(order_number) = (SELECT MAX(cnt) FROM ...)` or dynamic window functions like `DENSE_RANK()`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Orders Table:
++--------------+-----------------+
+| order_number | customer_number |
++--------------+-----------------+
+| 1            | 1               |
+| 2            | 2               |
+| 3            | 3               |
+| 4            | 3               |
++--------------+-----------------+
+
+1. Grouping and Counting:
+   - customer_number 1 -> COUNT = 1
+   - customer_number 2 -> COUNT = 1
+   - customer_number 3 -> COUNT = 2
+
+2. Ordering DESC:
+   - customer_number 3 (COUNT = 2)
+   - customer_number 1 (COUNT = 1)
+   - customer_number 2 (COUNT = 1)
+
+3. LIMIT 1:
+   - Output: customer_number 3
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- Primary Task: Single Top Customer (Your Code - Optimal)
+SELECT 
+    customer_number
+FROM Orders
+GROUP BY customer_number
+ORDER BY COUNT(order_number) DESC
+LIMIT 1;
+
+
+-- Follow-up Solution: Handling Ties (All Top Customers)
+-- Method 1: Subquery with HAVING COUNT(...) = MAX(...)
+SELECT 
+    customer_number
+FROM Orders
+GROUP BY customer_number
+HAVING COUNT(order_number) = (
+    SELECT COUNT(order_number)
+    FROM Orders
+    GROUP BY customer_number
+    ORDER BY COUNT(order_number) DESC
+    LIMIT 1
+);
+
+-- Method 2: Window Function (DENSE_RANK)
+WITH RankedOrders AS (
+    SELECT 
+        customer_number,
+        DENSE_RANK() OVER (ORDER BY COUNT(order_number) DESC) as rnk
+    FROM Orders
+    GROUP BY customer_number
+)
+SELECT 
+    customer_number
+FROM RankedOrders
+WHERE rnk = 1;
+
+
+# Equivalent Pandas Solution (Primary Task)
+import pandas as pd
+
+def largest_orders(orders: pd.DataFrame) -> pd.DataFrame:
+    if orders.empty:
+        return pd.DataFrame({'customer_number': []})
+        
+    # Group by customer_number, count orders, get mode/top element
+    top_customer = orders['customer_number'].mode()
+    return pd.DataFrame({'customer_number': top_customer})
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution (Primary Task):
+- Time Complexity: O(N log N) where N is the number of rows in Orders (or O(N log K) with index optimization on customer_number), dominated by sorting aggregated counts.
+- Space Complexity: O(U) Auxiliary Space where U is the number of unique customers.
+===================================================================

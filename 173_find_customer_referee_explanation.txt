@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 584: FIND CUSTOMER REFEREE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Find the names of the customers that are either:
+- referred by any customer with id != 2.
+- not referred by any customer (referee_id is NULL).
+
+Constraints & Notes:
+- Customer table contains id (Primary Key), name, referee_id.
+- Return the result table in any order.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. NULL HANDLING IN THREE-VALUED LOGIC (SQL):
+   - In SQL standard three-valued logic (`TRUE`, `FALSE`, `UNKNOWN`), comparing a `NULL` value using standard comparison operators (like `<>`, `!=`, or `=`) evaluates to `UNKNOWN` rather than `TRUE`.
+   - Therefore, `WHERE referee_id <> 2` alone will silently exclude rows where `referee_id` is `NULL`.
+   - Explicitly adding `OR referee_id IS NULL` is the standard and necessary way to handle NULL values in SQL filtering.
+
+2. ALTERNATIVE SQL FUNCTIONS:
+   - You can also write this using `IFNULL(referee_id, 0) <> 2` or `COALESCE(referee_id, 0) <> 2`.
+   - However, your explicit condition (`referee_id <> 2 OR referee_id IS NULL`) is preferred because function wrappers like `COALESCE` can prevent the database engine from using an index on `referee_id`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Customer Table:
++----+------+------------+
+| id | name | referee_id |
++----+------+------------+
+| 1  | Will | null       |
+| 2  | Jane | null       |
+| 3  | Alex | 2          |
+| 4  | Bill | null       |
+| 5  | Zack | 1          |
+| 6  | Mark | 2          |
++----+------+------------+
+
+Filtering Evaluation:
+1. Row 1 (Will, referee_id = null):
+   - referee_id <> 2 -> UNKNOWN
+   - referee_id IS NULL -> TRUE
+   - Keep: 'Will'
+
+2. Row 2 (Jane, referee_id = null):
+   - referee_id IS NULL -> TRUE
+   - Keep: 'Jane'
+
+3. Row 3 (Alex, referee_id = 2):
+   - referee_id <> 2 -> FALSE
+   - referee_id IS NULL -> FALSE
+   - Exclude.
+
+4. Row 4 (Bill, referee_id = null):
+   - referee_id IS NULL -> TRUE
+   - Keep: 'Bill'
+
+5. Row 5 (Zack, referee_id = 1):
+   - referee_id <> 2 -> TRUE
+   - Keep: 'Zack'
+
+6. Row 6 (Mark, referee_id = 2):
+   - referee_id <> 2 -> FALSE
+   - Exclude.
+
+Resulting Output:
++------+
+| name |
++------+
+| Will |
+| Jane |
+| Bill |
+| Zack |
++------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal & Index-Friendly)
+SELECT 
+    name
+FROM Customer
+WHERE referee_id <> 2 
+   OR referee_id IS NULL;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def find_customer_referee(customer: pd.DataFrame) -> pd.DataFrame:
+    # Handle NaN values explicitly with isna() or fillna()
+    filtered = customer[(customer['referee_id'] != 2) | (customer['referee_id'].isna())]
+    
+    return filtered[['name']]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N) where N is the number of rows in the Customer table (or O(K) if an index exists on `referee_id`).
+- Space Complexity: O(N) Auxiliary Space to store the result rows.
+===================================================================

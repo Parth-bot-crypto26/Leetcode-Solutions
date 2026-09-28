@@ -1,0 +1,110 @@
+===================================================================
+LEETCODE 181: EMPLOYEES EARNING MORE THAN THEIR MANAGERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find the employees who earn more than their managers.
+
+Constraints & Notes:
+- Employee table contains id (Primary Key), name, salary, managerId.
+- managerId references the id of another employee in the same table.
+- Return the result table in any order.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your correlated subquery approach is logically correct and returns the right answer!
+
+However, using a **SELF JOIN** is generally preferred in SQL databases for performance and query optimization:
+
+1. SELF JOIN APPROACH (RECOMMENDED O(N) TIME):
+   - We join the `Employee` table with itself, treating the first instance as the employee (`e`) and the second instance as their manager (`m`).
+   - Join condition: `e.managerId = m.id`
+   - Filtering condition: `e.salary > m.salary`
+   - This allows the database query engine to optimize the join using primary key indexes on `id`.
+
+2. CORRELATED SUBQUERY CONSIDERATION (YOUR APPROACH):
+   - For every row in the outer query, the subquery executes a lookup `WHERE m.id = e.managerId`.
+   - While modern SQL query optimizers often convert correlated subqueries into joins under the hood, writing an explicit `INNER JOIN` is clearer and guarantees standard join execution plans across all SQL dialects.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Employee Table:
++----+-------+--------+-----------+
+| id | name  | salary | managerId |
++----+-------+--------+-----------+
+| 1  | Joe   | 70000  | 3         |
+| 2  | Henry | 80000  | 4         |
+| 3  | Sam   | 60000  | Null      |
+| 4  | Max   | 90000  | Null      |
++----+-------+--------+-----------+
+
+Self Join Evaluation:
+1. Employee Joe (id=1, salary=70000, managerId=3):
+   - Manager: Sam (id=3, salary=60000)
+   - Condition check: 70000 > 60000 -> TRUE -> Include 'Joe'.
+
+2. Employee Henry (id=2, salary=80000, managerId=4):
+   - Manager: Max (id=4, salary=90000)
+   - Condition check: 80000 > 90000 -> FALSE -> Exclude.
+
+3. Employee Sam (id=3, managerId=NULL):
+   - No manager -> INNER JOIN excludes.
+
+4. Employee Max (id=4, managerId=NULL):
+   - No manager -> INNER JOIN excludes.
+
+Resulting Output:
++----------+
+| Employee |
++----------+
+| Joe      |
++----------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- Approach 1: Self Join (Optimal & Standard SQL)
+SELECT 
+    e.name AS Employee
+FROM Employee e
+INNER JOIN Employee m 
+    ON e.managerId = m.id
+WHERE e.salary > m.salary;
+
+
+-- Approach 2: Correlated Subquery (Your Code - Logically Correct)
+SELECT
+    e.name AS Employee
+FROM Employee e
+WHERE e.salary > (
+    SELECT m.salary
+    FROM Employee m
+    WHERE m.id = e.managerId
+);
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def find_employees(employee: pd.DataFrame) -> pd.DataFrame:
+    # Merge employee DataFrame with itself on managerId = id
+    merged = employee.merge(employee, left_on='managerId', right_on='id', suffixes=('', '_manager'))
+    
+    # Filter where employee salary > manager salary
+    result = merged[merged['salary'] > merged['salary_manager']]
+    
+    # Return renamed column
+    return result[['name']].rename(columns={'name': 'Employee'})
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Self Join Execution:
+- Time Complexity: O(N) where N is the number of rows in Employee (utilizing the primary key index on `id`).
+- Space Complexity: O(N) Auxiliary Space for storing matched output rows.
+===================================================================

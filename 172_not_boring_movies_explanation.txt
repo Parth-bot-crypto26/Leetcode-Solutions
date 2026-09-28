@@ -1,0 +1,99 @@
+===================================================================
+LEETCODE 620: NOT BORING MOVIES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to report the movies with an odd-numbered ID and a description that is not "boring".
+Return the result table ordered by rating in descending order.
+
+Constraints & Notes:
+- Cinema table contains id (Primary Key), movie, description, rating.
+- Filter conditions: `id % 2 != 0` (or `id % 2 = 1`) AND `description != 'boring'`.
+- Sorting: `ORDER BY rating DESC`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. EVEN/ODD CHECK IN SQL:
+   - `c.id % 2 != 0` (or `c.id % 2 = 1` or `MOD(c.id, 2) = 1`) correctly identifies odd IDs.
+2. STRING FILTERING:
+   - `c.description != 'boring'` filters out movies where description equals 'boring'.
+3. SORTING:
+   - `ORDER BY c.rating DESC` ensures highest-rated movies appear first.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Cinema Table:
++----+------------+-------------+--------+
+| id | movie      | description | rating |
++----+------------+-------------+--------+
+| 1  | War        | great 3D    | 8.9    |
+| 2  | Science    | fiction     | 8.5    |
+| 3  | irish      | boring      | 6.2    |
+| 4  | Ice song   | Fantacy     | 8.6    |
+| 5  | House card | Interesting | 9.1    |
++----+------------+-------------+--------+
+
+Filtering & Sorting Evaluation:
+1. Row 1 (id=1, description='great 3D', rating=8.9):
+   - id % 2 != 0 (1 % 2 = 1) -> TRUE
+   - description != 'boring' -> TRUE
+   - Keep: (1, War, great 3D, 8.9)
+
+2. Row 2 (id=2):
+   - id % 2 != 0 (2 % 2 = 0) -> FALSE -> Exclude.
+
+3. Row 3 (id=3, description='boring'):
+   - id % 2 != 0 (3 % 2 = 1) -> TRUE
+   - description != 'boring' -> FALSE -> Exclude.
+
+4. Row 4 (id=4):
+   - id % 2 != 0 (4 % 2 = 0) -> FALSE -> Exclude.
+
+5. Row 5 (id=5, description='Interesting', rating=9.1):
+   - id % 2 != 0 (5 % 2 = 1) -> TRUE
+   - description != 'boring' -> TRUE
+   - Keep: (5, House card, Interesting, 9.1)
+
+Sort matched rows by rating DESC:
+1. ID 5 (rating 9.1)
+2. ID 1 (rating 8.9)
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT 
+    id, 
+    movie, 
+    description, 
+    rating
+FROM Cinema
+WHERE id % 2 != 0 
+  AND description != 'boring'
+ORDER BY rating DESC;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def not_boring_movies(cinema: pd.DataFrame) -> pd.DataFrame:
+    # Filter rows where id is odd and description is not 'boring'
+    filtered = cinema[(cinema['id'] % 2 != 0) & (cinema['description'] != 'boring')]
+    
+    # Sort by rating descending
+    return filtered.sort_values(by='rating', ascending=False)
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N log N) where N is the number of rows in Cinema, dominated by the sorting step (`ORDER BY rating DESC`).
+- Space Complexity: O(N) Auxiliary Space for storing the filtered result set.
+===================================================================

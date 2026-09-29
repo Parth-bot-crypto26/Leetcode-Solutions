@@ -1,0 +1,89 @@
+===================================================================
+LEETCODE 596: CLASSES WITH AT LEAST 5 STUDENTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find all the classes that have at least five students.
+Return the result table in any order.
+
+Constraints & Notes:
+- Courses table contains student, class.
+- (student, class) is the primary key ( guarantees unique student-class pairs).
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. GROUP BY + HAVING COUNT():
+   - `GROUP BY class`: Aggregates the rows by each class name.
+   - `HAVING COUNT(student) >= 5` (or `COUNT(*) >= 5`): Filters the grouped results to include only those classes where the total enrolled student count is 5 or greater.
+
+2. PRIMARY KEY GUARANTEE:
+   - Since `(student, class)` is defined as the primary key, each student-class pairing is guaranteed to be unique.
+   - Therefore, `COUNT(student)` accurately counts distinct students per class without needing `COUNT(DISTINCT student)`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Courses Table:
++---------+----------+
+| student | class    |
++---------+----------+
+| A       | Math     |
+| B       | English  |
+| C       | Math     |
+| D       | Biology  |
+| E       | Math     |
+| F       | Computer |
+| G       | Math     |
+| H       | Math     |
+| I       | Math     |
++---------+----------+
+
+Grouping and Counting:
+- Math: 6 students (A, C, E, G, H, I) -> COUNT >= 5 -> Keep
+- English: 1 student (B) -> COUNT < 5 -> Exclude
+- Biology: 1 student (D) -> COUNT < 5 -> Exclude
+- Computer: 1 student (F) -> COUNT < 5 -> Exclude
+
+Resulting Output:
++---------+
+| class   |
++---------+
+| Math    |
++---------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT 
+    class
+FROM Courses
+GROUP BY class
+HAVING COUNT(student) >= 5;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def find_classes(courses: pd.DataFrame) -> pd.DataFrame:
+    # Group by class and count students
+    class_counts = courses.groupby('class').size().reset_index(name='count')
+    
+    # Filter classes with at least 5 students
+    result = class_counts[class_counts['count'] >= 5]
+    
+    return result[['class']]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N) where N is the total number of rows in the Courses table.
+- Space Complexity: O(C) Auxiliary Space where C is the number of distinct classes.
+===================================================================

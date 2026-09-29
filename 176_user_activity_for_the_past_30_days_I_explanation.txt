@@ -1,0 +1,103 @@
+===================================================================
+LEETCODE 1141: USER ACTIVITY FOR THE PAST 30 DAYS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find the daily active user count for a period of 30 days ending 2019-07-27 inclusively.
+A user was active on a day if they performed at least one activity on that day.
+
+Constraints & Notes:
+- Activity table contains user_id, session_id, activity_date, activity_type.
+- The 30-day window ending on 2019-07-27 starts on 2019-06-28 (inclusive: 2019-07-27 minus 29 days = 30 total days).
+- Each active user on a given day should be counted once using `COUNT(DISTINCT user_id)`.
+- Exclude days with 0 active users.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. DATE RANGE CALCULATION:
+   - 30 days ending on `2019-07-27` inclusive means the date interval is `['2019-06-28', '2019-07-27']`.
+   - Your condition `WHERE activity_date BETWEEN '2019-06-28' AND '2019-07-27'` accurately isolates this exact 30-day window.
+
+2. COUNT DISTINCT USERS:
+   - Since a user can log multiple activity types (e.g., 'open_session', 'scroll_down') on the same day, counting total rows would count a single user multiple times.
+   - `COUNT(DISTINCT user_id)` ensures each user is counted at most once per day.
+
+3. DYNAMIC DATE ALTERNATIVE:
+   - Instead of hardcoding `'2019-06-28'`, you can also express the start date dynamically in MySQL as `DATEDIFF('2019-07-27', activity_date) < 30 AND activity_date <= '2019-07-27'`.
+   - However, explicit date strings allow database engines to efficiently utilize indexes on `activity_date`.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Activity Table:
++---------+------------+---------------+---------------+
+| user_id | session_id | activity_date | activity_type |
++---------+------------+---------------+---------------+
+| 1       | 1          | 2019-07-20    | open_session  |
+| 1       | 1          | 2019-07-20    | scroll_down   |
+| 1       | 1          | 2019-07-20    | end_session   |
+| 2       | 4          | 2019-07-20    | open_session  |
+| 2       | 4          | 2019-07-21    | send_message  |
+| 2       | 4          | 2019-07-21    | end_session   |
+| 3       | 2          | 2019-07-21    | open_session  |
+| 3       | 2          | 2019-07-21    | send_message  |
+| 3       | 2          | 2019-07-21    | end_session   |
+| 4       | 3          | 2019-06-25    | open_session  |
+| 4       | 3          | 2019-06-25    | end_session   |
++---------+------------+---------------+---------------+
+
+Step 1: Filter by Date Range ('2019-06-28' <= activity_date <= '2019-07-27'):
+- Excludes row with date '2019-06-25' (User 4).
+
+Step 2: Group by activity_date and Count Distinct user_id:
+- 2019-07-20: Distinct users = {1, 2} -> Count = 2
+- 2019-07-21: Distinct users = {2, 3} -> Count = 2
+
+Resulting Output:
++------------+--------------+
+| day        | active_users |
++------------+--------------+
+| 2019-07-20 | 2            |
+| 2019-07-21 | 2            |
++------------+--------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal & Index-Friendly)
+SELECT 
+    activity_date AS day,
+    COUNT(DISTINCT user_id) AS active_users
+FROM Activity
+WHERE activity_date BETWEEN '2019-06-28' AND '2019-07-27'
+GROUP BY activity_date;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def user_activity(activity: pd.DataFrame) -> pd.DataFrame:
+    # Filter for dates within range
+    mask = (activity['activity_date'] >= '2019-06-28') & (activity['activity_date'] <= '2019-07-27')
+    filtered = activity[mask]
+    
+    # Group by date and count distinct user_id
+    result = filtered.groupby('activity_date')['user_id'].nunique().reset_index()
+    
+    # Rename columns to match expected output format
+    result.columns = ['day', 'active_users']
+    return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N) where N is the number of rows in the Activity table (or O(K) where K is the number of rows within the date range if indexed).
+- Space Complexity: O(D) Auxiliary Space where D is the number of distinct active days (up to 30).
+===================================================================

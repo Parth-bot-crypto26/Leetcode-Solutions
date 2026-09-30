@@ -1,0 +1,120 @@
+===================================================================
+LEETCODE 1193: MONTHLY TRANSACTIONS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write an SQL query to find for each month and country:
+1. The total number of transactions (`trans_count`).
+2. The number of approved transactions (`approved_count`).
+3. The total amount of all transactions (`trans_total_amount`).
+4. The total amount of approved transactions (`approved_total_amount`).
+
+Constraints & Notes:
+- Transactions table contains id (Primary Key), country, state, amount, trans_date.
+- `state` is an ENUM with values `['approved', 'declined']`.
+- Month format should be `'YYYY-MM'`.
+- Return the result table in any order.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. MONTH EXTRACTION:
+   - `LEFT(trans_date, 7)` or `DATE_FORMAT(trans_date, '%Y-%m')` extracts the year and month in `'YYYY-MM'` format.
+   - Using `LEFT(trans_date, 7)` is concise and works seamlessly across standard SQL dialects like MySQL and PostgreSQL (when cast to text).
+
+2. CONDITIONAL AGGREGATION:
+   - `SUM(CASE WHEN state = 'approved' THEN 1 ELSE 0 END)` correctly counts only approved transactions. (Alternatively, `COUNT(IF(state = 'approved', 1, NULL))` works in MySQL).
+   - `SUM(CASE WHEN state = 'approved' THEN amount ELSE 0 END)` (or `SUM(IF(state = 'approved', amount, 0))`) accurately sums amounts for approved transactions while defaulting non-approved rows to `0`.
+
+3. GROUP BY CLAUSE:
+   - `GROUP BY LEFT(trans_date, 7), country` ensures proper aggregation per month-country pair.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Transactions Table:
++------+---------+----------+--------+------------+
+| id   | country | state    | amount | trans_date |
++------+---------+----------+--------+------------+
+| 121  | US      | approved | 1000   | 2018-12-18 |
+| 122  | US      | declined | 2000   | 2018-12-19 |
+| 123  | US      | approved | 2000   | 2019-01-01 |
+| 124  | DE      | approved | 2000   | 2019-01-07 |
++------+---------+----------+--------+------------+
+
+Grouping Evaluation (month, country):
+1. Group ('2018-12', 'US') -> Rows [121, 122]:
+   - trans_count = 2
+   - approved_count = 1 (id 121)
+   - trans_total_amount = 1000 + 2000 = 3000
+   - approved_total_amount = 1000 + 0 = 1000
+
+2. Group ('2019-01', 'US') -> Rows [123]:
+   - trans_count = 1
+   - approved_count = 1
+   - trans_total_amount = 2000
+   - approved_total_amount = 2000
+
+3. Group ('2019-01', 'DE') -> Rows [124]:
+   - trans_count = 1
+   - approved_count = 1
+   - trans_total_amount = 2000
+   - approved_total_amount = 2000
+
+Resulting Output:
++----------+---------+-------------+----------------+--------------------+-----------------------+
+| month    | country | trans_count | approved_count | trans_total_amount | approved_total_amount |
++----------+---------+-------------+----------------+--------------------+-----------------------+
+| 2018-12  | US      | 2           | 1              | 3000               | 1000                  |
+| 2019-01  | US      | 1           | 1              | 2000               | 2000                  |
+| 2019-01  | DE      | 1           | 1              | 2000               | 2000                  |
++----------+---------+-------------+----------------+--------------------+-----------------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT 
+    LEFT(trans_date, 7) AS month,
+    country,
+    COUNT(id) AS trans_count,
+    SUM(CASE WHEN state = 'approved' THEN 1 ELSE 0 END) AS approved_count,
+    SUM(amount) AS trans_total_amount,
+    SUM(CASE WHEN state = 'approved' THEN amount ELSE 0 END) AS approved_total_amount
+FROM Transactions
+GROUP BY LEFT(trans_date, 7), country;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def monthly_transactions(transactions: pd.DataFrame) -> pd.DataFrame:
+    # Convert date to YYYY-MM string
+    transactions['month'] = transactions['trans_date'].dt.strftime('%Y-%m')
+    
+    # Create helper columns for approved metrics
+    transactions['approved_flag'] = (transactions['state'] == 'approved').astype(int)
+    transactions['approved_amount'] = transactions['amount'].where(transactions['state'] == 'approved', 0)
+    
+    # Group by month and country
+    result = transactions.groupby(['month', 'country'], dropna=False).agg(
+        trans_count=('id', 'count'),
+        approved_count=('approved_flag', 'sum'),
+        trans_total_amount=('amount', 'sum'),
+        approved_total_amount=('approved_amount', 'sum')
+    ).reset_index()
+    
+    return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N) where N is the total number of rows in the Transactions table.
+- Space Complexity: O(G) Auxiliary Space where G is the number of unique (month, country) groups.
+===================================================================

@@ -1,0 +1,113 @@
+===================================================================
+LEETCODE 1978: EMPLOYEES WHOSE MANAGER LEFT THE COMPANY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Find the IDs of employees whose:
+1. Salary is strictly less than $30,000 (`salary < 30000`).
+2. Manager has left the company (`manager_id IS NOT NULL` AND `manager_id` does NOT exist in the `Employees` table).
+
+Return the result table ordered by `employee_id`.
+
+Constraints & Notes:
+- Employees table contains employee_id (Primary Key), name, manager_id, salary.
+- When a manager leaves, their row is deleted from Employees, but their ID remains in `manager_id` for reporting employees.
+
+-------------------------------------------------------------------
+[METHODOLOGY & SOLUTIONS]
+-------------------------------------------------------------------
+
+There are two common and optimal ways to solve this problem:
+
+1. SUBQUERY WITH `NOT IN` (OR `NOT EXISTS`):
+   - Filter employees with `salary < 30000` and `manager_id IS NOT NULL`.
+   - Check if `manager_id NOT IN (SELECT employee_id FROM Employees)`.
+
+2. LEFT JOIN APPROACH:
+   - Join `Employees e` with `Employees m` on `e.manager_id = m.employee_id`.
+   - Filter where `e.salary < 30000`, `e.manager_id IS NOT NULL`, and `m.employee_id IS NULL` (indicating no matching manager row found).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Employees Table:
++-------------+-----------+------------+--------+
+| employee_id | name      | manager_id | salary |
++-------------+-----------+------------+--------+
+| 3           | Mila      | 9          | 60301  |
+| 12          | Antonella | null       | 31000  |
+| 13          | Emery     | null       | 67084  |
+| 1           | Kalel     | 11         | 21241  |
+| 9           | Mikaela   | null       | 50937  |
+| 11          | Joziah    | 6          | 28485  |
++-------------+-----------+------------+--------+
+
+Step 1: Filter by salary < 30000:
+- Employee 1 (Kalel): salary = 21241, manager_id = 11
+- Employee 11 (Joziah): salary = 28485, manager_id = 6
+
+Step 2: Check if manager exists in employee_id column {1, 3, 9, 11, 12, 13}:
+- Employee 1's manager is 11 -> Exists in table (Joziah is still employed) -> Exclude.
+- Employee 11's manager is 6 -> Does NOT exist in table (Manager left) -> Keep.
+
+Step 3: Sort by employee_id:
+- Result: 11
+
+Resulting Output:
++-------------+
+| employee_id |
++-------------+
+| 11          |
++-------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- Approach 1: Subquery with NOT IN (Recommended & Clean)
+SELECT 
+    employee_id
+FROM Employees
+WHERE salary < 30000
+  AND manager_id IS NOT NULL
+  AND manager_id NOT IN (
+      SELECT employee_id 
+      FROM Employees
+  )
+ORDER BY employee_id;
+
+
+-- Approach 2: Left Join
+SELECT 
+    e.employee_id
+FROM Employees e
+LEFT JOIN Employees m 
+    ON e.manager_id = m.employee_id
+WHERE e.salary < 30000
+  AND e.manager_id IS NOT NULL
+  AND m.employee_id IS NULL
+ORDER BY e.employee_id;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def find_employees(employees: pd.DataFrame) -> pd.DataFrame:
+    # Filter salary < 30000 and manager_id is not null
+    low_salary = employees[(employees['salary'] < 30000) & (employees['manager_id'].notna())]
+    
+    # Keep rows where manager_id is not in employee_id
+    existing_ids = set(employees['employee_id'])
+    result = low_salary[~low_salary['manager_id'].isin(existing_ids)]
+    
+    # Sort by employee_id and select column
+    return result[['employee_id']].sort_values(by='employee_id')
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N) where N is the number of rows in the Employees table (using primary key index lookup on `employee_id`).
+- Space Complexity: O(K) Auxiliary Space where K is the number of resulting employee IDs.
+===================================================================

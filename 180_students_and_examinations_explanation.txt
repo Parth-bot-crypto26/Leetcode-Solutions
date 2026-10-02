@@ -1,0 +1,125 @@
+===================================================================
+LEETCODE 1280: STUDENTS AND EXAMINATIONS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find the number of times each student attended each exam.
+Every student must be paired with every subject, even if they attended the exam 0 times.
+
+Return the result table ordered by `student_id` and `subject_name`.
+
+Constraints & Notes:
+- Students table: student_id (Primary Key), student_name.
+- Subjects table: subject_name (Primary Key).
+- Examinations table: student_id, subject_name (May contain duplicate attendance rows).
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. CROSS JOIN FOR CARTESIAN PRODUCT:
+   - `Students s CROSS JOIN Subjects sub` generates every possible pair of `(student_id, subject_name)`.
+   - This ensures that students who missed an exam (like Alex or Bob for Physics) still appear in the final output grid.
+
+2. LEFT JOIN TO PRESERVE ALL COMBINATIONS:
+   - `LEFT JOIN Examinations e ON s.student_id = e.student_id AND sub.subject_name = e.subject_name` matches actual exam attendance to the complete student-subject matrix.
+   - If a student never attended a specific exam, the `e` table columns evaluate to `NULL`.
+
+3. COUNT(column) VS COUNT(*):
+   - `COUNT(e.subject_name)` correctly counts non-NULL rows from `Examinations`.
+   - When a student has 0 attendances, `e.subject_name` is `NULL`, so `COUNT(e.subject_name)` returns `0` (whereas `COUNT(*)` would incorrectly return `1`).
+
+4. GROUP BY & ORDER BY:
+   - `GROUP BY s.student_id, s.student_name, sub.subject_name` properly collapses the repeated exam rows.
+   - `ORDER BY s.student_id, sub.subject_name` matches the required output sorting.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Cross Join Matrix (Students x Subjects):
+1. (1 Alice, Math)
+2. (1 Alice, Physics)
+3. (1 Alice, Programming)
+4. (2 Bob, Math)
+5. (2 Bob, Physics)
+6. (2 Bob, Programming)
+7. (6 Alex, Math)
+8. (6 Alex, Physics)
+9. (6 Alex, Programming)
+... and so on for John (13).
+
+Left Join with Examinations & Count:
+- (1 Alice, Math) -> Matches 3 rows in Examinations -> COUNT = 3
+- (1 Alice, Physics) -> Matches 2 rows in Examinations -> COUNT = 2
+- (2 Bob, Physics) -> Matches 0 rows (NULL) -> COUNT = 0
+- (6 Alex, Math) -> Matches 0 rows (NULL) -> COUNT = 0
+
+Resulting Output:
++------------+--------------+--------------+----------------+
+| student_id | student_name | subject_name | attended_exams |
++------------+--------------+--------------+----------------+
+| 1          | Alice        | Math         | 3              |
+| 1          | Alice        | Physics      | 2              |
+| 1          | Alice        | Programming  | 1              |
+| 2          | Bob          | Math         | 1              |
+| 2          | Bob          | Physics      | 0              |
+| 2          | Bob          | Programming  | 1              |
+| 6          | Alex         | Math         | 0              |
+| 6          | Alex         | Physics      | 0              |
+| 6          | Alex         | Programming  | 0              |
+| 13         | John         | Math         | 1              |
+| 13         | John         | Physics      | 1              |
+| 13         | John         | Programming  | 1              |
++------------+--------------+--------------+----------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT
+    s.student_id,
+    s.student_name,
+    sub.subject_name,
+    COUNT(e.subject_name) AS attended_exams
+FROM Students s
+CROSS JOIN Subjects sub
+LEFT JOIN Examinations e
+    ON s.student_id = e.student_id
+   AND sub.subject_name = e.subject_name
+GROUP BY
+    s.student_id,
+    s.student_name,
+    sub.subject_name
+ORDER BY
+    s.student_id,
+    sub.subject_name;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def students_and_examinations(students: pd.DataFrame, subjects: pd.DataFrame, examinations: pd.DataFrame) -> pd.DataFrame:
+    # 1. Cartesian Product of Students and Subjects
+    grid = students.merge(subjects, how='cross')
+    
+    # 2. Count actual attendances per student per subject
+    exam_counts = examinations.groupby(['student_id', 'subject_name']).size().reset_index(name='attended_exams')
+    
+    # 3. Merge grid with counts and fill missing with 0
+    result = grid.merge(exam_counts, on=['student_id', 'subject_name'], how='left')
+    result['attended_exams'] = result['attended_exams'].fillna(0).astype(int)
+    
+    # 4. Sort output as required
+    return result.sort_values(by=['student_id', 'subject_name'])
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(S * SUB + E) where S is students count, SUB is subjects count, and E is examination records count.
+- Space Complexity: O(S * SUB) Auxiliary Space to generate and return the complete student-subject matrix.
+===================================================================

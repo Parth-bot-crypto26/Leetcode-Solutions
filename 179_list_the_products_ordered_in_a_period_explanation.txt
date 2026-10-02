@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 1327: LIST THE PRODUCTS ORDERED IN A PERIOD
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to find the names of products that have at least 100 units 
+ordered in February 2020 (`2020-02-01` to `2020-02-29`) and their total 
+ordered units.
+
+Return the result table in any order.
+
+Constraints & Notes:
+- Products table: product_id (Primary Key), product_name, product_category.
+- Orders table: product_id (Foreign Key), order_date, unit.
+- Target period: February 2020 (`2020-02-01` to `2020-02-29`).
+- Threshold: SUM(unit) >= 100.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. INNER JOIN ON FOREIGN KEY:
+   - `JOIN Orders o ON p.product_id = o.product_id` correctly combines the product details with their corresponding order rows.
+
+2. RANGE FILTERING FOR DATE WINDOWS:
+   - `WHERE o.order_date BETWEEN '2020-02-01' AND '2020-02-29'` is the cleanest and most performant way to isolate February 2020 because range predicates allow database query planners to leverage index scans on `order_date`.
+   - String functions like `LEFT(order_date, 7) = '2020-02'` or `DATE_FORMAT(order_date, '%Y-%m') = '2020-02'` also work, but range filters are preferred for index efficiency.
+
+3. AGGREGATION & FILTERING:
+   - `GROUP BY p.product_id, p.product_name`: Grouping by `product_id` along with `product_name` ensures standard SQL compliance and prevents issues if two different products share the same name.
+   - `HAVING SUM(o.unit) >= 100`: Properly filters the aggregated total units per group.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Filtered Orders for February 2020 ('2020-02-01' <= order_date <= '2020-02-29'):
++------------+------------+------+--------------------+
+| product_id | order_date | unit | product_name       |
++------------+------------+------+--------------------+
+| 1          | 2020-02-05 | 60   | Leetcode Solutions |
+| 1          | 2020-02-10 | 70   | Leetcode Solutions |
+| 2          | 2020-02-11 | 80   | Jewels of...       |
+| 3          | 2020-02-17 | 2    | HP                 |
+| 3          | 2020-02-24 | 3    | HP                 |
+| 5          | 2020-02-25 | 50   | Leetcode Kit       |
+| 5          | 2020-02-27 | 50   | Leetcode Kit       |
++------------+------------+------+--------------------+
+
+Aggregation & Having Clause:
+- Product 1 (Leetcode Solutions): SUM(unit) = 60 + 70 = 130 (>= 100) -> Keep
+- Product 2 (Jewels...): SUM(unit) = 80 (< 100) -> Exclude
+- Product 3 (HP): SUM(unit) = 2 + 3 = 5 (< 100) -> Exclude
+- Product 5 (Leetcode Kit): SUM(unit) = 50 + 50 = 100 (>= 100) -> Keep
+
+Resulting Output:
++--------------------+---------+
+| product_name       | unit    |
++--------------------+---------+
+| Leetcode Solutions | 130     |
+| Leetcode Kit       | 100     |
++--------------------+---------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal & Index-Friendly)
+SELECT 
+    p.product_name,
+    SUM(o.unit) AS unit
+FROM Products p
+JOIN Orders o 
+    ON p.product_id = o.product_id
+WHERE o.order_date BETWEEN '2020-02-01' AND '2020-02-29'
+GROUP BY p.product_id, p.product_name
+HAVING SUM(o.unit) >= 100;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def list_products(products: pd.DataFrame, orders: pd.DataFrame) -> pd.DataFrame:
+    # Filter orders for February 2020
+    feb_orders = orders[
+        (orders['order_date'] >= '2020-02-01') & 
+        (orders['order_date'] <= '2020-02-29')
+    ]
+    
+    # Merge with Products table
+    merged = feb_orders.merge(products, on='product_id')
+    
+    # Group by product_name and sum units
+    grouped = merged.groupby('product_name')['unit'].sum().reset_index()
+    
+    # Filter units >= 100
+    result = grouped[grouped['unit'] >= 100]
+    
+    return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+SQL Execution:
+- Time Complexity: O(N + M) where N is the number of rows in Products and M is the number of rows in Orders (leveraging primary/foreign key indexes).
+- Space Complexity: O(K) Auxiliary Space where K is the number of distinct products sold in February 2020.
+===================================================================

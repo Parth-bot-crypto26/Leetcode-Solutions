@@ -1,0 +1,152 @@
+===================================================================
+LEETCODE 142: LINKED LIST CYCLE II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the head of a linked list, return the node where the cycle begins. 
+If there is no cycle, return `NULL`.
+
+Do not modify the linked list.
+
+Constraints & Notes:
+- The number of nodes in the list is in the range [0, 10^4].
+- `-10^5 <= Node.val <= 10^5`
+- `pos` is -1 or a valid index in the linked list (internal parameter, not passed).
+- Follow-up constraint: Solve using O(1) constant auxiliary memory.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is 100% optimal and correct!
+
+1. PHASE 1: CYCLE DETECTION (FLOYD'S TORTOISE AND HARE):
+   - Move `slow` by 1 step and `fast` by 2 steps.
+   - If `fast` or `fast->next` becomes `NULL`, there is no cycle, so return `NULL`.
+   - If `slow == fast`, a cycle is detected (`isCycle = true`), and we break.
+
+2. PHASE 2: FINDING THE CYCLE START:
+   - Reset `slow = head` while leaving `fast` at the meeting point inside the cycle.
+   - Move both `slow` and `fast` 1 step at a time until `slow == fast`.
+   - The node where they meet is guaranteed to be the start of the cycle.
+
+3. MATHEMATICAL PROOF FOR PHASE 2:
+   - Let $L$ = distance from head to cycle start.
+   - Let $C$ = length of the cycle.
+   - Let $d$ = distance from cycle start to the meeting point.
+   - When `slow` and `fast` meet:
+     - Distance traveled by `slow` = $L + d$
+     - Distance traveled by `fast` = $L + d + k \cdot C$ (where $k \ge 1$ full loops)
+   - Since `fast` travels twice as fast as `slow`:
+     $$2(L + d) = L + d + k \cdot C$$
+     $$L + d = k \cdot C \implies L = k \cdot C - d$$
+   - $L = (k - 1) \cdot C + (C - d)$: Moving $L$ steps from the `head` and $L$ steps from the meeting point ($d$ steps inside the cycle) lands both pointers at the exact start of the cycle!
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [3, 2, 0, -4], pos = 1 (Node with value 2)
+List layout: 3 -> 2 -> 0 -> -4 -> (connects back to 2)
+
+Phase 1 (Detect Cycle):
+- Start: slow = 3, fast = 3
+- Step 1: slow = 2, fast = 0
+- Step 2: slow = 0, fast = 2
+- Step 3: slow = -4, fast = -4 -> Meeting Point! (fast == slow)
+
+Phase 2 (Find Cycle Entry):
+- Reset slow = head (node 3), leave fast at meeting point (node -4).
+- Move both 1 step at a time:
+  - Step 1: slow = 2, fast = 2 -> Meet at Node(2)!
+- Return node with value 2.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal O(1) Space)
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        bool isCycle = false;
+
+        // Phase 1: Detect cycle
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+            if (slow == fast) {
+                isCycle = true;
+                break;
+            }
+        }
+
+        if (!isCycle) {
+            return nullptr;
+        }
+
+        // Phase 2: Find cycle entry
+        slow = head;
+        while (slow != fast) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+
+        return slow;
+    }
+};
+
+
+# Equivalent Python Solution
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = head
+        fast = head
+        has_cycle = False
+        
+        # Phase 1: Detect cycle
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow == fast:
+                has_cycle = True
+                break
+                
+        if not has_cycle:
+            return None
+            
+        # Phase 2: Find start node of cycle
+        slow = head
+        while slow != fast:
+            slow = slow.next
+            fast = fast.next
+            
+        return slow
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Phase 1 takes at most $N$ steps to meet inside the cycle.
+  - Phase 2 takes at most $N$ steps to reach the cycle entry node.
+  - Overall time complexity is strictly linear $O(N)$.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Only two pointers (`slow` and `fast`) and a boolean flag are used.
+===================================================================

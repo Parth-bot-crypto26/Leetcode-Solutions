@@ -1,0 +1,106 @@
+===================================================================
+LEETCODE 4000: LARGEST INTEGER WITH GIVEN DIGIT SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two non-negative integers `n` and `s`.
+Return the largest integer that has at most `n` digits and whose sum 
+of digits is `s`. If no such integer exists, return -1.
+
+Constraints & Notes:
+- `1 <= n <= 5`
+- `0 <= s <= 100`
+- Maximum sum possible for an $n$-digit integer is $9 \times n$. If $s > 9 \times n$, no valid integer exists.
+- Greedy Choice: To make the integer as large as possible, place the largest possible digit (`min(9, s)`) in the most significant position first.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is 100% optimal and correct!
+
+1. IMPOSSIBILITY & EDGE CASE HANDLERS:
+   - `if (s > 9 * n) return -1;`: Correctly checks if the target digit sum exceeds the maximum obtainable sum ($9 \times n$).
+   - `if (s == 0) return 0;`: Handles the $s = 0$ case cleanly.
+
+2. GREEDY DIGIT PLACEMENT:
+   - By iterating $n$ times and assigning `d = min(9, s)` to the left-most position, you guarantee the constructed number is maximized lexicographically and numerically.
+   - Example: For $n = 2, s = 9$, the greedy choice places 9 first and then 0, resulting in `90` (which is larger than `81`, `72`, etc.).
+
+3. STRING CONVERSION & CONSTRAINTS:
+   - Since $1 \le n \le 5$, `stoi(ans)` will easily fit within standard 32-bit signed integer limits ($n \le 5 \implies \text{max value} = 99999$).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 2, s = 9
+
+Initial Checks:
+- s (9) > 9 * n (18) -> False
+- s == 0 -> False
+
+Greedy Loop (n = 2):
+- i = 0:
+  - d = min(9, s) = min(9, 9) = 9
+  - ans = "9"
+  - s = s - 9 = 0
+- i = 1:
+  - d = min(9, s) = min(9, 0) = 0
+  - ans = "90"
+  - s = s - 0 = 0
+
+Final Output:
+- stoi("90") = 90 -> Return 90
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Greedy Strategy)
+#include <string>
+#include <algorithm>
+
+class Solution {
+public:
+    int largestInteger(int n, int s) {
+        if (s > 9 * n) return -1;
+        if (s == 0) return 0;
+
+        std::string ans = "";
+        for (int i = 0; i < n; i++) {
+            int d = std::min(9, s);
+            ans += std::to_string(d);
+            s -= d;
+        }
+
+        return std::stoi(ans);
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def largestInteger(self, n: int, s: int) -> int:
+        if s > 9 * n:
+            return -1
+        if s == 0:
+            return 0
+            
+        ans = []
+        for _ in range(n):
+            d = min(9, s)
+            ans.append(str(d))
+            s -= d
+            
+        return int("".join(ans))
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - The loop runs exactly $N$ times. Given $N \le 5$, this runs in $O(1)$ constant time.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Uses a string of length $N$ to build the number before converting to an integer ($O(1)$ space since $N \le 5$).
+===================================================================

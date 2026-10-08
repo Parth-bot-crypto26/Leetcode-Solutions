@@ -1,0 +1,143 @@
+===================================================================
+LEETCODE 608: TREE NODE
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a table `Tree` representing a valid tree structure:
+- `id`: unique ID of the current node.
+- `p_id`: ID of the parent node (can be `NULL` for the root node).
+
+Categorize each node into one of three types:
+- `"Root"`: If the node is the root of the tree (`p_id` is `NULL`).
+- `"Inner"`: If the node is neither a leaf nor a root (it has a parent and at least one child).
+- `"Leaf"`: If the node has a parent (`p_id` is not `NULL`) and no children.
+
+Return the result sorted in any order.
+
+Constraints & Notes:
+- The given structure is always a valid tree.
+- Note on `IN` with `NULL` values in SQL: When using `id IN (SELECT p_id FROM Tree)`, if the subquery returns any `NULL` value, SQL evaluates `id IN (...)` as `UNKNOWN` rather than `FALSE`. Filtering `WHERE p_id IS NOT NULL` in the subquery avoids this common trap.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal, robust, and correct!
+
+1. CASE STATEMENT ORDERING & LOGIC:
+   - `WHEN p_id IS NULL THEN 'Root'`: Correctly identifies the root node first.
+   - `WHEN id IN (SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL) THEN 'Inner'`: Checks if the node appears as a parent to any other node. Since root nodes were already handled in the first condition, any remaining node that acts as a parent must be an `"Inner"` node.
+   - `ELSE 'Leaf'`: Any remaining node neither is root nor serves as a parent, meaning it has no children and must be a `"Leaf"`.
+
+2. NULL HANDLING SAFETY:
+   - Your explicit check `WHERE p_id IS NOT NULL` in the subquery is excellent defensive SQL writing. Without it, the subquery includes `NULL` from the root node, which causes `IN` comparisons to evaluate to `UNKNOWN` and misclassify inner nodes as leaves.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: 
+Tree Table:
++----+------+
+| id | p_id |
++----+------+
+| 1  | null |
+| 2  | 1    |
+| 3  | 1    |
+| 4  | 2    |
+| 5  | 2    |
++----+------+
+
+Subquery Result `(SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL)`:
+- Returns `{1, 2}`
+
+Evaluating each row:
+1. Node 1 (`p_id` = null):
+   - `p_id IS NULL` is TRUE -> Classified as 'Root'.
+
+2. Node 2 (`p_id` = 1):
+   - `p_id IS NULL` is FALSE.
+   - `id (2) IN {1, 2}` is TRUE -> Classified as 'Inner'.
+
+3. Node 3 (`p_id` = 1):
+   - `p_id IS NULL` is FALSE.
+   - `id (3) IN {1, 2}` is FALSE -> `ELSE` branch -> Classified as 'Leaf'.
+
+4. Node 4 (`p_id` = 2):
+   - `p_id IS NULL` is FALSE.
+   - `id (4) IN {1, 2}` is FALSE -> `ELSE` branch -> Classified as 'Leaf'.
+
+5. Node 5 (`p_id` = 2):
+   - `p_id IS NULL` is FALSE.
+   - `id (5) IN {1, 2}` is FALSE -> `ELSE` branch -> Classified as 'Leaf'.
+
+Output Table:
++----+-------+
+| id | type  |
++----+-------+
+| 1  | Root  |
+| 2  | Inner |
+| 3  | Leaf  |
+| 4  | Leaf  |
+| 5  | Leaf  |
++----+-------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal & Safe)
+SELECT
+    id,
+    CASE
+        WHEN p_id IS NULL THEN 'Root'
+        WHEN id IN (SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL) THEN 'Inner'
+        ELSE 'Leaf'
+    END AS type
+FROM Tree;
+
+
+-- Alternative Approach: Using LEFT JOIN
+SELECT 
+    t.id,
+    CASE 
+        WHEN t.p_id IS NULL THEN 'Root'
+        WHEN c.id IS NOT NULL THEN 'Inner'
+        ELSE 'Leaf'
+    END AS type
+FROM Tree t
+LEFT JOIN (SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL) c
+    ON t.id = c.p_id;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+import numpy as np
+
+def tree_node(tree: pd.DataFrame) -> pd.DataFrame:
+    # Get all non-null parent IDs (nodes that have children)
+    parent_ids = set(tree['p_id'].dropna())
+    
+    # Define conditions
+    conditions = [
+        tree['p_id'].isna(),
+        tree['id'].isin(parent_ids)
+    ]
+    
+    choices = ['Root', 'Inner']
+    
+    # Assign 'Leaf' as default if neither condition matches
+    tree['type'] = np.select(conditions, choices, default='Leaf')
+    
+    return tree[['id', 'type']]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Extracting parent nodes for the `IN` subquery takes $O(N)$ time.
+  - Evaluating the `CASE` statement per row with hash-set/index lookup takes $O(1)$ per row, yielding $O(N)$ total time.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Space needed for the unique parent ID lookup set created during query execution.
+===================================================================

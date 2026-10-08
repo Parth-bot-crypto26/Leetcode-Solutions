@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 1045: CUSTOMERS WHO BOUGHT ALL PRODUCTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to report the `customer_id`s from the `Customer` table 
+that bought all the products present in the `Product` table.
+
+Return the result table in any order.
+
+Constraints & Notes:
+- Customer table: customer_id, product_key (May contain duplicate rows).
+- Product table: product_key (Primary Key, unique list of all available products).
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal and correct!
+
+1. GROUP BY & HAVING CLAUSE:
+   - Grouping by `customer_id` allows us to evaluate aggregate properties for each customer individually.
+
+2. COUNT(DISTINCT product_key):
+   - The `Customer` table may contain duplicate rows (e.g., a customer bought the same product multiple times).
+   - `COUNT(DISTINCT product_key)` ensures each product is counted only once per customer.
+
+3. SUBQUERY COMPARISON:
+   - `(SELECT COUNT(*) FROM Product)` computes the total number of unique products available.
+   - Matching `COUNT(DISTINCT product_key) = (SELECT COUNT(*) FROM Product)` guarantees that the customer purchased every single product.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: 
+Customer Table: (1, 5), (2, 6), (3, 5), (3, 6), (1, 6)
+Product Table: (5), (6) -> Total Products = 2
+
+Group by customer_id and evaluate HAVING condition:
+
+Customer 1:
+- Distinct product_keys bought: {5, 6} -> COUNT = 2
+- Total Products = 2
+- 2 == 2 -> KEEP
+
+Customer 2:
+- Distinct product_keys bought: {6} -> COUNT = 1
+- Total Products = 2
+- 1 == 2 -> DISCARD
+
+Customer 3:
+- Distinct product_keys bought: {5, 6} -> COUNT = 2
+- Total Products = 2
+- 2 == 2 -> KEEP
+
+Output:
++-------------+
+| customer_id |
++-------------+
+| 1           |
+| 3           |
++-------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal)
+SELECT 
+    customer_id
+FROM Customer
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(*) FROM Product);
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def find_customers(customer: pd.DataFrame, product: pd.DataFrame) -> pd.DataFrame:
+    # Get total count of distinct products
+    total_products = product['product_key'].nunique()
+    
+    # Group by customer_id and count distinct product_key
+    grouped = customer.groupby('customer_id')['product_key'].nunique().reset_index()
+    
+    # Filter customers who bought all products
+    result = grouped[grouped['product_key'] == total_products][['customer_id']]
+    
+    return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(C + P)
+  - O(P) to count rows in the Product table.
+  - O(C) to aggregate and count distinct product keys across C rows in the Customer table.
+
+- Space Complexity: O(U) Auxiliary Space
+  - O(U) space required by the database hash table / grouping buffer, where U is the number of unique customers.
+===================================================================

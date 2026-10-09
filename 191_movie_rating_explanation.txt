@@ -1,0 +1,146 @@
+===================================================================
+LEETCODE 1341: MOVIE RATING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Write a solution to perform two independent tasks and stack their results:
+1. Find the name of the user who has rated the greatest number of movies. 
+   - Tie-breaker: Return the lexicographically smaller user name.
+2. Find the movie title with the highest average rating in February 2020 (`2020-02-01` to `2020-02-29`).
+   - Tie-breaker: Return the lexicographically smaller movie title.
+
+Return the result table as a single-column table named `results`.
+
+Constraints & Notes:
+- Movies table: movie_id (Primary Key), title (Unique).
+- Users table: user_id (Primary Key), name (Unique).
+- MovieRating table: (movie_id, user_id) Primary Key, rating, created_at.
+- Must combine the two independent scalar results into a single column using `UNION ALL`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is 100% optimal, robust, and correct!
+
+1. PART 1: TOP USER BY NUMBER OF RATINGS
+   - `JOIN Users u ON mr.user_id = u.user_id`: Connects user IDs to their respective names.
+   - `GROUP BY mr.user_id, u.name`: Groups ratings by user.
+   - `ORDER BY COUNT(mr.movie_id) DESC, u.name ASC LIMIT 1`: Sorts by rating count descending, then lexicographically ascending to handle ties cleanly.
+
+2. PART 2: TOP MOVIE BY AVERAGE RATING IN FEB 2020
+   - `WHERE mr.created_at >= '2020-02-01' AND mr.created_at < '2020-03-01'`: Range condition captures February 2020 accurately while remaining index-friendly (sargable).
+   - `JOIN Movies m ON mr.movie_id = m.movie_id`: Connects movie IDs to titles.
+   - `GROUP BY mr.movie_id, m.title`: Groups ratings per movie within the date range.
+   - `ORDER BY AVG(mr.rating) DESC, m.title ASC LIMIT 1`: Sorts by highest average rating, breaking ties lexicographically.
+
+3. COMBINING RESULTS WITH `UNION ALL`:
+   - Parentheses around each subquery are required in SQL when using `ORDER BY` and `LIMIT` inside a `UNION ALL`.
+   - `UNION ALL` preserves order and allows duplicate string values if both queries happen to return the same string.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Subquery 1 (Top User):
+User Movie Ratings Count:
+- Daniel (user_id=1): Rated movies 1, 2, 3 -> Count = 3
+- Monica (user_id=2): Rated movies 1, 2, 3 -> Count = 3
+- Maria (user_id=3): Rated movies 1, 2 -> Count = 2
+- James (user_id=4): Rated movie 1 -> Count = 1
+
+Tie-breaker between Daniel and Monica (both 3):
+- 'Daniel' < 'Monica' lexicographically.
+- Subquery 1 Output: "Daniel"
+
+Subquery 2 (Top Movie in Feb 2020):
+Feb 2020 Ratings:
+- Movie 1 (Avengers):
+  - Ratings: 4 (Monica), 2 (Maria)
+  - Avg = (4 + 2) / 2 = 3.0
+- Movie 2 (Frozen 2):
+  - Ratings: 5 (Daniel), 2 (Monica)
+  - Avg = (5 + 2) / 2 = 3.5
+- Movie 3 (Joker):
+  - Ratings: 3 (Daniel), 4 (Monica)
+  - Avg = (3 + 4) / 2 = 3.5
+
+Tie-breaker between Frozen 2 (3.5) and Joker (3.5):
+- 'Frozen 2' < 'Joker' lexicographically.
+- Subquery 2 Output: "Frozen 2"
+
+Final Stacked Output:
++--------------+
+| results      |
++--------------+
+| Daniel       |
+| Frozen 2     |
++--------------+
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal & Clean)
+(
+    SELECT u.name AS results
+    FROM MovieRating mr
+    JOIN Users u 
+        ON mr.user_id = u.user_id
+    GROUP BY mr.user_id, u.name
+    ORDER BY COUNT(mr.movie_id) DESC, u.name ASC
+    LIMIT 1
+)
+UNION ALL
+(
+    SELECT m.title AS results
+    FROM MovieRating mr
+    JOIN Movies m 
+        ON mr.movie_id = m.movie_id
+    WHERE mr.created_at >= '2020-02-01' 
+      AND mr.created_at < '2020-03-01'
+    GROUP BY mr.movie_id, m.title
+    ORDER BY AVG(mr.rating) DESC, m.title ASC
+    LIMIT 1
+);
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def movie_rating(movies: pd.DataFrame, users: pd.DataFrame, movie_rating: pd.DataFrame) -> pd.DataFrame:
+    # 1. Top User by number of ratings
+    user_counts = movie_rating.groupby('user_id').size().reset_index(name='rating_count')
+    merged_users = user_counts.merge(users, on='user_id')
+    # Sort by rating_count desc, then name asc
+    top_user = merged_users.sort_values(
+        by=['rating_count', 'name'], 
+        ascending=[False, True]
+    ).iloc[0]['name']
+    
+    # 2. Top Movie by average rating in Feb 2020
+    feb_ratings = movie_rating[
+        (movie_rating['created_at'] >= '2020-02-01') & 
+        (movie_rating['created_at'] < '2020-03-01')
+    ]
+    movie_avgs = feb_ratings.groupby('movie_id')['rating'].mean().reset_index(name='avg_rating')
+    merged_movies = movie_avgs.merge(movies, on='movie_id')
+    # Sort by avg_rating desc, then title asc
+    top_movie = merged_movies.sort_values(
+        by=['avg_rating', 'title'], 
+        ascending=[False, True]
+    ).iloc[0]['title']
+    
+    # Construct resulting DataFrame
+    return pd.DataFrame({'results': [top_user, top_movie]})
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(R log R + M log M + U log U)
+  - Joining and grouping $R$ ratings takes linear time $O(R)$.
+  - Sorting group aggregates to find `LIMIT 1` takes $O(U \log U)$ for users and $O(M \log M)$ for movies.
+
+- Space Complexity: O(U + M) Auxiliary Space
+  - Space required to store group aggregates for users and movies in memory.
+===================================================================

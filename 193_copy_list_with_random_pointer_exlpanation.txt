@@ -1,0 +1,179 @@
+===================================================================
+LEETCODE 138: COPY LIST WITH RANDOM POINTER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A linked list of length `n` is given where each node contains an additional 
+`random` pointer, which could point to any node in the list, or `NULL`.
+
+Construct a deep copy of the list. Return the head of the copied linked list.
+
+Constraints & Notes:
+- `0 <= n <= 1000`
+- `-10^4 <= Node.val <= 10^4`
+- `Node.random` is `NULL` or points to some node in the list.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is 100% logic-wise correct!
+
+1. HASH MAP APPROACH (YOUR CODE):
+   - First Pass: Create a mapping from `oldNode` to `newNode` while cloning the values and setting `next` pointers.
+   - Second Pass: Assign `newTemp->random = m[oldTemp->random]`. Since `m[NULL]` defaults to `NULL` in `unordered_map`, this handles `NULL` random pointers seamlessly.
+   - Time Complexity: $O(N)$
+   - Space Complexity: $O(N)$ auxiliary space for storing the mapping.
+
+2. OPTIMAL O(1) AUXILIARY SPACE APPROACH (INTERWEAVING):
+   Instead of using a hash map, we can achieve $O(1)$ extra space in 3 steps:
+   - Step 1: Interleave cloned nodes right next to their originals:
+     `Original A -> Copy A' -> Original B -> Copy B'`
+   - Step 2: Set `random` pointers for cloned nodes:
+     `curr->next->random = curr->random ? curr->random->next : NULL`
+   - Step 3: Separate the two interleaved lists back into original and copied lists.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [[7,null],[13,0],[11,4]] (A=7, B=13->A, C=11->C)
+
+Optimal O(1) Interweaving Strategy:
+
+Step 1 (Interleave Clones):
+7 -> 7' -> 13 -> 13' -> 11 -> 11' -> NULL
+
+Step 2 (Copy Random Pointers):
+- 7'->random = (7->random = NULL) ? NULL -> NULL
+- 13'->random = (13->random = 7) -> 7->next -> 7'
+- 11'->random = (11->random = 11) -> 11->next -> 11'
+
+Step 3 (Separate Lists):
+- Original: 7 -> 13 -> 11 -> NULL
+- Copied:   7' -> 13' -> 11' -> NULL
+
+Resulting Head: 7'
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// Approach 1: Hash Map (Your Code - O(N) Space)
+#include <unordered_map>
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        if (head == nullptr) return nullptr;
+
+        std::unordered_map<Node*, Node*> m;
+        Node* curr = head;
+
+        // First Pass: Create copied nodes and map old -> new
+        while (curr != nullptr) {
+            m[curr] = new Node(curr->val);
+            curr = curr->next;
+        }
+
+        // Second Pass: Connect next and random pointers
+        curr = head;
+        while (curr != nullptr) {
+            m[curr]->next = m[curr->next];
+            m[curr]->random = m[curr->random];
+            curr = curr->next;
+        }
+
+        return m[head];
+    }
+};
+
+
+// Approach 2: Interweaving (Optimal - O(1) Auxiliary Space)
+class SolutionOptimal {
+public:
+    Node* copyRandomList(Node* head) {
+        if (head == nullptr) return nullptr;
+
+        // Step 1: Interleave copied nodes
+        Node* curr = head;
+        while (curr != nullptr) {
+            Node* clone = new Node(curr->val);
+            clone->next = curr->next;
+            curr->next = clone;
+            curr = clone->next;
+        }
+
+        // Step 2: Assign random pointers
+        curr = head;
+        while (curr != nullptr) {
+            if (curr->random != nullptr) {
+                curr->next->random = curr->random->next;
+            }
+            curr = curr->next->next;
+        }
+
+        // Step 3: Separate the lists
+        curr = head;
+        Node* newHead = head->next;
+        Node* cloneCurr = newHead;
+
+        while (curr != nullptr) {
+            curr->next = curr->next->next;
+            cloneCurr->next = (cloneCurr->next != nullptr) ? cloneCurr->next->next : nullptr;
+
+            curr = curr->next;
+            cloneCurr = cloneCurr->next;
+        }
+
+        return newHead;
+    }
+};
+
+
+# Equivalent Python Solution (Optimal O(1) Space)
+class Solution:
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        if not head:
+            return None
+            
+        # Step 1: Interleave
+        curr = head
+        while curr:
+            clone = Node(curr.val)
+            clone.next = curr.next
+            curr.next = clone
+            curr = clone.next
+            
+        # Step 2: Set Random Pointers
+        curr = head
+        while curr:
+            if curr.random:
+                curr.next.random = curr.random.next
+            curr = curr.next.next
+            
+        # Step 3: Separate
+        curr = head
+        new_head = head.next
+        clone_curr = new_head
+        
+        while curr:
+            curr.next = curr.next.next
+            clone_curr.next = clone_curr.next.next if clone_curr.next else None
+            
+            curr = curr.next
+            clone_curr = clone_curr.next
+            
+        return new_head
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Hash Map Approach (Your Code):
+- Time Complexity: O(N) — Two iterations over the list of size N.
+- Space Complexity: O(N) Auxiliary Space — Required to store old-to-new node pairs in unordered_map.
+
+Interweaving Approach (Optimal):
+- Time Complexity: O(N) — Three linear passes over the list.
+- Space Complexity: O(1) Auxiliary Space — In-place pointer manipulation without extra data structures.
+===================================================================

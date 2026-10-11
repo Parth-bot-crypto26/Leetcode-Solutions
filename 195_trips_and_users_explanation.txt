@@ -1,0 +1,111 @@
+===================================================================
+LEETCODE 262: TRIPS AND USERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Find the daily cancellation rate of requests with unbanned users (both client 
+and driver must not be banned) between "2013-10-01" and "2013-10-03" for days 
+that have at least one trip.
+
+- Cancellation Rate = (Canceled requests with unbanned users) / (Total requests with unbanned users)
+- Round the result to two decimal places.
+- Return the result table in any order.
+
+Constraints & Notes:
+- Trips table: id, client_id, driver_id, city_id, status, request_at.
+- Users table: users_id, banned ('Yes'/'No'), role ('client'/'driver'/'partner').
+- Status values: 'completed', 'cancelled_by_driver', 'cancelled_by_client'.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL logic is structurally correct and handles the user filtering and date window brilliantly, but it contains a common **MySQL Integer Division Trap**:
+
+1. INNER JOIN FOR UNBANNED USERS:
+   - Joining `Users c` (client) and `Users d` (driver) with `banned = 'No'` correctly filters out any trip where *either* the client or the driver is banned.
+
+2. DATE FILTER & GROUPING:
+   - `WHERE t.request_at BETWEEN '2013-10-01' AND '2013-10-03'` isolates the target date range.
+   - `GROUP BY t.request_at` aggregates data day by day.
+
+3. THE CRITICAL FIX (INTEGER DIVISION):
+   - In MySQL, `SUM(...) / COUNT(*)` performs **integer division** if both operands are integers, which can truncate results to `0.00` before `ROUND()` runs.
+   - Multiplying the numerator by `1.0` (e.g., `SUM(...) * 1.0 / COUNT(*)`) forces floating-point arithmetic, ensuring accurate decimal calculation.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+On 2013-10-01:
+- Total raw trips: 4 (IDs: 1, 2, 3, 4)
+- Trip ID 2 has client_id = 2 (`banned = 'Yes'`), so it is filtered out by the inner join.
+- Remaining unbanned trips:
+  - ID 1: completed
+  - ID 3: completed
+  - ID 4: cancelled_by_client
+- Total unbanned requests = 3
+- Canceled unbanned requests = 1 (ID 4)
+- Rate = 1 / 3 = 0.333... -> Rounded to `0.33`.
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Corrected for Integer Division)
+SELECT
+    t.request_at AS Day,
+    ROUND(
+        SUM(CASE WHEN t.status != 'completed' THEN 1 ELSE 0 END) * 1.0 / COUNT(*),
+        2
+    ) AS 'Cancellation Rate'
+FROM Trips t
+JOIN Users c ON t.client_id = c.users_id AND c.banned = 'No'
+JOIN Users d ON t.driver_id = d.users_id AND d.banned = 'No'
+WHERE t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.request_at;
+
+
+# Equivalent Pandas Solution (for LeetCode Pandas track)
+import pandas as pd
+
+def trips_and_users(trips: pd.DataFrame, users: pd.DataFrame) -> pd.DataFrame:
+    # Filter unbanned users
+    unbanned_users = users[users['banned'] == 'No']['users_id']
+    
+    # Filter trips where both client and driver are unbanned
+    valid_trips = trips[
+        trips['client_id'].isin(unbanned_users) & 
+        trips['driver_id'].isin(unbanned_users)
+    ]
+    
+    # Filter date range
+    filtered_trips = valid_trips[
+        (valid_trips['request_at'] >= '2013-10-01') & 
+        (valid_trips['request_at'] <= '2013-10-03')
+    ]
+    
+    if filtered_trips.empty:
+        return pd.DataFrame(columns=['Day', 'Cancellation Rate'])
+        
+    # Compute cancellation flag
+    filtered_trips['is_cancelled'] = filtered_trips['status'] != 'completed'
+    
+    # Group by date
+    grouped = filtered_trips.groupby('request_at').agg(
+        cancellation_rate=('is_cancelled', 'mean')
+    ).reset_index()
+    
+    grouped['cancellation_rate'] = grouped['cancellation_rate'].round(2)
+    grouped = grouped.rename(columns={'request_at': 'Day', 'cancellation_rate': 'Cancellation Rate'})
+    
+    return grouped
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(T + U)
+  - Where T is the number of rows in `Trips` and U is the number of rows in `Users`. Joining and scanning indexes takes linear time.
+- Space Complexity: O(T + U) Auxiliary Space
+  - Space required for hash joins and intermediate grouping results.
+===================================================================

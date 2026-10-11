@@ -1,0 +1,168 @@
+===================================================================
+LEETCODE 430: FLATTEN A MULTILEVEL DOUBLY LINKED LIST
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a doubly linked list containing nodes with a `next` pointer, 
+a `previous` pointer, and an additional `child` pointer which may point to 
+a separate doubly linked list.
+
+Flatten the list so that all nodes appear in a single-level doubly linked list. 
+The nodes in the child list should appear after `curr` and before `curr.next`. 
+All child pointers in the flattened list must be set to `NULL`.
+
+Return the head of the flattened list.
+
+Constraints & Notes:
+- The number of nodes does not exceed 1000.
+- `-10^5 <= Node.val <= 10^5`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your recursive C++ implementation is clever, intuitive, and correct!
+
+1. RECURSIVE SUB-LIST FLATTENING:
+   - When `curr->child` is found, you recursively flatten the child branch using `flatten(curr->child)`, splice it directly between `curr` and `curr->next`, and clear the `child` pointer.
+
+2. TRAVERSING TO THE TAIL:
+   - After splicing the flattened child list, you traverse forward to find the tail of that sublist (`while(curr->next != NULL) curr = curr->next;`) so you can attach the saved `next` node.
+
+3. COMPLEXITY NUANCE:
+   - Because you traverse to the end of the child sublist and then continue the outer loop from that tail, deeply nested structures can cause redundant traversals in the worst case, leading to $O(N^2)$ time complexity. However, given the constraint $N \le 1000$, this executes well within limits. 
+   - An iterative approach using a stack or pointer weaving can achieve strict $O(N)$ linear time complexity.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input (Simplified): 1 -> 2 -> 3 (child: 7 -> 8) -> 4 -> NULL
+
+Iteration 1 (curr = 1):
+- No child. Move to 2.
+
+Iteration 2 (curr = 2):
+- No child. Move to 3.
+
+Iteration 3 (curr = 3):
+- Has child (7 -> 8).
+- Save `next` = 4.
+- `curr->next` = flatten(7) -> returns 7 -> 8.
+- Attach: 3 -> 7 -> 8. Set `curr->child = NULL`.
+- Find tail of child sublist: `curr` moves to 8.
+- Attach saved `next` (4): 8 -> 4, and `4->prev = 8`.
+- Loop continues from current position.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Recursive Approach)
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        if (head == nullptr) {
+            return head;
+        }
+        Node* curr = head;
+        while (curr != nullptr) {
+            if (curr->child != nullptr) {
+                Node* nextNode = curr->next;
+                curr->next = flatten(curr->child);
+                curr->next->prev = curr;
+                curr->child = nullptr;
+                
+                // Find tail of the flattened child list
+                while (curr->next != nullptr) {
+                    curr = curr->next;
+                }
+                
+                // Attach the saved next node
+                if (nextNode != nullptr) {
+                    curr->next = nextNode;
+                    nextNode->prev = curr;
+                }
+            }
+            curr = curr->next;
+        }
+        return head;
+    }
+};
+
+
+// Optimal Iterative Approach (Strict O(N) Time, O(N) Stack Space)
+class SolutionIterative {
+public:
+    Node* flatten(Node* head) {
+        if (head == nullptr) return nullptr;
+        
+        Node* curr = head;
+        while (curr != nullptr) {
+            if (curr->child != nullptr) {
+                Node* nextNode = curr->next;
+                Node* childNode = curr->child;
+                
+                // Connect curr to child
+                curr->next = childNode;
+                childNode->prev = curr;
+                curr->child = nullptr;
+                
+                // Find tail of child list
+                Node* tail = childNode;
+                while (tail->next != nullptr) {
+                    tail = tail->next;
+                }
+                
+                // Connect tail to nextNode
+                if (nextNode != nullptr) {
+                    tail->next = nextNode;
+                    nextNode->prev = tail;
+                }
+            }
+            curr = curr->next;
+        }
+        return head;
+    }
+};
+
+
+# Equivalent Python Solution (Iterative)
+class Solution:
+    def flatten(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        if not head:
+            return None
+            
+        curr = head
+        while curr:
+            if curr.child:
+                next_node = curr.next
+                child_node = curr.child
+                
+                curr.next = child_node
+                child_node.prev = curr
+                curr.child = None
+                
+                tail = child_node
+                while tail.next:
+                    tail = tail.next
+                    
+                if next_node:
+                    tail.next = next_node
+                    next_node.prev = tail
+                    
+            curr = curr.next
+            
+        return head
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Your Recursive Approach:
+- Time Complexity: O(N^2) in the worst-case scenario with deep linear nested child lists due to repeated tail traversals.
+- Space Complexity: O(D) Auxiliary Space where D is the maximum depth of nested child lists (recursion stack).
+
+Optimal Iterative Approach:
+- Time Complexity: O(N) since every node is visited at most a constant number of times.
+- Space Complexity: O(1) Auxiliary Space since pointers are adjusted entirely in-place.
+===================================================================

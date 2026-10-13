@@ -1,0 +1,88 @@
+===================================================================
+LEETCODE 191: NUMBER OF 1 BITS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a positive integer `n`, write a function that returns the number of 
+set bits in its binary representation (also known as the Hamming weight).
+
+Constraints & Notes:
+- $1 \le n \le 2^{31} - 1$
+- Follow-up: If this function is called many times, how would you optimize it?
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using GCC built-ins is 100% optimal and correct!
+
+1. COMPILER INTRINSIC (`__builtin_popcount`):
+   - `__builtin_popcount(n)` compiles directly down to a single hardware instruction (such as `POPCNT` on modern x86/ARM processors) supported by CPU hardware. 
+   - This executes in $O(1)$ constant time at maximum hardware speed.
+
+2. ALTERNATIVE BIT-MANIPULATION TRICK (BRIAN KERNIGHAN'S ALGORITHM):
+   - If running in a restricted environment where compiler built-ins are unavailable, Brian Kernighan’s algorithm (`n & (n - 1)`) clears the least significant set bit in each iteration.
+   - Time Complexity: $O(k)$ where $k$ is the number of set bits (at most 31).
+
+3. FOLLOW-UP OPTIMIZATION FOR FREQUENT CALLS:
+   - If called millions of times, precomputing or caching results via a lookup table (e.g., splitting a 32-bit integer into four 8-bit bytes and using a 256-element byte-weight array) can optimize execution even further without hardware instruction dependencies.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 11 (Binary: `1011`)
+
+Using Brian Kernighan's Algorithm (`n = n & (n - 1)`):
+- Iteration 1: n = 11 (`1011`), n - 1 = 10 (`1010`)
+  - n = 11 & 10 = 10 (`1010`). Count = 1.
+- Iteration 2: n = 10 (`1010`), n - 1 = 9 (`1001`)
+  - n = 10 & 9 = 8 (`1000`). Count = 2.
+- Iteration 3: n = 8 (`1000`), n - 1 = 7 (`0111`)
+  - n = 8 & 7 = 0 (`0000`). Count = 3.
+- Loop terminates. Returns 3.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution 1: Compiler Intrinsic (Your Code - Hardware Optimized)
+class Solution {
+public:
+    int hammingWeight(int n) {
+        return __builtin_popcount(n);
+    }
+};
+
+
+// C++ Solution 2: Brian Kernighan's Algorithm (Bitwise Manual Approach)
+class SolutionKernighan {
+public:
+    int hammingWeight(int n) {
+        int count = 0;
+        while (n != 0) {
+            n &= (n - 1); // Clears the lowest set bit
+            count++;
+        }
+        return count;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def hammingWeight(self, n: int) -> int:
+        # Python's built-in bin().count('1') or bit manipulation
+        return bin(n).count('1')
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Using `__builtin_popcount`:
+- Time Complexity: O(1) — Executed in a single CPU instruction.
+- Space Complexity: O(1) Auxiliary Space.
+
+Using Brian Kernighan's Algorithm:
+- Time Complexity: O(K) where K is the number of set bits (at most 32).
+- Space Complexity: O(1) Auxiliary Space.
+===================================================================

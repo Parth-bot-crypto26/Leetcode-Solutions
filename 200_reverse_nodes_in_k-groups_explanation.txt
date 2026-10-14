@@ -1,0 +1,174 @@
+===================================================================
+LEETCODE 25: REVERSE NODES IN K-GROUP
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given the head of a linked list, reverse the nodes of the list `k` at a time, 
+and return the modified list.
+
+- `k` is a positive integer and $\le$ the length of the linked list.
+- If the number of nodes is not a multiple of `k`, left-out nodes at the end 
+  should remain as they are.
+- You may not alter node values, only nodes themselves may be changed.
+
+Constraints & Notes:
+- Number of nodes `n` in the list satisfies $1 \le k \le n \le 5000$.
+- Follow-up: Can you solve the problem in $O(1)$ extra memory space?
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your recursive C++ implementation is exceptionally elegant, concise, and 100% correct!
+
+1. RECURSIVE GROUP REVERSAL:
+   - First, you advance `k` steps using `temp`. If fewer than `k` nodes remain (`temp == NULL`), you return `head` untouched, fulfilling the requirement for left-out nodes.
+   - You recursively call `reverseKGroup(temp, k)` to process all subsequent groups first.
+   - Then, you reverse the current group of `k` nodes iteratively, pointing the tail of the current group to the head of the already-reversed subsequent groups.
+
+2. SPACE COMPLEXITY NUANCE (FOLLOW-UP):
+   - Your recursive solution uses $O(N/k)$ auxiliary stack space. 
+   - To satisfy the follow-up requirement of strict $O(1)$ extra memory space, an iterative approach using pointer adjustments and a dummy head node can be used instead.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [1, 2, 3, 4, 5], k = 2
+
+1. First check: Can we find 2 nodes? 
+   - `temp` moves 2 steps to point at node 3. (`count = 2 == k`, valid group).
+2. Recursive call: `reverseKGroup(3 -> 4 -> 5, k=2)`
+   - Processes remaining list `[3, 4, 5]` recursively.
+   - For `[3, 4, 5]`, first 2 nodes `[3, 4]` are reversed to `[4, 3]`, leaving `[5]` untouched.
+   - Returns new head of sublist: `4`.
+3. Reverse current group `[1, 2]` and attach recursive result (`4`):
+   - `1->next` becomes `4`.
+   - `2->next` becomes `1`.
+   - Returns new group head: `2`.
+   
+Final Output: `2 -> 1 -> 4 -> 3 -> 5`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution 1: Your Recursive Approach (O(N/k) Stack Space)
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode* temp = head;
+        int count = 0;
+        
+        // Check if there are at least k nodes remaining
+        while (count < k) {
+            if (temp == nullptr) {
+                return head;
+            }
+            temp = temp->next;
+            count++;
+        }
+        
+        // Recursively process the rest of the list
+        ListNode* prevNode = reverseKGroup(temp, k);
+        
+        // Reverse the current k-group
+        temp = head;
+        count = 0;
+        while (count < k) {
+            ListNode* nextNode = temp->next;
+            temp->next = prevNode;
+            prevNode = temp;
+            temp = nextNode;
+            count++;
+        }
+        
+        return prevNode;
+    }
+};
+
+
+// C++ Solution 2: Optimal Iterative Approach (Strict O(1) Auxiliary Space)
+class SolutionIterative {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        if (head == nullptr || k == 1) return head;
+
+        ListNode* dummy = new ListNode(0);
+        dummy->next = head;
+        ListNode* groupPrev = dummy;
+
+        while (true) {
+            // Check if there are k nodes left to reverse
+            ListNode* kth = groupPrev;
+            for (int i = 0; i < k && kth != nullptr; i++) {
+                kth = kth->next;
+            }
+            if (kth == nullptr) break;
+
+            ListNode* groupNext = kth->next;
+            
+            // Reverse the k group
+            ListNode* prev = groupNext;
+            ListNode* curr = groupPrev->next;
+            while (curr != groupNext) {
+                ListNode* nextTemp = curr->next;
+                curr->next = prev;
+                prev = curr;
+                curr = nextTemp;
+            }
+
+            // Connect with previous part
+            ListNode* temp = groupPrev->next;
+            groupPrev->next = kth;
+            groupPrev = temp;
+        }
+
+        ListNode* result = dummy->next;
+        delete dummy;
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution (Iterative O(1) Space)
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        dummy = ListNode(0, head)
+        group_prev = dummy
+        
+        while True:
+            # Find the k-th node
+            kth = group_prev
+            for _ in range(k):
+                kth = kth.node if hasattr(kth, 'node') else kth.next # standard traversal
+                if not kth:
+                    return dummy.next
+                    
+            group_next = kth.next
+            
+            # Reverse group
+            prev = group_next
+            curr = group_prev.next
+            while curr != group_next:
+                nxt = curr.next
+                curr.next = prev
+                prev = curr
+                curr = nxt
+                
+            # Reconnect
+            tmp = group_prev.next
+            group_prev.next = kth
+            group_prev = tmp
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Your Recursive Approach:
+- Time Complexity: O(N) — Every node is visited once during traversal and once during reversal.
+- Space Complexity: O(N/k) Auxiliary Space — Due to the recursion stack depth.
+
+Iterative Approach:
+- Time Complexity: O(N) — Single pass over all $N$ nodes.
+- Space Complexity: O(1) Auxiliary Space — Uses only a few pointer variables.
+===================================================================

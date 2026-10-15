@@ -1,0 +1,155 @@
+===================================================================
+LEETCODE 24: SWAP NODES IN PAIRS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a linked list, swap every two adjacent nodes and return its head. 
+You must solve the problem without modifying the values in the list's nodes 
+(i.e., only node pointers may be changed).
+
+Constraints & Notes:
+- The number of nodes in the list is in the range `[0, 100]`.
+- `0 <= Node.val <= 100`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is 100% logic-wise correct, robust, and optimal!
+
+1. ITERATIVE POINTER ADJUSTMENT:
+   - You carefully track `first`, `second`, and `third` (the next pair's anchor) to reverse adjacent elements without losing track of the rest of the list.
+   - You correctly use a `prev` pointer to link the previously swapped pair to the current pair.
+
+2. EDGE CASE HANDLING:
+   - Checking `if (head == NULL || head->next == NULL)` handles empty lists or single-node lists instantly.
+   - The `if (prev != NULL)` branch correctly assigns the new head of the entire list on the very first swap iteration.
+
+3. CLEANER ALTERNATIVE (DUMMY NODE):
+   - While your manual pointer tracking works wonderfully, introducing a **dummy node** at the beginning of the list eliminates the need for `if (prev != NULL)` head-adjustment checks, streamlining the loop logic.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: head = [1, 2, 3, 4]
+
+Initial State:
+- first = 1, second = 2, prev = NULL, head = 1
+
+Iteration 1:
+- third = second->next = 3
+- second->next = first (2 -> 1)
+- first->next = third (1 -> 3) -> List is now: 2 -> 1 -> 3 -> 4
+- `prev` is NULL -> `head` becomes second (head is now 2).
+- prev = first (prev is 1)
+- first = third (first is 3)
+- third (3) != NULL -> second = third->next (second is 4)
+
+Iteration 2:
+- first = 3, second = 4, prev = 1
+- third = second->next = NULL
+- second->next = first (4 -> 3)
+- first->next = third (3 -> NULL) -> List is now: 2 -> 1 -> 4 -> 3
+- `prev` (!= NULL) -> `prev->next = second` (1 -> 4)
+- prev = first (prev is 3)
+- first = third (NULL)
+- third == NULL -> second = NULL
+- Loop terminates (`first == NULL`).
+
+Resulting Head: 2 -> 1 -> 4 -> 3
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution 1: Your Iterative Approach
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return head;
+        }
+        ListNode* first = head;
+        ListNode* second = head->next;
+        ListNode* prev = nullptr;
+        
+        while (first != nullptr && second != nullptr) {
+            ListNode* third = second->next;
+            second->next = first;
+            first->next = third;
+            
+            if (prev != nullptr) {
+                prev->next = second;
+            } else {
+                head = second;
+            }
+            
+            prev = first;
+            first = third;
+            
+            if (third != nullptr) {
+                second = third->next;
+            } else {
+                second = nullptr;
+            }
+        }
+        return head;
+    }
+};
+
+
+// C++ Solution 2: Clean Iterative Approach using a Dummy Node
+class SolutionDummy {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* prev = dummy;
+        
+        while (prev->next != nullptr && prev->next->next != nullptr) {
+            ListNode* first = prev->next;
+            ListNode* second = prev->next->next;
+            
+            // Swapping
+            first->next = second->next;
+            second->next = first;
+            prev->next = second;
+            
+            // Move prev forward by 2 nodes
+            prev = first;
+        }
+        
+        ListNode* newHead = dummy->next;
+        delete dummy;
+        return newHead;
+    }
+};
+
+
+# Equivalent Python Solution (Dummy Node)
+class Solution:
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = ListNode(0, head)
+        prev = dummy
+        
+        while prev.next and prev.next.next:
+            first = prev.next
+            second = prev.next.next
+            
+            first.next = second.next
+            second.next = first
+            prev.next = second
+            
+            prev = first
+            
+        return dummy.next
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - We traverse each node in the linked list exactly once.
+
+- Space Complexity: O(1) Auxiliary Space
+  - In-place pointer modifications require constant extra space.
+===================================================================

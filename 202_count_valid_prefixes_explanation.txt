@@ -1,0 +1,111 @@
+===================================================================
+COUNT VALID PREFIXES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a binary string `s`. A prefix of `s` is considered valid if its 
+characters can be rearranged to form an alternating string (no two adjacent 
+characters are equal). 
+
+Return the number of valid prefixes of `s`.
+
+Constraints & Notes:
+- `1 <= s.length <= 100`
+- `s` consists only of '0' and '1'.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is 100% mathematically sound, elegant, and optimal!
+
+1. THE ALTERNATING STRING PROPERTY:
+   - A binary string can be rearranged into an alternating string (like `010101...` or `101010...`) 
+     if and only if the absolute difference between the count of `0`s and `1`s is at most `1`.
+   - If the difference is greater than `1`, it is impossible to interleave the characters 
+     without having at least two identical characters adjacent to each other.
+
+2. RUNNING FREQUENCY COUNT (YOUR CODE):
+   - By maintaining running counts (`cnt0` and `cnt1`) as you iterate character by character 
+     through each prefix, you evaluate the condition `abs(cnt0 - cnt1) <= 1` in $O(1)$ time per prefix.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "00101"
+
+Initialization:
+- cnt0 = 0, cnt1 = 0, ans = 0
+
+Iteration 1 (c = '0'):
+- cnt0 = 1, cnt1 = 0
+- abs(1 - 0) = 1 <= 1 -> valid! `ans` becomes 1. Prefix: "0"
+
+Iteration 2 (c = '0'):
+- cnt0 = 2, cnt1 = 0
+- abs(2 - 0) = 2 > 1 -> invalid. `ans` remains 1. Prefix: "00"
+
+Iteration 3 (c = '1'):
+- cnt0 = 2, cnt1 = 1
+- abs(2 - 1) = 1 <= 1 -> valid! `ans` becomes 2. Prefix: "001" (rearranges to "010")
+
+Iteration 4 (c = '0'):
+- cnt0 = 3, cnt1 = 1
+- abs(3 - 1) = 2 > 1 -> invalid. `ans` remains 2. Prefix: "0010"
+
+Iteration 5 (c = '1'):
+- cnt0 = 3, cnt1 = 2
+- abs(3 - 2) = 1 <= 1 -> valid! `ans` becomes 3. Prefix: "00101" (rearranges to "01010")
+
+Final Output: 3
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Single Pass)
+#include <string>
+#include <cmath>
+
+class Solution {
+public:
+    int countValidPrefixes(std::string s) {
+        int cnt0 = 0, cnt1 = 0, ans = 0;
+        for (char c : s) {
+            if (c == '0') {
+                cnt0++;
+            } else {
+                cnt1++;
+            }
+            if (std::abs(cnt0 - cnt1) <= 1) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def countValidPrefixes(self, s: str) -> int:
+        cnt0 = cnt1 = ans = 0
+        for c in s:
+            if c == '0':
+                cnt0 += 1
+            else:
+                cnt1 += 1
+            if abs(cnt0 - cnt1) <= 1:
+                ans += 1
+        return ans
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - We traverse the string `s` of length `N` exactly once, performing constant-time checks at each step.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only a few primitive integer counters (`cnt0`, `cnt1`, `ans`), requiring constant extra memory.
+===================================================================

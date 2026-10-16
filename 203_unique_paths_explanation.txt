@@ -1,0 +1,103 @@
+===================================================================
+LEETCODE 62: UNIQUE PATHS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+There is a robot on an `m x n` grid. The robot is initially located at the 
+top-left corner `(0, 0)` and tries to move to the bottom-right corner `(m - 1, n - 1)`. 
+The robot can only move either down or right at any point in time.
+
+Return the number of possible unique paths that the robot can take to reach the 
+bottom-right corner.
+
+Constraints & Notes:
+- `1 <= m, n <= 100`
+- The test cases are generated so that the answer is $\le 2 \times 10^9$.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using combinatorics is **100% optimal, brilliant, and lightning-fast!**
+
+1. COMBINATORIAL FORMULATION:
+   - To reach the bottom-right corner from the top-left corner in an $m \times n$ grid, the robot must make exactly $m - 1$ downward moves and $n - 1$ rightward moves.
+   - Total steps = $(m - 1) + (n - 1) = m + n - 2$.
+   - The problem reduces to choosing where to make the $m - 1$ downward moves out of the total $m + n - 2$ total steps, which is given by the binomial coefficient:
+     $$\binom{m + n - 2}{m - 1} \quad \text{or} \quad \binom{m + n - 2}{n - 1}$$
+
+2. ITERATIVE MULTIPLICATION & DIVISION (YOUR CODE):
+   - Computing large factorials directly causes integer overflow. By computing the combination incrementally using `ans = ans * (N - r + i) / i` in a single loop, you avoid overflow entirely while operating in $O(\min(m, n))$ time and $O(1)$ space.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: m = 3, n = 7
+
+- N = m + n - 2 = 3 + 7 - 2 = 8 total steps.
+- r = min(m - 1, n - 1) = min(2, 6) = 2 (number of down moves).
+- We want to compute $\binom{8}{2} = \frac{8 \times 7}{1 \times 2}$.
+
+Loop execution (i from 1 to 2):
+- i = 1: ans = 1 * (8 - 2 + 1) / 1 = 7 / 1 = 7
+- i = 2: ans = 7 * (8 - 2 + 2) / 2 = 7 * 8 / 2 = 56 / 2 = 28
+
+Resulting Output: 28
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Combinatorics)
+#include <algorithm>
+
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        long long ans = 1;
+        int N = m + n - 2;
+        int r = std::min(m - 1, n - 1);
+        
+        for (int i = 1; i <= r; i++) {
+            ans = ans * (N - r + i) / i;
+        }
+        
+        return static_cast<int>(ans);
+    }
+};
+
+
+// Alternative Dynamic Programming Approach (O(N * M) Time, O(N) Space)
+class SolutionDP {
+public:
+    int uniquePaths(int m, int n) {
+        std::vector<int> dp(n, 1);
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[j] += dp[j - 1];
+            }
+        }
+        return dp[n - 1];
+    }
+};
+
+
+# Equivalent Python Solution (Combinatorics)
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        import math
+        # Using Python's built-in combination function
+        return math.comb(m + n - 2, min(m - 1, n - 1))
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Combinatorial Approach (Your Code):
+- Time Complexity: O(min(m, n)) — The loop runs for $\min(m - 1, n - 1)$ iterations.
+- Space Complexity: O(1) Auxiliary Space — Uses only a few scalar variables.
+
+Dynamic Programming Approach:
+- Time Complexity: O(m * n) — Iterates through every cell in the grid.
+- Space Complexity: O(n) Auxiliary Space — Uses a single 1D array of size `n` for state-tracking.
+===================================================================

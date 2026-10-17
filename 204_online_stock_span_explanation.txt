@@ -1,0 +1,131 @@
+===================================================================
+LEETCODE 901: ONLINE STOCK SPAN
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Design an algorithm that collects daily price quotes for a stock and returns 
+the span of that stock's price for the current day.
+
+- The span of a stock's price on a given day is the maximum number of consecutive days 
+  (starting from that day and going backward) for which the stock price was 
+  less than or equal to today's price.
+
+Implement the `StockSpanner` class:
+- `StockSpanner()` Initializes the object.
+- `int next(int price)` Returns the span of today's price.
+
+Constraints & Notes:
+- `1 <= price <= 10^5`
+- At most `10^4` calls will be made to `next`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using a monotonic stack combined with a prices vector is clever, fully correct, and optimal!
+
+1. MONOTONIC STACK PATTERN:
+   - Instead of storing every price and index in separate structures, a monotonic decreasing stack can directly store pairs of `(price, span)` to achieve even cleaner $O(1)$ amortized space and time without needing a separate `prices` vector.
+
+2. YOUR APPROACH (INDEX-BASED STACK):
+   - You maintain a `prices` vector and a stack `s` holding indices of previous prices.
+   - When a new `price` arrives, you pop any previous indices whose price is $\le$ the current `price`.
+   - The span is calculated as the difference between the current `day` index and the index of the last remaining greater element on the stack (or `day + 1` if the stack becomes empty).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input sequence of prices: [100, 80, 60, 70, 60, 75, 85]
+
+1. `next(100)`:
+   - `prices` = [100], `s` is empty.
+   - Stack empty -> span = `0 + 1 = 1`.
+   - Push index `0` to stack. `day` becomes 1. Returns 1.
+
+2. `next(80)`:
+   - `prices` = [100, 80], `s` top is index 0 (`100 > 80`, no pop).
+   - span = `day (1) - s.top() (0) = 1`.
+   - Push index `1`. `day` becomes 2. Returns 1.
+
+3. `next(70)`:
+   - `prices` = [100, 80, 60, 70], `s` contains indices `[0, 1, 2]` (prices: 100, 80, 60).
+   - Top is index 2 (price 60 $\le$ 70) -> pop index 2.
+   - Next top is index 1 (price 80 > 70) -> stop popping.
+   - span = `day (3) - s.top() (1) = 2`.
+   - Push index `3`. `day` becomes 4. Returns 2.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution 1: Your Index-Based Approach
+class StockSpanner {
+private:
+    vector<int> prices;
+    stack<int> s;
+    int day;
+public:
+    StockSpanner() {
+        day = 0;
+    }
+    
+    int next(int price) {
+        prices.push_back(price);
+        while (!s.empty() && prices[s.top()] <= price) {
+            s.pop();
+        }
+        int span;
+        if (s.empty()) {
+            span = day + 1;
+        } else {
+            span = day - s.top();
+        }
+        s.push(day);
+        day++;
+        return span;
+    }
+};
+
+
+// C++ Solution 2: Clean Monotonic Pair Stack (Optimal - No Vectors Needed)
+class StockSpannerOptimal {
+private:
+    stack<pair<int, int>> st; // stores {price, span}
+public:
+    StockSpannerOptimal() {}
+    
+    int next(int price) {
+        int span = 1;
+        while (!st.empty() && st.top().first <= price) {
+            span += st.top().second;
+            st.pop();
+        }
+        st.push({price, span});
+        return span;
+    }
+};
+
+
+# Equivalent Python Solution (Optimal Pair Stack)
+class StockSpanner:
+
+    def __init__(self):
+        self.st = [] # stores (price, span)
+
+    def next(self, price: int) -> int:
+        span = 1
+        while self.st and self.st[-1][0] <= price:
+            span += self.st.pop()[1]
+        self.st.append((price, span))
+        return span
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(1) Amortized per `next()` call
+  - Each price is pushed onto the stack once and popped at most once across all calls, ensuring linear total time over $N$ operations.
+
+- Space Complexity: O(N) Auxiliary Space
+  - In the worst-case scenario (strictly increasing prices), the stack stores up to $N$ elements.
+===================================================================

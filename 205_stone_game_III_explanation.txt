@@ -1,0 +1,124 @@
+===================================================================
+LEETCODE 1406: STONE GAME III
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Alice and Bob take turns playing a game with a row of stones, each with an 
+integer value given in `stoneValue`. Alice starts first.
+
+- On each player's turn, they can take 1, 2, or 3 stones from the beginning 
+  of the remaining stones.
+- The score of each player is the sum of the values of the stones taken.
+- Both players play optimally to maximize their score difference.
+- Return "Alice" if Alice wins, "Bob" if Bob wins, or "Tie" if they tie.
+
+Constraints & Notes:
+- $1 \le \text{stoneValue.length} \le 5 \times 10^4$
+- $-1000 \le \text{stoneValue}[i] \le 1000$
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is an **absolute masterpiece of dynamic programming and space optimization!**
+
+1. MINIMAX WITH TABULATION:
+   - Let `dp[i]` represent the maximum score difference (`current_player_score - opponent_score`) 
+     from index `i` to the end of the array.
+   - At index `i`, the current player can choose to take 1, 2, or 3 stones. 
+   - For each choice `k` (where $1 \le k \le 3$), the net score gain is `take - dp[i + k]`, and the player 
+     chooses the maximum possible difference among valid choices.
+
+2. O(1) SPACE OPTIMIZATION (YOUR CODE):
+   - Since the state at index `i` only ever depends on `i + 1`, `i + 2`, and `i + 3`, you eliminated 
+     the $O(N)$ lookup table entirely by using a cyclic array of size 4 (`vector<int> dp(4, 0)`).
+   - Traversing backwards from `n - 1` down to `0` ensures that all required future states are safely 
+     available without collision before being overwritten.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: stoneValue = [1, 2, 3] (n = 3)
+
+Backward iteration:
+- i = 2 (stone value: 3):
+  - k = 1: take = 3, maxDiff = 3 - dp[3] = 3 - 0 = 3.
+  - dp[2] = 3.
+- i = 1 (stone values: 2, 3):
+  - k = 1: take = 2, maxDiff = 2 - dp[2] = 2 - 3 = -1.
+  - k = 2: take = 2 + 3 = 5, maxDiff = max(-1, 5 - dp[3]) = 5.
+  - dp[1] = 5.
+- i = 0 (stone values: 1, 2, 3):
+  - k = 1: take = 1, maxDiff = 1 - dp[1] = 1 - 5 = -4.
+  - k = 2: take = 1 + 2 = 3, maxDiff = max(-4, 3 - dp[2]) = max(-4, 3 - 3) = 0.
+  - k = 3: take = 1 + 2 + 3 = 6, maxDiff = max(0, 6 - dp[3]) = 6.
+  - dp[0] = 6.
+
+Final Evaluation:
+- `dp[0]` = 6 > 0 -> Returns "Alice".
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal O(1) Space)
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+
+class Solution {
+public:
+    string stoneGameIII(vector<int>& stoneValue) {
+        int n = stoneValue.size();
+        vector<int> dp(4, 0);
+        
+        for (int i = n - 1; i >= 0; i--) {
+            int take = 0;
+            int maxDiff = INT_MIN;
+            for (int k = 1; k <= 3 && i + k <= n; ++k) {
+                take += stoneValue[i + k - 1];
+                maxDiff = max(maxDiff, take - dp[(i + k) % 4]);
+            }
+            dp[i % 4] = maxDiff;
+        }
+        
+        if (dp[0] > 0) return "Alice";
+        if (dp[0] < 0) return "Bob";
+        return "Tie";
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def stoneGameIII(self, stoneValue: list[int]) -> str:
+        n = len(stoneValue)
+        dp = [0] * 4
+        
+        for i in range(n - 1, -1, -1):
+            take = 0
+            max_diff = -float('inf')
+            for k in range(1, 4):
+                if i + k > n:
+                    break
+                take += stoneValue[i + k - 1]
+                max_diff = max(max_diff, take - dp[(i + k) % 4])
+            dp[i % 4] = max_diff
+            
+        if dp[0] > 0:
+            return "Alice"
+        elif dp[0] < 0:
+            return "Bob"
+        return "Tie"
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - We perform a single backward pass over the array of length `N`. At each step, the inner loop runs at most 3 times ($O(1)$ work per element).
+
+- Space Complexity: O(1) Auxiliary Space
+  - Using a fixed-size array of 4 integers strictly optimizes memory usage from $O(N)$ down to $O(1)$.
+===================================================================

@@ -1,0 +1,101 @@
+===================================================================
+LEETCODE 3731: FIND MISSING ELEMENTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array `nums` consisting of unique integers. 
+Originally, `nums` contained every integer within a certain range from its 
+minimum to maximum values. Some integers might have gone missing.
+
+The smallest and largest integers of the original range are still present in `nums`.
+Return a sorted list of all the missing integers in this range. If no integers 
+are missing, return an empty list.
+
+Constraints & Notes:
+- `2 <= nums.length <= 100`
+- `1 <= nums[i] <= 100`
+- `nums` consists of unique integers.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is clean, straightforward, and 100% correct!
+
+1. SORTING & RANGE ITERATION (YOUR CODE):
+   - First, you sort `nums` in ascending order so that the smallest element is at `nums[0]` 
+     and the largest is at `nums[n - 1]`.
+   - You define the full expected range from `minVal` to `maxVal`.
+   - Using a pointer index (`idx`), you iterate through every integer in the range. If the expected 
+     number matches `nums[idx]`, you advance `idx`; otherwise, you collect the missing number into `ans`.
+
+2. ALTERNATIVE APPROACH (HASH SET):
+   - Alternatively, you could insert all elements into an unordered set or boolean array, then iterate 
+     from `minVal` to `maxVal` in $O(N)$ time without sorting. However, given $N \le 100$, 
+     your sorting approach is extremely efficient and simple.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 4, 2, 5]
+
+1. Sort `nums`: `[1, 2, 4, 5]`
+2. `minVal` = 1, `maxVal` = 5
+3. Iterate `count` from 1 to 5:
+   - count = 1: matches `nums[0]` (1). `idx` becomes 1.
+   - count = 2: matches `nums[1]` (2). `idx` becomes 2.
+   - count = 3: does NOT match `nums[2]` (4). Pushes `3` to `ans`.
+   - count = 4: matches `nums[2]` (4). `idx` becomes 3.
+   - count = 5: matches `nums[3]` (5). `idx` becomes 4.
+
+Resulting Output: `[3]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Sorting + Range Scan)
+#include <vector>
+#include <algorithm>
+
+class Solution {
+public:
+    std::vector<int> findMissingElements(std::vector<int>& nums) {
+        std::sort(nums.begin(), nums.end());
+        int n = nums.size();
+        std::vector<int> ans;
+        int minVal = nums[0], maxVal = nums[n - 1];
+        int idx = 0;
+        
+        for (int count = minVal; count <= maxVal; count++) {
+            if (idx < n && nums[idx] == count) {
+                while (idx < n && nums[idx] == count) {
+                    idx++;
+                }
+            } else {
+                ans.push_back(count);
+            }
+        }
+        
+        return ans;
+    }
+};
+
+
+# Equivalent Python Solution (Set Difference Approach)
+class Solution:
+    def findMissingElements(self, nums: list[int]) -> list[int]:
+        min_val, max_val = min(nums), max(nums)
+        full_range = set(range(min_val, max_val + 1))
+        missing = sorted(list(full_range - set(nums)))
+        return missing
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+Your Sorting Approach:
+- Time Complexity: O(N log N)
+  - Dominated by the initial sorting step of size `N`. The subsequent linear range scan takes $O(N + R)$ where $R$ is the range span.
+- Space Complexity: O(1) Auxiliary Space (excluding the output `ans` vector).
+===================================================================

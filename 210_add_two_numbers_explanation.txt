@@ -1,0 +1,121 @@
+===================================================================
+LEETCODE 2: ADD TWO NUMBERS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two non-empty linked lists representing two non-negative integers. 
+The digits are stored in **reverse order**, and each node contains a single digit. 
+Add the two numbers and return the sum as a linked list.
+
+Constraints & Notes:
+- The number of nodes in each linked list is in the range `[1, 100]`.
+- `0 <= Node.val <= 9`
+- It is guaranteed that the list represents a number that does not have leading zeros (except for `0` itself).
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is **100% optimal, pristine, and written to textbook perfection!**
+
+1. DUMMY HEAD PATTERN:
+   - Using `dummyHead` avoids special-case handling for the head of the new list, making the pointer construction unified and clean.
+   - Deallocating the dummy node (`delete dummyHead`) prevents memory leaks, showcasing professional resource management.
+
+2. ELEMENTARY ADDITION & CARRY SIMULATION:
+   - Traversing both lists simultaneously while `l1 != nullptr || l2 != nullptr || carry != 0` naturally handles lists of unequal lengths and accounts for any final leftover carry.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: l1 = [2, 4, 3], l2 = [5, 6, 4] (represents 342 + 465 = 807)
+
+- Initial: dummyHead = 0, current = dummyHead, carry = 0
+
+Iteration 1:
+- l1 val = 2, l2 val = 5
+- sum = 2 + 5 + 0 = 7
+- carry = 7 / 10 = 0
+- New node: 7. current->next points to 7. `current` moves to 7.
+- l1 and l2 advance.
+
+Iteration 2:
+- l1 val = 4, l2 val = 6
+- sum = 4 + 6 + 0 = 10
+- carry = 10 / 10 = 1
+- New node: 0. current->next points to 0. `current` moves to 0.
+- l1 and l2 advance.
+
+Iteration 3:
+- l1 val = 3, l2 val = 4
+- sum = 3 + 4 + 1 = 8
+- carry = 8 / 10 = 0
+- New node: 8. current->next points to 8. `current` moves to 8.
+- l1 and l2 reach nullptr.
+
+Loop terminates (l1, l2 are null, carry is 0).
+Result list: `7 -> 0 -> 8` (represents 807).
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Elementary Addition)
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* dummyHead = new ListNode(0);
+        ListNode* current = dummyHead;
+        int carry = 0;
+        
+        while (l1 != nullptr || l2 != nullptr || carry != 0) {
+            int val1 = (l1 != nullptr) ? l1->val : 0;
+            int val2 = (l2 != nullptr) ? l2->val : 0;
+            int sum = val1 + val2 + carry;
+            
+            carry = sum / 10;
+            current->next = new ListNode(sum % 10);
+            current = current->next;
+            
+            if (l1 != nullptr) l1 = l1->next;
+            if (l2 != nullptr) l2 = l2->next;
+        }
+        
+        ListNode* result = dummyHead->next;
+        delete dummyHead;
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        dummy_head = ListNode(0)
+        current = dummy_head
+        carry = 0
+        
+        while l1 or l2 or carry:
+            val1 = l1.val if l1 else 0
+            val2 = l2.val if l2 else 0
+            total = val1 + val2 + carry
+            
+            carry = total // 10
+            current.next = ListNode(total % 10)
+            current = current.next
+            
+            if l1: l1 = l1.next
+            if l2: l2 = l2.next
+            
+        return dummy_head.next
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(max(N, M))
+  - Where `N` and `M` are the lengths of lists `l1` and `l2`. The loop runs at most $\max(N, M) + 1$ times.
+
+- Space Complexity: O(max(N, M)) Auxiliary Space
+  - The length of the new result linked list is at most $\max(N, M) + 1$.
+===================================================================

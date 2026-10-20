@@ -1,0 +1,162 @@
+===================================================================
+LEETCODE 315: COUNT OF SMALLER NUMBERS AFTER SELF
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array `nums`, return an integer array `counts` where `counts[i]` 
+is the number of smaller elements to the right of `nums[i]`.
+
+Constraints & Notes:
+- `1 <= nums.length <= 10^5`
+- `-10^4 <= nums[i] <= 10^4`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using an augmented Merge Sort is **100% optimal, elegant, and exceptionally efficient!**
+
+1. MERGE SORT INVERSION / SMALLER COUNTING TECHNIQUE:
+   - To track the original indices of elements as they move during sorting, you pair each number 
+     with its index: `pair<int, int>{nums[i], i}`.
+   - During the `merge` step, whenever an element from the right subarray is smaller than an element 
+     from the left subarray (`arr[j].first < arr[i].first`), it means this right-side element is smaller 
+     than `arr[i]` and lies to its right in the array. 
+   - You increment a local `rightLess` counter. When elements from the left subarray are placed, 
+     you add accumulated `rightLess` contributions directly to `count[arr[i].second]`.
+
+2. PERFORMANCE:
+   - This approach achieves $O(N \log N)$ time complexity, bypassing the $O(N^2)$ brute-force limitation 
+     and satisfying the strict constraints for $N = 10^5$.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [5, 2, 6, 1]
+Pairs with indices: `[(5,0), (2,1), (6,2), (1,3)]`
+
+1. Divide into halves:
+   - Left: `[(5,0), (2,1)]` -> Sorted: `[(2,1), (5,0)]` (count[1] updated during its internal merge)
+   - Right: `[(6,2), (1,3)]` -> Sorted: `[(1,3), (6,2)]` (count[2] updated during its internal merge)
+
+2. Merge Left and Right:
+   - Left sorted: `[(2,1), (5,0)]`, Right sorted: `[(1,3), (6,2)]`
+   - Compare pointers and accumulate `rightLess` when right elements are smaller than left elements, updating `count` for each left element accordingly.
+
+Final Output: `[2, 1, 1, 0]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Merge Sort)
+#include <vector>
+#include <utility>
+
+class Solution {
+    void merge(std::vector<std::pair<int, int>>& arr, int left, int mid, int right, std::vector<int>& count) {
+        std::vector<std::pair<int, int>> temp(right - left + 1);
+        int i = left;
+        int j = mid + 1;
+        int k = 0;
+        int rightLess = 0;
+        
+        while (i <= mid && j <= right) {
+            if (arr[j].first < arr[i].first) {
+                rightLess++;
+                temp[k++] = arr[j++];
+            } else {
+                count[arr[i].second] += rightLess;
+                temp[k++] = arr[i++];
+            }
+        }
+        
+        while (i <= mid) {
+            count[arr[i].second] += rightLess;
+            temp[k++] = arr[i++];
+        }
+        
+        while (j <= right) {
+            temp[k++] = arr[j++];
+        }
+        
+        for (int p = 0; p < temp.size(); p++) {
+            arr[left + p] = temp[p];
+        }
+    }
+    
+    void mergeSort(std::vector<std::pair<int, int>>& arr, int left, int right, std::vector<int>& count) {
+        if (left >= right) return;
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid, count);
+        mergeSort(arr, mid + 1, right, count);
+        merge(arr, left, mid, right, count);
+    }
+    
+public:
+    std::vector<int> countSmaller(std::vector<int>& nums) {
+        int n = nums.size();
+        std::vector<int> count(n, 0);
+        std::vector<std::pair<int, int>> arr(n);
+        
+        for (int i = 0; i < n; i++) {
+            arr[i] = {nums[i], i};
+        }
+        
+        mergeSort(arr, 0, n - 1, count);
+        return count;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def countSmaller(self, nums: list[int]) -> list[int]:
+        def merge_sort(arr):
+            if len(arr) <= 1:
+                return arr
+            mid = len(arr) // 2
+            left = merge_sort(arr[:mid])
+            right = merge_sort(arr[mid:])
+            
+            merged = []
+            i = j = 0
+            right_less = 0
+            
+            while i < len(left) and j < len(right):
+                if right[j][0] < left[i][0]:
+                    right_less += 1
+                    merged.append(right[j])
+                    j += 1
+                else:
+                    counts[left[i][1]] += right_less
+                    merged.append(left[i])
+                    i += 1
+                    
+            while i < len(left):
+                counts[left[i][1]] += right_less
+                merged.append(left[i])
+                i += 1
+                
+            while j < len(right):
+                merged.append(right[j])
+                j += 1
+                
+            return merged
+
+        n = len(nums)
+        counts = [0] * n
+        indexed_nums = [(nums[i], i) for i in range(n)]
+        merge_sort(indexed_nums)
+        return counts
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N log N)
+  - The array is recursively split in half (depth of $\log N$) and merged in linear time $O(N)$ at each level.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Space required for the temporary vectors in merge sort and storing index-value pairs.
+===================================================================

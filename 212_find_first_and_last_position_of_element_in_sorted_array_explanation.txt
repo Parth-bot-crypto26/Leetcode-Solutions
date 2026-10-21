@@ -1,0 +1,148 @@
+===================================================================
+LEETCODE 34: FIND FIRST AND LAST POSITION OF ELEMENT IN SORTED ARRAY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an array of integers `nums` sorted in non-decreasing order, find the starting 
+and ending position of a given `target` value. If `target` is not found, return `[-1, -1]`.
+
+You must write an algorithm with O(log n) runtime complexity.
+
+Constraints & Notes:
+- `0 <= nums.length <= 10^5`
+- `-10^9 <= nums[i], target <= 10^9`
+- `nums` is a non-decreasing array.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using dual binary searches is **100% optimal, elegant, and textbook-perfect!**
+
+1. DUAL BINARY SEARCH (LOWER & UPPER BOUNDS):
+   - `findFirst`: When `nums[mid] == target`, you record the index and continue searching to the left (`right = mid - 1`) to ensure you find the absolute first occurrence.
+   - `findLast`: When `nums[mid] == target`, you record the index and continue searching to the right (`left = mid + 1`) to ensure you find the absolute last occurrence.
+
+2. EARLY EXIT OPTIMIZATION:
+   - Calling `findFirst` first and immediately returning `[-1, -1]` if the target is absent avoids wasting computation on `findLast`. This is a clean, efficient short-circuit.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [5, 7, 7, 8, 8, 10], target = 8
+
+1. `findFirst(nums, 8)`:
+   - left = 0, right = 5
+   - mid = 2 (`nums[2] = 7`). 7 < 8 -> left = 3.
+   - mid = 4 (`nums[4] = 8`). 8 == target -> first = 4, right = 3.
+   - mid = 3 (`nums[3] = 8`). 8 == target -> first = 3, right = 2.
+   - Loop terminates (left 3 > right 2). Returns `3`.
+
+2. Since `first != -1`, call `findLast(nums, 8)`:
+   - left = 0, right = 5
+   - mid = 2 (`nums[2] = 7`). 7 < 8 -> left = 3.
+   - mid = 4 (`nums[4] = 8`). 8 == target -> last = 4, left = 5.
+   - mid = 5 (`nums[5] = 10`). 10 > 8 -> right = 4.
+   - Loop terminates (left 5 > right 4). Returns `4`.
+
+Resulting Output: `[3, 4]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Dual Binary Search)
+#include <vector>
+
+class Solution {
+    int findFirst(std::vector<int>& nums, int target) {
+        int left = 0, right = nums.size() - 1;
+        int first = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                first = mid;
+                right = mid - 1; // Look for earlier occurrence on the left
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return first;
+    }
+    
+    int findLast(std::vector<int>& nums, int target) {
+        int left = 0, right = nums.size() - 1;
+        int last = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                last = mid;
+                left = mid + 1; // Look for later occurrence on the right
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return last;
+    }
+public:
+    std::vector<int> searchRange(std::vector<int>& nums, int target) {
+        int first = findFirst(nums, target);
+        if (first == -1) {
+            return {-1, -1};
+        }
+        int last = findLast(nums, target);
+        return {first, last};
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def searchRange(self, nums: list[int], target: int) -> list[int]:
+        def find_first():
+            left, right = 0, len(nums) - 1
+            first = -1
+            while left <= right:
+                mid = (left + right) // 2
+                if nums[mid] == target:
+                    first = mid
+                    right = mid - 1
+                elif nums[mid] < target:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+            return first
+
+        def find_last():
+            left, right = 0, len(nums) - 1
+            last = -1
+            while left <= right:
+                mid = (left + right) // 2
+                if nums[mid] == target:
+                    last = mid
+                    left = mid + 1
+                elif nums[mid] < target:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+            return last
+
+        first = find_first()
+        if first == -1:
+            return [-1, -1]
+        return [first, find_last()]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(log N)
+  - Performs two independent binary searches over an array of length `N`, each taking logarithmic time.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only a few constant scalar variables for pointers and bounds tracking.
+===================================================================

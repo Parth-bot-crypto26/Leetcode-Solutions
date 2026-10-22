@@ -1,0 +1,114 @@
+===================================================================
+LEETCODE 541: REVERSE STRING II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string `s` and an integer `k`, reverse the first `k` characters for every 
+`2k` characters counting from the start of the string.
+
+- If there are fewer than `k` characters left, reverse all of them.
+- If there are less than `2k` but greater than or equal to `k` characters, reverse 
+  the first `k` characters and leave the rest as original.
+
+Constraints & Notes:
+- `1 <= s.length <= 10^4`
+- `s` consists of only lowercase English letters.
+- `1 <= k <= 10^4`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is functionally correct and adheres to the problem rules!
+
+1. CHUNKING BY 2K:
+   - You iterate through the string in steps of `2 * k` (`i += 2 * k`).
+   - For each block, you check if the remaining characters (`rem = n - i`) are $\ge k$ or $< k$, 
+     extracting the relevant segment via `s.substr()`, reversing it, and putting it back via `s.replace()`.
+
+2. PERFORMANCE & REFINEMENT CRITIQUE:
+   - While `s.substr()` and `s.replace()` work correctly, they create temporary string objects and incur 
+     overhead from dynamic memory allocation and shifting.
+   - An even more efficient and idiomatic approach is to use `std::reverse()` directly on the string 
+     iterators/indices in place, utilizing `std::min(i + k, n)` to clamp the boundary safely without extra allocations.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "abcdefg", k = 2
+
+Iteration 1 (i = 0):
+- `rem = 7 - 0 = 7`. Since `7 >= 2` ($k$), we reverse the first `k` characters (from index 0 to 1: `"ab"`).
+- Reversed segment: `"ba"`. String becomes `"bacdefg"`.
+- Next step jumps by `2 * k = 4`. `i` becomes 4.
+
+Iteration 2 (i = 4):
+- `rem = 7 - 4 = 3`. Since `3 >= 2` ($k$), we reverse the first `k` characters from index 4 to 5 (`"ef"`).
+- Reversed segment: `"fe"`. String becomes `"bacdfeeg"` (Wait, let's trace accurately: index 4 is 'e', 5 is 'f', 6 is 'g').
+- Extracting `s.substr(4, 2)` gives `"ef"`, reversing gives `"fe"`, replacing at 4 gives `"bacdfe0"` -> `"bacdfeg"`.
+- `i` increments by 4 to 8, loop terminates.
+
+Final Output: `"bacdfeg"`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution 1: Your Substring/Replace Approach
+#include <string>
+#include <algorithm>
+
+class SolutionSubstr {
+public:
+    std::string reverseStr(std::string s, int k) {
+        int n = s.length();
+        for (int i = 0; i < n; i += 2 * k) {
+            int rem = n - i;
+            if (rem >= k) {
+                std::string sub = s.substr(i, k);
+                std::reverse(sub.begin(), sub.end());
+                s.replace(i, k, sub);
+            } else {
+                std::string sub = s.substr(i, rem);
+                std::reverse(sub.begin(), sub.end());
+                s.replace(i, rem, sub);
+            }
+        }
+        return s;
+    }
+};
+
+
+// C++ Solution 2: Optimal In-Place Approach (Zero Extra Allocations)
+class Solution {
+public:
+    std::string reverseStr(std::string s, int k) {
+        int n = s.length();
+        for (int i = 0; i < n; i += 2 * k) {
+            // Reverse the first k characters of the current 2k block
+            std::reverse(s.begin() + i, s.begin() + std::min(i + k, n));
+        }
+        return s;
+    }
+};
+
+
+# Equivalent Python Solution (In-Place Slice Modification)
+class Solution:
+    def reverseStr(self, s: str, k: int) -> str:
+        a = list(s)
+        for i in range(0, len(a), 2 * k):
+            a[i:i + k] = reversed(a[i:i + k])
+        return "".join(a)
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+In-Place Approach:
+- Time Complexity: O(N)
+  - Every character in the string of length `N` is visited and reversed at most once.
+
+- Space Complexity: O(1) Auxiliary Space (C++) / O(N) (Python List Conversion)
+  - Modifies the string in place without requiring additional data structures or dynamic string copies.
+===================================================================

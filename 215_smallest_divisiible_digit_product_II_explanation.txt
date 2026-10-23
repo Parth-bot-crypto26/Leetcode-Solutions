@@ -1,0 +1,163 @@
+===================================================================
+LEETCODE 3348: SMALLEST DIVISIBLE DIGIT PRODUCT II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a string `num` representing a positive integer, and an integer `t`.
+A number is called zero-free if none of its digits are 0. 
+
+Return a string representing the smallest zero-free number greater than or equal 
+to `num` such that the product of its digits is divisible by `t`. If no such 
+number exists, return `"-1"`.
+
+Constraints & Notes:
+- `2 <= num.length <= 2 * 10^5`
+- `num` consists only of digits in the range `['0', '9']` and has no leading zeros.
+- `1 <= t <= 10^14`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation establishes an advanced and highly sophisticated framework 
+combining prime factorization, prefix-state reduction, and greedy backtracking search:
+
+1. PRIME FACTORIZATION & FACTOR TRACKING:
+   - Since a digit product can only yield prime factors of 2, 3, 5, and 7, any `t` with 
+     prime factors greater than 7 is immediately caught and rejected (`return "-1"`).
+   - The `Factors` struct tracks remaining counts of `2`, `3`, `5`, and `7` required from the product.
+
+2. GREEDY BACKTRACKING & SUFFIX CONSTRUCTION:
+   - Your code attempts to match the prefix of `num` as tightly as possible, incrementing 
+     digits when necessary, and then building the lexicographically smallest valid suffix 
+     using `buildSmallestSuffix()`.
+
+3. SYNTACTIC CORRECTION:
+   - Notice that your code snippet contains minor copy-paste/diff artifacts such as `- 1i` 
+     (e.g., `len - 1i`), which causes compilation failures in standard C++. Changing these 
+     to standard arithmetic (like `len - 1` or `n - 1`) resolves the syntax issue.
+
+-------------------------------------------------------------------
+[CORRECTED C++ IMPLEMENTATION]
+-------------------------------------------------------------------
+
+#include <string>
+#include <vector>
+#include <algorithm>
+
+class Solution {
+public:
+    struct Factors {
+        int c2 = 0, c3 = 0, c5 = 0, c7 = 0;
+    };
+
+    int getMinLength(Factors f) {
+        int count = 0;
+        count += f.c7;
+        count += f.c5;
+        int n9 = f.c3 / 2;
+        f.c3 %= 2;
+        int n8 = f.c2 / 3;
+        f.c2 %= 3;
+        
+        if (f.c3 == 1 && f.c2 == 1) {
+            count += 1;
+            f.c3 = 0;
+            f.c2 = 0;
+        } else if (f.c3 == 1 && f.c2 == 2) {
+            count += 2;
+            f.c3 = 0;
+            f.c2 = 0;
+        }
+        
+        if (f.c2 >= 1) count += 1;
+        if (f.c3 == 1) count += 1;
+        
+        count += n9 + n8;
+        return count;
+    }
+
+    bool canForm(Factors f, int len) {
+        if (len < 0) return false;
+        return getMinLength(f) <= len;
+    }
+
+    Factors reduceFactors(Factors f, int d) {
+        if (d == 0) return f;
+        while (d % 2 == 0 && f.c2 > 0) { f.c2--; d /= 2; }
+        while (d % 3 == 0 && f.c3 > 0) { f.c3--; d /= 3; }
+        if (d == 5 && f.c5 > 0) f.c5--;
+        if (d == 7 && f.c7 > 0) f.c7--;
+        return f;
+    }
+
+    std::string buildSmallestSuffix(Factors f, int len) {
+        std::string res = "";
+        for (int i = 0; i < len; ++i) {
+            for (int d = 1; d <= 9; ++d) {
+                Factors nextF = reduceFactors(f, d);
+                if (canForm(nextF, len - 1)) {
+                    res += std::to_string(d);
+                    f = nextF;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    std::string smallestNumber(std::string num, long long t) {
+        Factors f;
+        long long temp = t;
+        while (temp % 2 == 0) { f.c2++; temp /= 2; }
+        while (temp % 3 == 0) { f.c3++; temp /= 3; }
+        while (temp % 5 == 0) { f.c5++; temp /= 5; }
+        while (temp % 7 == 0) { f.c7++; temp /= 7; }
+        
+        if (temp > 1) return "-1";
+
+        int n = num.length();
+        int firstZero = num.find('0');
+        if (firstZero == std::string::npos) firstZero = n;
+
+        Factors currentF = f;
+        for (char c : num) {
+            currentF = reduceFactors(currentF, c - '0');
+        }
+        
+        if (firstZero == n && currentF.c2 == 0 && currentF.c3 == 0 && currentF.c5 == 0 && currentF.c7 == 0) {
+            return num;
+        }
+
+        std::vector<Factors> prefixF(n + 1);
+        prefixF[0] = f;
+        for (int i = 0; i < std::min(n, firstZero); ++i) {
+            prefixF[i + 1] = reduceFactors(prefixF[i], num[i] - '0');
+        }
+
+        for (int i = std::min(n - 1, firstZero); i >= 0; --i) {
+            int startDigit = (i < firstZero) ? (num[i] - '0' + 1) : 1;
+            for (int d = startDigit; d <= 9; ++d) {
+                Factors nextF = reduceFactors(prefixF[i], d);
+                if (canForm(nextF, n - 1)) {
+                    std::string res = num.substr(0, i) + std::to_string(d);
+                    res += buildSmallestSuffix(nextF, n - 1);
+                    return res;
+                }
+            }
+        }
+        int targetLen = std::max(n + 1, getMinLength(f));
+        return buildSmallestSuffix(f, targetLen);
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N log(T) + 9^K)
+  - Prime factorization takes logarithmic time relative to `t`, and the suffix construction 
+    explores small bounded digit combinations efficiently through factor pruning.
+- Space Complexity: O(N) Auxiliary Space
+  - Stores prefix states and recursion/suffix string buffers up to the length of `num`.
+===================================================================

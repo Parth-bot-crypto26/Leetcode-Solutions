@@ -1,0 +1,127 @@
+===================================================================
+LEETCODE 93: RESTORE IP ADDRESSES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+A valid IP address consists of exactly four integers separated by single dots. 
+Each integer is between 0 and 255 (inclusive) and cannot have leading zeros.
+
+Given a string `s` containing only digits, return all possible valid IP addresses 
+that can be formed by inserting dots into `s`. You cannot reorder or remove any digits.
+
+Constraints & Notes:
+- `1 <= s.length <= 20`
+- `s` consists of digits only.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **three nested loops to place three dots** is exceptionally clever, extremely fast, and highly intuitive!
+
+1. FIXED-PARTITION ITERATIVE APPROACH:
+   - An IP address always consists of 4 parts. Instead of a recursive backtracking function, you iterate over all possible lengths for the first three segments (`l1`, `l2`, `l3`), each ranging from 1 to 3 characters.
+   - The fourth segment length (`l4`) is directly derived as `n - (l1 + l2 + l3)`, bounded between 1 and 3.
+
+2. EFFICIENCY:
+   - Since an IP address can have at most $3 \times 3 \times 3 = 27$ valid combinations of lengths, the nested loops run in strict $O(1)$ constant time (bounded by a maximum of 27 iterations regardless of string length up to 20)!
+   - Substring extraction and validation take negligible time.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "25525511135" (n = 11)
+
+- Loop `l1` from 1 to 3:
+  - Suppose `l1 = 3` (`s1 = "255"`). Valid.
+- Loop `l2` from 1 to 3:
+  - Suppose `l2 = 3` (`s2 = "255"`). Valid.
+- Loop `l3` from 1 to 3:
+  - Suppose `l3 = 2` (`s3 = "11"`). Valid.
+- Calculate `l4 = 11 - (3 + 3 + 2) = 3`. `l4` is 3, which is valid (`s4 = "135"`).
+- All segments `"255"`, `"255"`, `"11"`, `"135"` pass `isValid()`.
+- Pushes `"255.255.11.135"` to `result`.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Iterative Partitioning)
+#include <vector>
+#include <string>
+
+class Solution {
+    bool isValid(const std::string& s) {
+        if (s.empty() || s.length() > 3) return false;
+        if (s.length() > 1 && s[0] == '0') return false;
+        int val = std::stoi(s);
+        return val >= 0 && val <= 255;
+    }
+public:
+    std::vector<std::string> restoreIpAddresses(std::string s) {
+        std::vector<std::string> result;
+        int n = s.length();
+        if (n < 4 || n > 12) return result;
+        
+        for (int l1 = 1; l1 <= 3 && l1 < n; ++l1) {
+            for (int l2 = 1; l2 <= 3 && l1 + l2 < n; ++l2) {
+                for (int l3 = 1; l3 <= 3 && l1 + l2 + l3 < n; ++l3) {
+                    int l4 = n - (l1 + l2 + l3);
+                    if (l4 >= 1 && l4 <= 3) {
+                        std::string s1 = s.substr(0, l1);
+                        std::string s2 = s.substr(l1, l2);
+                        std::string s3 = s.substr(l1 + l2, l3);
+                        std::string s4 = s.substr(l1 + l2 + l3, l4);
+                        
+                        if (isValid(s1) && isValid(s2) && isValid(s3) && isValid(s4)) {
+                            result.push_back(s1 + '.' + s2 + '.' + s3 + '.' + s4);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def restoreIpAddresses(self, s: str) -> list[str]:
+        def is_valid(segment: str) -> bool:
+            if not segment or len(segment) > 3:
+                return False
+            if len(segment) > 1 and segment[0] == '0':
+                return False
+            return 0 <= int(segment) <= 255
+
+        result = []
+        n = len(s)
+        if n < 4 or n > 12:
+            return result
+
+        for l1 in range(1, 4):
+            for l2 in range(1, 4):
+                for l3 in range(1, 4):
+                    l4 = n - (l1 + l2 + l3)
+                    if 1 <= l4 <= 3:
+                        s1 = s[:l1]
+                        s2 = s[l1:l1 + l2]
+                        s3 = s[l1 + l2:l1 + l2 + l3]
+                        s4 = s[l1 + l2 + l3:]
+                        
+                        if is_valid(s1) and is_valid(s2) and is_valid(s3) and is_valid(s4):
+                            result.append(f"{s1}.{s2}.{s3}.{s4}")
+                            
+        return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(1)
+  - The loops run at most $3 \times 3 \times 3 = 27$ times regardless of the string length, making the execution time strictly constant.
+
+- Space Complexity: O(1) Auxiliary Space (excluding the output container)
+  - Uses only a few scalar variables and temporary strings of fixed length $\le 12$.
+===================================================================

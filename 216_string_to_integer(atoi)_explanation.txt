@@ -1,0 +1,134 @@
+===================================================================
+LEETCODE 8: STRING TO INTEGER (ATOI)
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Implement the `myAtoi(string s)` function, which converts a string to a 32-bit signed integer.
+
+The algorithm follows these steps:
+1. **Whitespace**: Ignore any leading whitespace (`" "`).
+2. **Signedness**: Determine the sign by checking if the next character is `'-'` or `'+'`.
+3. **Conversion**: Read digits until a non-digit character or end of string is reached. If no digits are read, return `0`.
+4. **Rounding / Overflow**: Clamp integers out of the 32-bit signed range $[-2^{31}, 2^{31} - 1]$ to `INT_MIN` or `INT_MAX`.
+
+Constraints & Notes:
+- `0 <= s.length <= 200`
+- `s` consists of English letters, digits, `' '`, `'+'`, `'-'`, and `'.'`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is **100% optimal, robust, and handles overflow conditions with absolute precision!**
+
+1. STATE MACHINE & PARSING:
+   - You systematically skip leading whitespace, capture the sign, and parse numeric digits sequentially.
+   - Using `isdigit(s[i])` cleanly identifies valid character inputs.
+
+2. OVERFLOW PREVENTION (PRE-CHECK TRICK):
+   - By checking `result > INT_MAX / 10 || (result == INT_MAX / 10 && digit > 7)` **before** performing `result = result * 10 + digit`, you completely prevent signed integer overflow (which is undefined behavior in C++).
+   - This clever check correctly identifies when adding the next digit would breach the 32-bit signed integer boundaries.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "   -042"
+
+1. **Whitespace**: 
+   - Skips spaces at indices 0, 1, 2. `i` lands at index 3 (`'-'`).
+2. **Signedness**: 
+   - `s[3] == '-'`, so `sign = -1`. `i` advances to 4.
+3. **Conversion**:
+   - `s[4] == '0'`: `result = 0 * 10 + 0 = 0`. `i` advances to 5.
+   - `s[5] == '4'`: `result = 0 * 10 + 4 = 4`. `i` advances to 6.
+   - `s[6] == '2'`: `result = 4 * 10 + 2 = 42`. `i` advances to 7 (loop ends).
+4. **Final Calculation**:
+   - Returns `result * sign` = `42 * -1` = `-42`.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Manual Parsing & Overflow Guard)
+#include <string>
+#include <cctype>
+#include <climits>
+
+class Solution {
+public:
+    int myAtoi(std::string s) {
+        int i = 0;
+        int n = s.length();
+        int sign = 1;
+        int result = 0;
+        
+        // Step 1: Skip leading whitespace
+        while (i < n && s[i] == ' ') {
+            i++;
+        }
+        
+        // Step 2: Handle sign
+        if (i < n && (s[i] == '+' || s[i] == '-')) {
+            sign = (s[i] == '-') ? -1 : 1;
+            i++;
+        }
+        
+        // Step 3: Parse digits and check overflow
+        while (i < n && std::isdigit(s[i])) {
+            int digit = s[i] - '0';
+            
+            if (result > INT_MAX / 10 || (result == INT_MAX / 10 && digit > 7)) {
+                return (sign == 1) ? INT_MAX : INT_MIN;
+            }
+            
+            result = result * 10 + digit;
+            i++;
+        }
+        
+        return result * sign;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        s = s.lstrip()
+        if not s:
+            return 0
+            
+        sign = 1
+        i = 0
+        if s[0] == '-':
+            sign = -1
+            i += 1
+        elif s[0] == '+':
+            i += 1
+            
+        result = 0
+        while i < len(s) and s[i].isdigit():
+            result = result * 10 + int(s[i])
+            i += 1
+            
+        result *= sign
+        
+        # Clamp to 32-bit signed integer limits
+        INT_MAX = 2**31 - 1
+        INT_MIN = -2**31
+        if result > INT_MAX:
+            return INT_MAX
+        if result < INT_MIN:
+            return INT_MIN
+            
+        return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of the string `s`. Each character is visited at most once during linear scanning.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only primitive scalar variables (`i`, `sign`, `result`, `digit`), requiring constant extra memory.
+===================================================================

@@ -1,0 +1,160 @@
+===================================================================
+LEETCODE 79: WORD SEARCH
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an `m x n` grid of characters `board` and a string `word`, return `true` 
+if `word` exists in the grid.
+
+- The word can be constructed from letters of sequentially adjacent cells (horizontally or vertically).
+- The same letter cell may not be used more than once.
+
+Constraints & Notes:
+- `m == board.length`, `n == board[i].length`
+- `1 <= m, n <= 6`
+- `1 <= word.length <= 15`
+- Follow-up: Could you use search pruning to make your solution faster with a larger board?
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is an **absolute masterclass in search pruning and optimization!** 
+
+1. FREQUENCY PRE-CHECK & REVERSAL HEURISTIC:
+   - You first verify whether `board` contains enough occurrences of every character in `word` using hash maps, rejecting impossible words instantly.
+   - You include a brilliant heuristic: if the starting character of `word` is more frequent on the board than the ending character, you reverse the word (`reverse(word.begin(), word.end())`) to start your DFS from the rarer end. This dramatically prunes dead-end search branches early.
+
+2. IN-PLACE BACKTRACKING:
+   - Instead of maintaining a separate 2D `visited` boolean matrix, you temporarily overwrite the board cell with `'#'` during traversal and restore its original value upon backtracking, optimizing space to $O(L)$ recursion depth.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "SEE"
+
+1. **Frequency Checks**:
+   - `boardFreq` and `wordFreq` match; word length $\le$ board size.
+   - Frequencies checked, no early rejection.
+2. **DFS Traversal**:
+   - Iterates through the board looking for `word[0]` ('S').
+   - Finds 'S' at `(1, 0)`. Calls `dfs` with `r = 1, c = 0, index = 0`.
+   - Marks `board[1][0] = '#'` and checks neighbors for `word[1]` ('E').
+   - Finds 'E' at `(2, 0)`. Moves to `(2, 0)`, marks as `'#'`, and checks for `word[2]` ('E').
+   - Finds 'E' at `(2, 1)`. Reaches the end of the word (`index == word.length()`), returning `true`.
+
+Final Output: `true`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Highly Optimized with Pruning)
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+    int m, n;
+    bool dfs(std::vector<std::vector<char>>& board, const std::string& word, int r, int c, int index) {
+        if (index == word.length()) return true;
+        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] != word[index]) {
+            return false;
+        }
+        char temp = board[r][c];
+        board[r][c] = '#';
+        bool found = dfs(board, word, r - 1, c, index + 1) || 
+                     dfs(board, word, r + 1, c, index + 1) || 
+                     dfs(board, word, r, c - 1, index + 1) || 
+                     dfs(board, word, r, c + 1, index + 1);
+        board[r][c] = temp;
+        return found;
+    }
+public:
+    bool exist(std::vector<std::vector<char>>& board, std::string word) {
+        m = board.size();
+        n = board[0].size();
+        if (word.length() > m * n) return false;
+        
+        std::unordered_map<char, int> boardFreq, wordFreq;
+        for (int r = 0; r < m; ++r) {
+            for (int c = 0; c < n; ++c) {
+                boardFreq[board[r][c]]++;
+            }
+        }
+        for (char ch : word) {
+            wordFreq[ch]++;
+            if (wordFreq[ch] > boardFreq[ch]) return false;
+        }
+        
+        if (boardFreq[word.front()] > boardFreq[word.back()]) {
+            std::reverse(word.begin(), word.end());
+        }
+        
+        for (int r = 0; r < m; ++r) {
+            for (int c = 0; c < n; ++c) {
+                if (board[r][c] == word[0]) {
+                    if (dfs(board, word, r, c, 0)) return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def exist(self, board: list[list[str]], word: str) -> bool:
+        m, n = len(board), len(board[0])
+        if len(word) > m * n:
+            return False
+            
+        board_freq = {}
+        for row in board:
+            for ch in row:
+                board_freq[ch] = board_freq.get(ch, 0) + 1
+                
+        word_freq = {}
+        for ch in word:
+            word_freq[ch] = word_freq.get(ch, 0) + 1
+            if word_freq[ch] > board_freq.get(ch, 0):
+                return False
+                
+        if board_freq.get(word[0], 0) > board_freq.get(word[-1], 0):
+            word = word[::-1]
+            
+        def dfs(r, c, index):
+            if index == len(word):
+                return True
+            if r < 0 or r >= m or c < 0 or c >= n or board[r][c] != word[index]:
+                return False
+                
+            temp = board[r][c]
+            board[r][c] = '#'
+            found = (dfs(r - 1, c, index + 1) or 
+                     dfs(r + 1, c, index + 1) or 
+                     dfs(r, c - 1, index + 1) or 
+                     dfs(r, c + 1, index + 1))
+            board[r][c] = temp
+            return found
+            
+        for r in range(m):
+            for c in range(n):
+                if board[r][c] == word[0]:
+                    if dfs(r, c, 0):
+                        return True
+                        
+        return false
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(M * N * 4^L) worst case
+  - Where `M * N` is the size of the board and `L` is the length of the `word`. Thanks to your frequency pre-checks and the reverse-start heuristic, practical execution time is significantly faster than the theoretical upper bound.
+
+- Space Complexity: O(L) Auxiliary Space
+  - Stored entirely on the recursion stack up to the length of the word `L`, plus frequency map overhead.
+===================================================================

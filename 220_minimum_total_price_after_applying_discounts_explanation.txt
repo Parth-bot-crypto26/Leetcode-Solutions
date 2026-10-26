@@ -1,0 +1,104 @@
+===================================================================
+MINIMUM TOTAL PRICE AFTER APPLYING DISCOUNTS
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given two integer arrays `prices` and `discounts`. 
+- `prices[i]` represents the price of the $i$-th item.
+- `discounts[j]` represents a discount percentage.
+
+Rules:
+- Each discount can be applied to at most one item.
+- Each item can receive at most one discount (or no discount).
+- Final price of an item with price `p` and discount `d` is $(p \times (100 - d)) / 100$.
+
+Return the minimum possible sum of final prices after assigning discounts optimally.
+
+Constraints & Notes:
+- `1 <= prices.length, discounts.length <= 10^5`
+- `1 <= prices[i] <= 10^5`
+- `1 <= discounts[j] <= 100`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your Python implementation is **100% optimal, elegant, and mathematically rigorous!**
+
+1. GREEDY REARRANGEMENT INEQUALITY:
+   - To minimize the final total price, we need to **maximize the total discount amount** saved across all items.
+   - By sorting both `prices` and `discounts` in descending order, you pair the **largest prices with the largest discount percentages**. 
+   - According to the Rearrangement Inequality, matching sequences in the same relative order always maximizes the sum of their pairwise products.
+
+2. EFFICIENCY:
+   - Sorting both arrays takes $O(N \log N + M \log M)$ time, which easily scales to handle $10^5$ elements well within time limits.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: prices = [10, 30, 21], discounts = [50, 60]
+
+1. **Sort both arrays in descending order**:
+   - `prices` $\to [30, 21, 10]$
+   - `discounts` $\to [60, 50]$
+2. **Calculate initial total sum**:
+   - `total` = $30 + 21 + 10 = 61.0$
+3. **Iterate and apply available discounts ($k = \min(3, 2) = 2$)**:
+   - i = 0: apply discount 60 to price 30 $\to$ discount amount = $30 \times 60 / 100 = 18.0$. `total` = $61 - 18 = 43.0$.
+   - i = 1: apply discount 50 to price 21 $\to$ discount amount = $21 \times 50 / 100 = 10.5$. `total` = $43 - 10.5 = 32.5$.
+4. Return `total` = `32.5`
+
+-------------------------------------------------------------------
+[PYTHON & C++ IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+# Python Solution (Your Code - Optimal Greedy Sorting)
+class Solution:
+    def minPrice(self, prices: list[int], discounts: list[int]) -> float:
+        prices.sort(reverse=True)
+        discounts.sort(reverse=True)
+        
+        total = float(sum(prices))
+        k = min(len(prices), len(discounts))
+        
+        for i in range(k):
+            total -= prices[i] * discounts[i] / 100.0
+            
+        return total
+
+
+// Equivalent C++ Solution
+#include <vector>
+#include <numeric>
+#include <algorithm>
+
+class Solution {
+public:
+    double minPrice(std::vector<int>& prices, std::vector<int>& discounts) {
+        std::sort(prices.begin(), prices.end(), std::greater<int>());
+        std::sort(discounts.begin(), discounts.end(), std::greater<int>());
+        
+        double total = 0.0;
+        for (int p : prices) {
+            total += p;
+        }
+        
+        int k = std::min(prices.size(), discounts.size());
+        for (int i = 0; i < k; ++i) {
+            total -= (double)prices[i] * discounts[i] / 100.0;
+        }
+        
+        return total;
+    }
+};
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N log N + M log M)
+  - Dominated by sorting the `prices` array of size `N` and the `discounts` array of size `M`, followed by a linear scan of length $\min(N, M)$.
+
+- Space Complexity: O(1) or O(N + M) Auxiliary Space
+  - Depends on the sorting implementation's underlying recursion stack or space overhead (typically $O(\log N)$ or $O(N)$ for sorting buffers).
+===================================================================

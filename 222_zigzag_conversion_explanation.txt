@@ -1,0 +1,109 @@
+===================================================================
+LEETCODE 6: ZIGZAG CONVERSION
+===================================================================
+
+[PROBLEM DESCRIPTION]
+The string `s` is written in a zigzag pattern on a given number of rows 
+and then read line by line. Write a function that takes a string and this conversion, 
+returning the resulting string.
+
+Constraints & Notes:
+- `1 <= s.length <= 1000`
+- `s` consists of English letters, commas, and periods.
+- `1 <= numRows <= 1000`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using simulation with row buffers and a directional flag is **100% optimal, elegant, and exceptionally clean!**
+
+1. SIMULATION WITH DIRECTION TOGGLING:
+   - You handle the base edge case immediately (`numRows == 1 || numRows >= s.length()`).
+   - You maintain an array of `string` rows and a `currentRow` pointer. As you iterate through characters, 
+     you append each character to the current row buffer.
+   - When you hit the top (`currentRow == 0`) or the bottom (`currentRow == numRows - 1`), you flip 
+     the `goingDown` boolean flag to reverse direction.
+
+2. EFFICIENCY:
+   - This approach simulates the zigzag trajectory in linear time $O(N)$ with minimal overhead and 
+     concatenates the final rows together cleanly.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "PAYPALISHIRING", numRows = 3
+
+- rows = `["", "", ""]`, currentRow = 0, goingDown = false
+- 'P' -> rows[0] += 'P' (currentRow = 0, flips goingDown to true). currentRow becomes 1.
+- 'A' -> rows[1] += 'A' (currentRow = 1). currentRow becomes 2.
+- 'Y' -> rows[2] += 'Y' (currentRow = 2, flips goingDown to false). currentRow becomes 1.
+- 'P' -> rows[1] += 'P' (currentRow = 1). currentRow becomes 0.
+- ... continuing through the string fills the row strings, which combine to `"PAHNAPLSIIGYIR"`.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Simulation Approach)
+#include <vector>
+#include <string>
+#include <algorithm>
+
+class Solution {
+public:
+    std::string convert(std::string s, int numRows) {
+        if (numRows == 1 || numRows >= s.length()) {
+            return s;
+        }
+
+        std::vector<std::string> rows(std::min(static_cast<int>(s.length()), numRows));
+        int currentRow = 0;
+        bool goingDown = false;
+
+        for (char c : s) {
+            rows[currentRow] += c;
+            if (currentRow == 0 || currentRow == numRows - 1) {
+                goingDown = !goingDown;
+            }
+            currentRow += goingDown ? 1 : -1;
+        }
+
+        std::string result;
+        for (const std::string& row : rows) {
+            result += row;
+        }
+
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def convert(self, s: str, numRows: int) -> str:
+        if numRows == 1 or numRows >= len(s):
+            return s
+            
+        rows = [[] for _ in range(numRows)]
+        current_row = 0
+        going_down = False
+        
+        for c in s:
+            rows[current_row].append(c)
+            if current_row == 0 or current_row == numRows - 1:
+                going_down = not going_down
+            current_row += 1 if going_down else -1
+            
+        return "".join("".join(row) for row in rows)
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of the string `s`. Every character is visited exactly once and appended to its respective row buffer.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Stores the characters across the row buffers, whose combined length equals the length of `s`.
+===================================================================

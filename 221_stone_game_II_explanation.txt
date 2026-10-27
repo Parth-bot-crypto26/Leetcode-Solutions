@@ -1,0 +1,115 @@
+===================================================================
+LEETCODE 1140: STONE GAME II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Alice and Bob take turns playing a game with piles of stones arranged in a row (`piles`).
+- Alice starts first, and $M = 1$ initially.
+- On each player's turn, they can take all the stones from the first $X$ remaining piles, 
+  where $1 \le X \le 2M$.
+- After taking $X$ piles, we update $M = \max(M, X)$.
+- The game continues until all piles are taken. Both players play **optimally** to maximize 
+  their total stones.
+
+Return the maximum number of stones Alice can get.
+
+Constraints & Notes:
+- `1 <= piles.length <= 100`
+- `1 <= piles[i] <= 10^4`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is an **absolute masterpiece of dynamic programming and bottom-up space/time optimization!**
+
+1. SUFFIX SUM PRECOMPUTATION:
+   - You precompute a `suffixSum` array where `suffixSum[i]` represents the total sum of stones 
+     from index `i` to the end of the array. This allows instant calculation of the remaining stones 
+     available from index `i` onwards.
+
+2. MINIMAX / ZERO-SUM REASONING:
+   - In a zero-sum game, if the current player starts at index `i` with parameter `M` and can 
+     collect a sub-total from taking $X$ piles, the opponent will play optimally on the remaining 
+     piles starting at index `i + X` with $M' = \max(M, X)$, leaving the current player with whatever 
+     total stones remain minus what the opponent gets: `suffixSum[i] - dp[i + X][max(M, X)]`.
+   - By iterating **bottom-up** from `i = n-1` down to `0`, you avoid recursion overhead while 
+     guaranteeing all sub-problems are solved before they are needed.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: piles = [2, 7, 9, 4, 4] (n = 5)
+
+1. **Suffix Sum Array**:
+   - `suffixSum` = `[26, 24, 17, 8, 4, 0]`
+2. **Bottom-Up DP Table Filling**:
+   - For each index `i` and each state `M`, we test valid choices of $X$ ($1 \le X \le 2M$).
+   - `dp[0][1]` evaluates all choices for Alice at the very beginning with $M = 1$.
+   - Taking $X = 1$ or $X = 2$ leads to the optimal branch yielding $10$ stones for Alice.
+
+Final Output: `10`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Bottom-Up DP)
+#include <vector>
+#include <algorithm>
+
+class Solution {
+public:
+    int stoneGameII(std::vector<int>& piles) {
+        int n = piles.size();
+        std::vector<int> suffixSum(n + 1, 0);
+        
+        for (int i = n - 1; i >= 0; --i) {
+            suffixSum[i] = suffixSum[i + 1] + piles[i];
+        }
+        
+        std::vector<std::vector<int>> dp(n + 1, std::vector<int>(n + 1, 0));
+        
+        for (int i = n - 1; i >= 0; --i) {
+            for (int M = 1; M <= n; ++M) {
+                for (int X = 1; X <= 2 * M && i + X <= n; ++X) {
+                    dp[i][M] = std::max(dp[i][M], suffixSum[i] - dp[i + X][std::max(M, X)]);
+                }
+            }
+        }
+        
+        return dp[0][1];
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def stoneGameII(self, piles: list[int]) -> int:
+        n = len(piles)
+        suffix_sum = [0] * (n + 1)
+        for i in range(n - 1, -1, -1):
+            suffix_sum[i] = suffix_sum[i + 1] + piles[i]
+            
+        dp = [[0] * (n + 1) for _ in range(n + 1)]
+        
+        for i in range(n - 1, -1, -1):
+            for M in range(1, n + 1):
+                for X in range(1, 2 * M + 1):
+                    if i + X > n:
+                        break
+                    dp[i][M] = max(dp[i][M], suffix_sum[i] - dp[i + X][max(M, X)])
+                    
+        return dp[0][1]
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N^3)
+  - There are $O(N^2)$ states for `(i, M)` and an inner loop iterating $O(N)$ times for $X$, 
+    resulting in roughly $N^3 / 3$ total operations, which for $N = 100$ executes in milliseconds.
+
+- Space Complexity: O(N^2) Auxiliary Space
+  - Space required for the `dp` table of size $(N + 1) \times (N + 1)$ and the `suffixSum` vector.
+===================================================================

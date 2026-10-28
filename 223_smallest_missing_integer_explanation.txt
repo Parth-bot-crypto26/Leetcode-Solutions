@@ -1,0 +1,106 @@
+===================================================================
+LEETCODE 2996: SMALLEST MISSING INTEGER GREATER THAN OR EQUAL TO SEQUENTIAL PREFIX SUM
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a 0-indexed array of integers `nums`.
+- A prefix `nums[0..i]` is sequential if, for all `1 <= j <= i`, `nums[j] == nums[j - 1] + 1`. 
+  In particular, the prefix consisting only of `nums[0]` is sequential.
+- Return the smallest integer `x` missing from `nums` such that `x` is greater than 
+  or equal to the sum of the longest sequential prefix.
+
+Constraints & Notes:
+- `1 <= nums.length <= 50`
+- `1 <= nums[i] <= 50`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is **100% optimal, elegant, and completely correct!**
+
+1. LONGEST SEQUENTIAL PREFIX SUM:
+   - You correctly initialize `sum = nums[0]` and iterate through the array, checking 
+     whether each element continues the sequence (`nums[i] == nums[i-1] + 1`). If it does, 
+     you add it to `sum`; otherwise, you break early.
+
+2. HASH SET LOOKUP & MISSING CHECK:
+   - You load all elements of `nums` into an `unordered_set` (`st`) to allow $O(1)$ average time lookups.
+   - You then use a `while` loop starting from the computed `sum`, incrementing it until an integer 
+     is found that is not present in the set (`st.count(sum)`).
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 3, 2, 5]
+
+1. **Longest Sequential Prefix Calculation**:
+   - `nums[0] = 1` -> sum = 1
+   - `nums[1] = 2` (1 + 1) -> sum = 1 + 2 = 3
+   - `nums[2] = 3` (2 + 1) -> sum = 3 + 3 = 6
+   - `nums[3] = 2` != 3 + 1 -> break.
+   - Longest sequential prefix sum = `6`.
+
+2. **Missing Integer Search**:
+   - `st` = `{1, 2, 3, 5}` (from `nums`)
+   - Check `sum = 6`: `st.count(6)` is false. 
+   - Loop terminates, returns `6`.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Sequential Prefix Sum + Hash Set)
+#include <vector>
+#include <unordered_set>
+
+class Solution {
+public:
+    int missingInteger(std::vector<int>& nums) {
+        int sum = nums[0];
+        for (int i = 1; i < nums.size(); ++i) {
+            if (nums[i] == nums[i - 1] + 1) {
+                sum += nums[i];
+            } else {
+                break;
+            }
+        }
+        
+        std::unordered_set<int> st(nums.begin(), nums.end());
+        while (st.count(sum)) {
+            sum++;
+        }
+        
+        return sum;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def missingInteger(self, nums: list[int]) -> int:
+        total_sum = nums[0]
+        for i in range(1, len(nums)):
+            if nums[i] == nums[i - 1] + 1:
+                total_sum += nums[i]
+            else:
+                break
+                
+        num_set = set(nums)
+        while total_sum in num_set:
+            total_sum += 1
+            
+        return total_sum
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of `nums`. Finding the sequential prefix takes $O(N)$ time, 
+    populating the hash set takes $O(N)$ time, and the missing number check runs at most $N + 1$ times 
+    since array elements and values are bounded.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Space required to store the elements of `nums` inside the `unordered_set`.
+===================================================================

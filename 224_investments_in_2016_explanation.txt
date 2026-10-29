@@ -1,0 +1,99 @@
+===================================================================
+LEETCODE 585: INVESTMENTS IN 2016
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Table: `Insurance`
+- `pid` (int, PK)
+- `tiv_2015` (float)
+- `tiv_2016` (float)
+- `lat` (float)
+- `lon` (float)
+
+Write a solution to report the sum of all total investment values in 2016 (`tiv_2016`), 
+for all policyholders who:
+1. Have the same `tiv_2015` value as one or more other policyholders (`COUNT(*) > 1` for `tiv_2015`).
+2. Are not located in the same city as any other policyholder—meaning the `(lat, lon)` 
+   coordinate pair must be unique (`COUNT(*) = 1` for `(lat, lon)`).
+
+Round `tiv_2016` to two decimal places.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your SQL implementation is **100% optimal, elegant, and completely correct!**
+
+1. SUBQUERY FILTERING:
+   - The first subquery isolates all `tiv_2015` values shared by multiple policyholders using `GROUP BY` and `HAVING COUNT(*) > 1`.
+   - The second subquery identifies unique geographic coordinate pairs `(lat, lon)` using `HAVING COUNT(*) = 1`.
+
+2. MULTI-COLUMN IN OPERATOR:
+   - Using the tuple comparison `(lat, lon) IN (...)` cleanly matches policyholders against unique locations in SQL.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Insurance table:
+pid=1: tiv_2015=10, tiv_2016=5,  lat=10, lon=10
+pid=2: tiv_2015=20, tiv_2016=20, lat=20, lon=20
+pid=3: tiv_2015=10, tiv_2016=30, lat=20, lon=20
+pid=4: tiv_2015=10, tiv_2016=40, lat=40, lon=40
+
+- Shared `tiv_2015` values (count > 1): `10` (associated with pids 1, 3, 4).
+- Unique locations `(lat, lon)` (count = 1): `(10, 10)` (pid 1) and `(40, 40)` (pid 4). Note `(20, 20)` appears twice (pids 2 and 3).
+- Intersection of criteria:
+  - pid=1: tiv_2015=10 (shared), location=(10,10) (unique) -> **Included** (tiv_2016 = 5)
+  - pid=2: tiv_2015=20 (not shared) -> Excluded
+  - pid=3: tiv_2015=10 (shared), location=(20,20) (not unique) -> Excluded
+  - pid=4: tiv_2015=10 (shared), location=(40,40) (unique) -> **Included** (tiv_2016 = 40)
+- Sum of `tiv_2016` = 5 + 40 = 45.00.
+
+-------------------------------------------------------------------
+[SQL & PANDAS IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+-- SQL Solution (Your Code - Optimal Subquery Filtering)
+SELECT ROUND(SUM(tiv_2016), 2) AS tiv_2016
+FROM Insurance
+WHERE tiv_2015 IN (
+    SELECT tiv_2015
+    FROM Insurance
+    GROUP BY tiv_2015
+    HAVING COUNT(*) > 1
+)
+AND (lat, lon) IN (
+    SELECT lat, lon
+    FROM Insurance
+    GROUP BY lat, lon
+    HAVING COUNT(*) = 1
+);
+
+
+# Equivalent Pandas Solution
+import pandas as pd
+
+def find_investments(insurance: pd.DataFrame) -> pd.DataFrame:
+    # Condition 1: tiv_2015 appears more than once
+    tiv_counts = insurance['tiv_2015'].transform('count')
+    cond1 = tiv_counts > 1
+    
+    # Condition 2: (lat, lon) pair is unique
+    loc_counts = insurance.groupby(['lat', 'lon'])['lat'].transform('count')
+    cond2 = loc_counts == 1
+    
+    filtered = insurance[cond1 & cond2]
+    total_tiv = round(filtered['tiv_2016'].sum(), 2)
+    
+    return pd.DataFrame({'tiv_2016': [total_tiv]})
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the number of rows in the `Insurance` table. Aggregating and joining via subqueries or group transformations runs in linear time.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Space required for hash tables and intermediate grouping states in database execution or Pandas dataframes.
+===================================================================

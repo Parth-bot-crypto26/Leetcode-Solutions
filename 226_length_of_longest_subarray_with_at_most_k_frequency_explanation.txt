@@ -1,0 +1,111 @@
+===================================================================
+LEETCODE 2958: LENGTH OF LONGEST SUBARRAY WITH AT MOST K FREQUENCY
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array `nums` and an integer `k`.
+- The frequency of an element `x` is the number of times it occurs in an array.
+- An array is called **good** if the frequency of each element in this array is $\le k$.
+
+Return the length of the longest good contiguous subarray of `nums`.
+
+Constraints & Notes:
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= k <= nums.length`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using a **sliding window (two pointers) and a hash map** is **100% optimal, elegant, and textbook-perfect!**
+
+1. SLIDING WINDOW / VARIABLE-SIZE WINDOW:
+   - You maintain a sliding window defined by pointers `left` and `right`.
+   - As `right` expands, you increment the frequency of `nums[right]` in your `unordered_map`.
+   - If the frequency of the incoming element exceeds `k`, you shrink the window from the left (`left++`) 
+     until the violating element's frequency drops back down to $\le k$.
+
+2. EFFICIENCY:
+   - Each element is added to and removed from the sliding window at most once, resulting in a strict 
+     linear time complexity $O(N)$ with $O(N)$ space complexity.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [1, 2, 3, 1, 2, 3, 1, 2], k = 2
+
+- right = 0 ('1'): freq[1] = 1. maxLen = max(0, 0-0+1) = 1
+- right = 1 ('2'): freq[2] = 1. maxLen = max(1, 1-0+1) = 2
+- right = 2 ('3'): freq[3] = 1. maxLen = max(2, 2-0+1) = 3
+- right = 3 ('1'): freq[1] = 2. maxLen = max(3, 3-0+1) = 4
+- right = 4 ('2'): freq[2] = 2. maxLen = max(4, 4-0+1) = 5
+- right = 5 ('3'): freq[3] = 2. maxLen = max(5, 5-0+1) = 6
+- right = 6 ('1'): freq[1] becomes 3 (> 2).
+  - Shrink window: `left` moves from 0 to 1, freq[1] decrements to 2.
+  - maxLen = max(6, 6-1+1) = 6.
+- right = 7 ('2'): freq[2] becomes 3 (> 2).
+  - Shrink window: `left` moves from 1 to 2, freq[2] decrements to 2.
+  - maxLen = max(6, 7-2+1) = 6.
+
+Final Output: `6`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Sliding Window)
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+public:
+    int maxSubarrayLength(std::vector<int>& nums, int k) {
+        std::unordered_map<int, int> freq;
+        int left = 0, maxLen = 0;
+        
+        for (int right = 0; right < nums.size(); ++right) {
+            freq[nums[right]]++;
+            
+            while (freq[nums[right]] > k) {
+                freq[nums[left]]--;
+                left++;
+            }
+            
+            maxLen = std::max(maxLen, right - left + 1);
+        }
+        
+        return maxLen;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def maxSubarrayLength(self, nums: list[int], k: int) -> int:
+        freq = {}
+        left = 0
+        max_len = 0
+        
+        for right, num in enumerate(nums):
+            freq[num] = freq.get(num, 0) + 1
+            
+            while freq[num] > k:
+                freq[nums[left]] -= 1
+                left += 1
+                
+            max_len = max(max_len, right - left + 1)
+            
+        return max_len
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of `nums`. Both `left` and `right` pointers traverse the array at most once.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Space required for the `unordered_map` to store element frequencies within the current window.
+===================================================================

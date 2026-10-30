@@ -1,0 +1,121 @@
+===================================================================
+LEETCODE 17: LETTER COMBINATIONS OF A PHONE NUMBER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string containing digits from `2-9` inclusive, return all possible letter 
+combinations that the number could represent, following standard telephone button mappings.
+
+Constraints & Notes:
+- `0 <= digits.length <= 4` (with constraint notes showing `1 <= digits.length <= 4`)
+- `digits[i]` is in the range `['2', '9']`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **backtracking and in-place string manipulation** is **100% optimal, textbook-perfect, and extremely efficient!**
+
+1. TELEPHONE MAPPING & RECURSIVE BACKTRACKING:
+   - You predefine the digit-to-letter mapping array where indices correspond to the digit characters.
+   - The recursive `backtrack` function builds the combination character by character:
+     - At each level `index`, it retrieves the corresponding string of letters for `digits[index]`.
+     - It loops through each letter, appends it to `current`, recurses to the next digit index, and then 
+       backtracks by popping the character (`current.pop_back()`).
+
+2. EFFICIENCY:
+   - Since maximum length is small (`<= 4`), the recursion tree depth is at most 4, branching up to 
+     4 times per level. This runs in optimal time proportional to the output size.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: digits = "23"
+
+- mapping[2] = "abc", mapping[3] = "def"
+- index = 0, digits[0] = '2':
+  - Try 'a': current = "a"
+    - index = 1, digits[1] = '3':
+      - Try 'd': current = "ad" -> pushes "ad" to result
+      - Try 'e': current = "ae" -> pushes "ae" to result
+      - Try 'f': current = "af" -> pushes "af" to result
+  - Try 'b': current = "b" -> ... pushes "bd", "be", "bf"
+  - Try 'c': current = "c" -> ... pushes "cd", "ce", "cf"
+
+Final Output: `["ad","ae","af","bd","be","bf","cd","ce","cf"]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Backtracking)
+#include <vector>
+#include <string>
+
+class Solution {
+    void backtrack(int index, const std::string& digits, std::string& current, 
+                   const std::vector<std::string>& mapping, std::vector<std::string>& result) {
+        if (index == digits.length()) {
+            result.push_back(current);
+            return;
+        }
+        std::string letters = mapping[digits[index] - '0'];
+        for (char c : letters) {
+            current.push_back(c);
+            backtrack(index + 1, digits, current, mapping, result);
+            current.pop_back();
+        }
+    }
+public:
+    std::vector<std::string> letterCombinations(std::string digits) {
+        if (digits.empty()) return {};
+        std::vector<std::string> mapping = {
+            "", "", "abc", "def",
+            "ghi", "jkl", "mno", "pqrs",
+            "tuv", "wxyz"
+        };
+        std::vector<std::string> result;
+        std::string current = "";
+        backtrack(0, digits, current, mapping, result);
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def letterCombinations(self, digits: str) -> list[str]:
+        if not digits:
+            return []
+            
+        mapping = {
+            "2": "abc", "3": "def", "4": "ghi", "5": "jkl",
+            "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz"
+        }
+        
+        result = []
+        
+        def backtrack(index: int, current: list[str]):
+            if index == len(digits):
+                result.append("".join(current))
+                return
+                
+            for char in mapping[digits[index]]:
+                current.append(char)
+                backtrack(index + 1, current)
+                current.pop()
+                
+        backtrack(0, [])
+        return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(4^N * N)
+  - Where `N` is the length of `digits`. In the worst case (e.g., digits like '7' or '9' with 4 letters), 
+    there are $4^N$ combinations, and constructing each string takes $O(N)$ time. Given $N \le 4$, operations are trivial.
+
+- Space Complexity: O(N) Auxiliary Space (excluding the output container)
+  - Storage required for the recursion stack and the `current` string buffer up to length `N`.
+===================================================================

@@ -1,0 +1,114 @@
+===================================================================
+LEETCODE 36: VALID SUDOKU
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Determine if a `9 x 9` Sudoku board is valid. Only the filled cells need 
+to be validated according to three rules:
+1. Each row must contain digits `1-9` without repetition.
+2. Each column must contain digits `1-9` without repetition.
+3. Each of the nine `3 x 3` sub-boxes must contain digits `1-9` without repetition.
+
+Constraints & Notes:
+- `board.length == 9`, `board[i].length == 9`
+- `board[i][j]` is a digit `1-9` or `'.'`.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **boolean frequency tracking arrays** is **100% optimal, lightning-fast, and elegant!**
+
+1. CONSTANT-SPACE HASHING / BITSET ALTERNATIVE:
+   - Instead of using slow hash sets (`unordered_set`), you use fixed-size 2D boolean arrays:
+     - `rows[9][9]` tracks if digit `d` has appeared in row `r`.
+     - `cols[9][9]` tracks if digit `d` has appeared in column `c`.
+     - `boxes[9][9]` tracks if digit `d` has appeared in sub-box `b`.
+   - Sub-box index mapping `b = (r / 3) * 3 + (c / 3)` maps any `(r, c)` coordinate to its corresponding 
+     $3 \times 3$ grid block index (0 to 8) perfectly.
+
+2. EFFICIENCY:
+   - Since the Sudoku board is strictly fixed at $9 \times 9$, your solution runs in $O(1)$ constant time 
+     (precisely 81 cell checks) and $O(1)$ auxiliary memory.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: board snippet with top-left corner modified from '5' to '8' (violating sub-box rule)
+
+- At cell `(0, 0)`: `ch = '8'`, digit index `d = 7`, box `b = 0`.
+  - `rows[0][7]`, `cols[0][7]`, and `boxes[0][7]` are initially `false`.
+  - Set them to `true`.
+- At cell `(0, 1)`: `ch = '3'`, digit index `d = 2`, box `b = 0`.
+  - Set corresponding flags to `true`.
+- Suppose another `'8'` appears later in the same sub-box `0` (e.g., at `(1, 0)`):
+  - `boxes[0][7]` is already `true`.
+  - The condition `boxes[b][d]` triggers immediately, returning `false`.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Boolean Tracking Arrays)
+#include <vector>
+
+class Solution {
+public:
+    bool isValidSudoku(std::vector<std::vector<char>>& board) {
+        bool rows[9][9] = {false};
+        bool cols[9][9] = {false};
+        bool boxes[9][9] = {false};
+
+        for (int r = 0; r < 9; ++r) {
+            for (int c = 0; c < 9; ++c) {
+                char ch = board[r][c];
+                if (ch == '.') continue;
+
+                int d = ch - '1';
+                int b = (r / 3) * 3 + (c / 3);
+
+                if (rows[r][d] || cols[c][d] || boxes[b][d]) {
+                    return false;
+                }
+                
+                rows[r][d] = cols[c][d] = boxes[b][d] = true;
+            }
+        }
+        return true;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def isValidSudoku(self, board: list[list[str]]) -> bool:
+        rows = [[False] * 9 for _ in range(9)]
+        cols = [[False] * 9 for _ in range(9)]
+        boxes = [[False] * 9 for _ in range(9)]
+
+        for r in range(9):
+            for c in range(9):
+                ch = board[r][c]
+                if ch == '.':
+                    continue
+
+                d = ord(ch) - ord('1')
+                b = (r // 3) * 3 + (c // 3)
+
+                if rows[r][d] or cols[c][d] or boxes[b][d]:
+                    return False
+
+                rows[r][d] = cols[c][d] = boxes[b][d] = True
+
+        return True
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(1)
+  - The board dimensions are fixed ($9 \times 9 = 81$ cells). The algorithm always performs exactly 81 iterations.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses fixed-size boolean tracking arrays of size $9 \times 9$, requiring constant extra memory.
+===================================================================

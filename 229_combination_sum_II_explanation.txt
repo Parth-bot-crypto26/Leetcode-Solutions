@@ -1,0 +1,120 @@
+===================================================================
+LEETCODE 40: COMBINATION SUM II
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a collection of candidate numbers (`candidates`) and a target number (`target`), 
+find all unique combinations in `candidates` where the candidate numbers sum to `target`.
+- Each number in `candidates` may only be used **once** in the combination.
+- The solution set must not contain duplicate combinations.
+
+Constraints & Notes:
+- `1 <= candidates.length <= 100`
+- `1 <= candidates[i] <= 50`
+- `1 <= target <= 30`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation is an **absolute masterpiece of backtracking design, pruning, and duplicate avoidance!**
+
+1. SORTING & DUPLICATE AVOIDANCE:
+   - Sorting the `candidates` array upfront is the key to both handling duplicate values and enabling early stopping.
+   - The duplicate skip condition `if (i > start && candidates[i] == candidates[i-1]) continue;` ensures that identical 
+     numbers at the same recursion depth are not processed multiple times, entirely preventing duplicate combination paths.
+
+2. PRUNING & EARLY BREAKING:
+   - Passing `i + 1` into the recursive step guarantees each element is used at most once.
+   - The early break condition `if (candidates[i] > target) break;` immediately terminates the loop when the current 
+     candidate exceeds the remaining target, saving massive amounts of redundant branch exploration.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: candidates = [10, 1, 2, 7, 6, 1, 5], target = 8
+
+1. **Sorting**: 
+   - `candidates` becomes `[1, 1, 2, 5, 6, 7, 10]`
+2. **Backtracking Traversal**:
+   - `start = 0`, `target = 8`:
+     - Try `candidates[0] = 1`: current = `[1]`, target = 7, next start = 1.
+       - Try `candidates[1] = 1`: current = `[1, 1]`, target = 6, next start = 2.
+         - Try `candidates[2] = 2`: current = `[1, 1, 2]`, target = 4... 
+         - Eventually finds `[1, 1, 6]` (sums to 8). Pushes to `result`.
+       - Skip duplicate `candidates[2] = 1` because `i > start` (1 > 1 is false? Wait, at index 2, `start` is 1, so `i > start` is `2 > 1` which is true, and `candidates[2] == candidates[1]` is true -> skips correctly!).
+     - Try `candidates[2] = 2` (since first '1' branch finished): current = `[1, 2]`, target = 5. Finds `[1, 2, 5]`. Pushes to `result`.
+     - Try `candidates[3] = 5`: current = `[1, 7]`. Finds `[1, 7]`. Pushes to `result`.
+
+Final Output: `[[1, 1, 6], [1, 2, 5], [1, 7], [2, 6]]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Backtracking with Pruning)
+#include <vector>
+#include <algorithm>
+
+class Solution {
+    void backtrack(const std::vector<int>& candidates, int target, int start, 
+                   std::vector<int>& current, std::vector<std::vector<int>>& result) {
+        if (target == 0) {
+            result.push_back(current);
+            return;
+        }
+        for (int i = start; i < candidates.size(); ++i) {
+            if (i > start && candidates[i] == candidates[i - 1]) continue;
+            if (candidates[i] > target) break;
+            
+            current.push_back(candidates[i]);
+            backtrack(candidates, target - candidates[i], i + 1, current, result);
+            current.pop_back();
+        }
+    }
+public:
+    std::vector<std::vector<int>> combinationSum2(std::vector<int>& candidates, int target) {
+        std::sort(candidates.begin(), candidates.end());
+        std::vector<std::vector<int>> result;
+        std::vector<int> current;
+        backtrack(candidates, target, 0, current, result);
+        return result;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def combinationSum2(self, candidates: list[int], target: int) -> list[list[int]]:
+        candidates.sort()
+        result = []
+        
+        def backtrack(start: int, target: int, current: list[int]):
+            if target == 0:
+                result.append(list(current))
+                return
+                
+            for i in range(start, len(candidates)):
+                if i > start and candidates[i] == candidates[i - 1]:
+                    continue
+                if candidates[i] > target:
+                    break
+                    
+                current.append(candidates[i])
+                backtrack(i + 1, target - candidates[i], current)
+                current.pop()
+                
+        backtrack(0, target, [])
+        return result
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(2^N)
+  - In the worst case, every subset could be a valid combination. Sorting takes $O(N \log N)$, 
+    and backtracking explores valid combinations bounded by the constraints.
+
+- Space Complexity: O(N) Auxiliary Space (excluding the output container)
+  - Stored entirely on the recursion stack and temporary `current` vector up to the maximum depth of `N`.
+===================================================================

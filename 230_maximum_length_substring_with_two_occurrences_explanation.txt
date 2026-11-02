@@ -1,0 +1,105 @@
+===================================================================
+LEETCODE 3090: MAXIMUM LENGTH SUBSTRING WITH TWO OCCURRENCES
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a string `s`, return the maximum length of a substring such that it contains 
+at most two occurrences of each character.
+
+Constraints & Notes:
+- `2 <= s.length <= 100`
+- `s` consists only of lowercase English letters.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using a **sliding window with a fixed-size frequency array** is **100% optimal, elegant, and lightning-fast!**
+
+1. SLIDING WINDOW & FREQUENCY TRACKING:
+   - Since `s` consists strictly of lowercase English letters, a fixed vector of size 26 (`vector<int> count(26, 0)`) 
+     acts as an exceptionally fast $O(1)$ hash map alternative.
+   - As the `right` pointer expands the window, you increment the character's frequency.
+   - If any character's frequency exceeds 2, the `while` loop shrinks the window from the left (`left++`) 
+     until all character frequencies drop back down to $\le 2$.
+
+2. EFFICIENCY:
+   - Both `left` and `right` pointers traverse the string at most once, yielding a strict linear time complexity 
+     $O(N)$ and $O(1)$ auxiliary memory footprint.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "bcbbbcba"
+
+- right = 0 ('b'): count['b' - 'a'] = 1. maxLength = max(0, 0 - 0 + 1) = 1
+- right = 1 ('c'): count['c' - 'a'] = 1. maxLength = max(1, 1 - 0 + 1) = 2
+- right = 2 ('b'): count['b' - 'a'] = 2. maxLength = max(2, 2 - 0 + 1) = 3
+- right = 3 ('b'): count['b' - 'a'] becomes 3 (> 2).
+  - Shrink window: `left` moves from 0 to 1, count['b' - 'a'] decrements to 2.
+  - maxLength = max(3, 3 - 1 + 1) = 3.
+- right = 4 ('b'): count['b' - 'a'] becomes 3 (> 2).
+  - Shrink window: `left` moves from 1 to 2, count['b' - 'a'] decrements to 2.
+  - maxLength = max(3, 4 - 2 + 1) = 3.
+- Continuing through the string finds longer valid windows, peaking at length 4 (e.g., substring `"cbbb"` or `"bcbb"`).
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Sliding Window with Fixed Vector)
+#include <vector>
+#include <string>
+#include <algorithm>
+
+class Solution {
+public:
+    int maximumLengthSubstring(std::string s) {
+        std::vector<int> count(26, 0);
+        int left = 0, maxLength = 0;
+
+        for (int right = 0; right < s.length(); ++right) {
+            count[s[right] - 'a']++;
+
+            while (count[s[right] - 'a'] > 2) {
+                count[s[left] - 'a']--;
+                left++;
+            }
+
+            maxLength = std::max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def maximumLengthSubstring(self, s: str) -> int:
+        count = [0] * 26
+        left = 0
+        max_length = 0
+        
+        for right, ch in enumerate(s):
+            idx = ord(ch) - ord('a')
+            count[idx] += 1
+            
+            while count[idx] > 2:
+                count[ord(s[left]) - ord('a')] -= 1
+                left += 1
+                
+            max_length = max(max_length, right - left + 1)
+            
+        return max_length
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of the string `s`. The `left` and `right` pointers each iterate across the string at most once.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses a fixed-size frequency array of length 26, requiring constant extra memory regardless of input string length.
+===================================================================

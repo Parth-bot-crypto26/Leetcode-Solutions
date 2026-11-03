@@ -1,0 +1,95 @@
+===================================================================
+LEETCODE 4020: ELEVATOR REQUESTS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer `n` denoting the number of floors in a building (0 to `n - 1`), 
+and an integer array `requests` representing the sequence of floor requests.
+- The elevator starts at floor 0.
+- It moves one floor per second.
+- It serves requests in the given order.
+- If it is already on the requested floor, 0 movement is needed.
+- After serving a request, it immediately moves toward the next request.
+
+Return the total time in seconds required to serve all requests.
+
+Constraints & Notes:
+- `1 <= n <= 100`
+- `1 <= requests.length <= 100`
+- `0 <= requests[i] <= n - 1`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using a **linear simulation approach** is **100% optimal, elegant, and extremely clean!**
+
+1. LINEAR FLOOR TRACKING:
+   - You track the elevator's current floor (`currFloor`), initialized to 0.
+   - For each requested floor in the sequence, the travel time required is simply the absolute difference 
+     between the target floor and the current floor (`abs(req - currFloor)`).
+   - You accumulate this travel time into `timeTaken` and update `currFloor` to the new target floor.
+
+2. EFFICIENCY:
+   - This single-pass simulation runs in strict linear time $O(R)$ (where `R` is the number of requests) 
+     with $O(1)$ auxiliary memory.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 5, requests = [2, 1, 4, 3]
+
+- Initial: currFloor = 0, timeTaken = 0
+- req = 2: |2 - 0| = 2 seconds. currFloor becomes 2. timeTaken = 2.
+- req = 1: |1 - 2| = 1 second. currFloor becomes 1. timeTaken = 2 + 1 = 3.
+- req = 4: |4 - 1| = 3 seconds. currFloor becomes 4. timeTaken = 3 + 3 = 6.
+- req = 3: |3 - 4| = 1 second. currFloor becomes 3. timeTaken = 6 + 1 = 7.
+
+Final Output: `7`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Linear Simulation)
+#include <vector>
+#include <cmath>
+
+class Solution {
+public:
+    int elevatorRequests(int n, std::vector<int>& requests) {
+        int timeTaken = 0;
+        int currFloor = 0;
+        
+        for (int req : requests) {
+            timeTaken += std::abs(req - currFloor);
+            currFloor = req;
+        }
+        
+        return timeTaken;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def elevatorRequests(self, n: int, requests: list[int]) -> int:
+        time_taken = 0
+        curr_floor = 0
+        
+        for req in requests:
+            time_taken += abs(req - curr_floor)
+            curr_floor = req
+            
+        return time_taken
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(R)
+  - Where `R` is the length of the `requests` array. Each request is processed in constant time $O(1)$.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only a few scalar variables (`timeTaken`, `currFloor`), requiring constant extra memory.
+===================================================================

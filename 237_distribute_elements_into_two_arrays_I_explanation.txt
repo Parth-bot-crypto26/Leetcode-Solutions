@@ -1,0 +1,103 @@
+===================================================================
+LEETCODE 3069: DISTRIBUTE ELEMENTS INTO TWO ARRAYS I
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a 1-indexed array of distinct integers `nums` of length `n`.
+You need to distribute all the elements of `nums` between two arrays `arr1` and `arr2` using `n` operations:
+1. In the first operation, append `nums[0]` (1st element) to `arr1`.
+2. In the second operation, append `nums[1]` (2nd element) to `arr2`.
+3. For each subsequent operation (`i` from 2 to `n-1`):
+   - If the last element of `arr1` is greater than the last element of `arr2`, append `nums[i]` to `arr1`.
+   - Otherwise, append `nums[i]` to `arr2`.
+
+Return the array formed by concatenating `arr1` and `arr2`.
+
+Constraints & Notes:
+- `3 <= n <= 50`
+- `1 <= nums[i] <= 100`
+- All elements in `nums` are distinct.
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **direct simulation and vector concatenation** is **100% optimal, elegant, and clean!**
+
+1. SIMULATION & DYNAMIC COMPARISON:
+   - You initialize `arr1` with `nums[0]` and `arr2` with `nums[1]`.
+   - For the rest of the array, you check the condition `arr1.back() > arr2.back()` to decide which vector receives `nums[i]`.
+   - Finally, you merge `arr2` into the back of `arr1` using `arr1.insert()` and return the result.
+
+2. EFFICIENCY:
+   - Since $N \le 50$, this simulation runs in $O(N)$ time and requires $O(N)$ space, which is well within optimal limits.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [5, 4, 3, 8]
+
+- Initialize: `arr1 = [5]`, `arr2 = [4]`
+- i = 2 (`nums[2] = 3`):
+  - Last element of `arr1` (5) > last element of `arr2` (4).
+  - Append `3` to `arr1`. `arr1 = [5, 3]`, `arr2 = [4]`.
+- i = 3 (`nums[3] = 8`):
+  - Last element of `arr1` (3) is NOT greater than last element of `arr2` (4).
+  - Append `8` to `arr2`. `arr1 = [5, 3]`, `arr2 = [4, 8]`.
+- Concatenate `arr1` and `arr2`: `[5, 3, 4, 8]`
+
+Final Output: `[5, 3, 4, 8]`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Simulation & Insertion)
+#include <vector>
+
+class Solution {
+public:
+    std::vector<int> resultArray(std::vector<int>& nums) {
+        std::vector<int> arr1;
+        std::vector<int> arr2;
+        arr1.push_back(nums[0]);
+        arr2.push_back(nums[1]);
+        
+        for (int i = 2; i < nums.size(); ++i) {
+            if (arr1.back() > arr2.back()) {
+                arr1.push_back(nums[i]);
+            } else {
+                arr2.push_back(nums[i]);
+            }
+        }
+        
+        arr1.insert(arr1.end(), arr2.begin(), arr2.end());
+        return arr1;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def resultArray(self, nums: list[int]) -> list[int]:
+        arr1 = [nums[0]]
+        arr2 = [nums[1]]
+        
+        for i in range(2, len(nums)):
+            if arr1[-1] > arr2[-1]:
+                arr1.append(nums[i])
+            else:
+                arr2.append(nums[i])
+                
+        return arr1 + arr2
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N)
+  - Where `N` is the length of `nums`. Each element is processed and appended exactly once, and vector concatenation takes linear time relative to the number of elements.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Stores the elements across `arr1` and `arr2` scaling linearly with input size `N`.
+===================================================================

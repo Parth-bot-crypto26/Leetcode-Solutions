@@ -1,0 +1,106 @@
+===================================================================
+LEETCODE 3622: CHECK DIVISIBILITY BY DIGIT SUM AND PRODUCT
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a positive integer `n`, determine whether `n` is divisible by the sum of:
+- The **digit sum** of `n` (the sum of its digits).
+- The **digit product** of `n` (the product of its digits).
+
+Return `true` if `n` is divisible by this combined sum; otherwise, return `false`.
+
+Constraints & Notes:
+- `1 <= n <= 10^6`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using modular digit extraction and helper functions is **100% optimal, robust, and clean!**
+
+1. DIGIT EXTRACTION & ACCUMULATION:
+   - You implemented dedicated helper methods (`digitSum` and `digitProd`) to extract digits iteratively via modulo (`% 10`) and division (`/ 10`).
+   - Using `long long` for the product accumulation prevents potential integer overflow when numbers have larger digits.
+   - The safety check `total != 0` guards against potential division-by-zero errors (though since `n >= 1`, digit sums/products are generally non-zero unless `n` contains zeros, which affects product behavior cleanly).
+
+2. EFFICIENCY:
+   - Since `n <= 10^6`, `n` has at most 7 digits. The digit extraction loop runs in logarithmic time $O(\log_{10} N)$, which executes in mere nanoseconds with $O(1)$ auxiliary space.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 99
+
+- `digitSum(99)`:
+  - temp = 99 -> digit = 9, sum = 9, temp = 9
+  - temp = 9 -> digit = 9, sum = 18, temp = 0
+  - Returns `18`.
+- `digitProd(99)`:
+  - temp = 99 -> digit = 9, prod = 9, temp = 9
+  - temp = 9 -> digit = 9, prod = 81, temp = 0
+  - Returns `81`.
+- Combined `total = 18 + 81 = 99`.
+- Divisibility check: `99 % 99 == 0` -> returns `true`.
+
+Final Output: `true`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Modular Extraction)
+#include <iostream>
+
+class Solution {
+    int digitSum(int n) {
+        int temp = n;
+        int sum = 0;
+        while (temp > 0) {
+            int digit = temp % 10;
+            sum += digit;
+            temp /= 10;
+        }
+        return sum;
+    }
+    
+    long long digitProd(int n) {
+        int temp = n;
+        long long prod = 1;
+        while (temp > 0) {
+            long long digit = temp % 10;
+            prod *= digit;
+            temp /= 10;
+        }
+        return prod;
+    }
+public:
+    bool checkDivisibility(int n) {
+        long long total = (long long)digitSum(n) + digitProd(n);
+        return total != 0 && n % total == 0;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def checkDivisibility(self, n: int) -> bool:
+        s = str(n)
+        digit_sum = sum(int(ch) for ch in s)
+        
+        digit_prod = 1
+        for ch in s:
+            digit_prod *= int(ch)
+            
+        total = digit_sum + digit_prod
+        return total != 0 and n % total == 0
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(log_{10} N)
+  - The number of iterations is proportional to the number of digits in `n`, which is at most 7 for `n <= 10^6`.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only a few scalar variables for accumulation, requiring constant extra memory.
+===================================================================

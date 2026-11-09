@@ -1,0 +1,105 @@
+===================================================================
+LEETCODE 3718: SMALLEST MISSING MULTIPLE OF K
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given an integer array `nums` and an integer `k`, return the smallest positive 
+multiple of `k` that is missing from `nums`.
+
+A multiple of `k` is any positive integer divisible by `k` (e.g., $k, 2k, 3k, \dots$).
+
+Constraints & Notes:
+- `1 <= nums.length <= 100`
+- `1 <= nums[i] <= 100`
+- `1 <= k <= 100`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **Sorting + Binary Search Probing** is **100% correct, functional, and very clean!**
+
+1. LOGIC & PROBING:
+   - Sorting `nums` upfront enables standard logarithmic lookups via `std::binary_search`.
+   - Starting at candidate `ans = k`, you repeatedly check if `ans` exists in `nums`. If it is absent, you immediately return it; otherwise, you increment `ans` by `k` and test the next multiple.
+
+2. EVEN FASTER $O(N)$ HASH SET ALTERNATIVE:
+   - For an even higher-performance pattern, inserting `nums` into an `unordered_set<int>` (or a boolean frequency lookup array `bool seen[101]` given the $N, \text{nums}[i] \le 100$ constraint) avoids the $O(N \log N)$ sorting step and drops lookup time per multiple from $O(\log N)$ to $O(1)$.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [8, 2, 3, 4, 6], k = 2
+
+- Sorted `nums`: `[2, 3, 4, 6, 8]`
+- `ans = 2`: `binary_search` finds `2` $\to$ `ans` becomes `4`.
+- `ans = 4`: `binary_search` finds `4` $\to$ `ans` becomes `6`.
+- `ans = 6`: `binary_search` finds `6` $\to$ `ans` becomes `8`.
+- `ans = 8`: `binary_search` finds `8` $\to$ `ans` becomes `10`.
+- `ans = 10`: `binary_search` does NOT find `10` $\to$ returns `10`.
+
+Final Output: `10`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Sorting + Binary Search)
+#include <vector>
+#include <algorithm>
+
+class Solution {
+public:
+    int missingMultiple(std::vector<int>& nums, int k) {
+        std::sort(nums.begin(), nums.end());
+        int ans = k;
+        while (true) {
+            if (!std::binary_search(nums.begin(), nums.end(), ans)) {
+                return ans;
+            }
+            ans += k;
+        }
+    }
+};
+
+
+// C++ Solution (Alternative - O(N) Time via Direct Hash Set / Boolean Map)
+#include <vector>
+#include <unordered_set>
+
+class SolutionHashSet {
+public:
+    int missingMultiple(std::vector<int>& nums, int k) {
+        std::unordered_set<int> present(nums.begin(), nums.end());
+        int ans = k;
+        while (present.count(ans)) {
+            ans += k;
+        }
+        return ans;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def missingMultiple(self, nums: list[int], k: int) -> int:
+        present = set(nums)
+        ans = k
+        while ans in present:
+            ans += k
+        return ans
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity:
+  - Your Binary Search Approach: O(N \log N + M \log N)
+    - Where `N` is the length of `nums` and `M` is the number of multiples tested (at most $N + 1$).
+  - Hash Set / Direct Frequency Array Approach: O(N + M) = O(N)
+    - Insertion takes $O(N)$ and each multiple check takes $O(1)$ average time.
+
+- Space Complexity:
+  - Your Code: O(1) or O(\log N) auxiliary space depending on `std::sort` implementation.
+  - Hash Set Approach: O(N) auxiliary space to store unique numbers.
+===================================================================

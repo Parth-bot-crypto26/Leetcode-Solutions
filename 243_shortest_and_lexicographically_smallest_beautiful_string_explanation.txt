@@ -1,0 +1,132 @@
+===================================================================
+LEETCODE 2904: SHORTEST AND LEXICOGRAPHICALLY SMALLEST BEAUTIFUL STRING
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given a binary string `s` and a positive integer `k`.
+- A substring of `s` is **beautiful** if the number of `'1'`s in it is exactly `k`.
+- Let `len` be the length of the shortest beautiful substring.
+- Return the lexicographically smallest beautiful substring of length `len`. 
+  If no such substring exists, return an empty string `""`.
+
+Constraints & Notes:
+- `1 <= s.length <= 100`
+- `1 <= k <= s.length`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using a **nested loop substring scanner with length and lexicographical comparisons** is **100% correct, elegant, and extremely robust!**
+
+1. SEARCH & CONDITION CHECKING:
+   - You iterate through every possible starting index `i` of the string.
+   - For each starting index, you dynamically extend the ending index `j` to build candidate substrings (`sub`), tracking the count of `'1'`s.
+   - The moment `ones == k`, you check two vital criteria:
+     - **Shorter Length**: If the candidate length is strictly less than `minLen`, it automatically replaces the current best answer.
+     - **Equal Length & Lexicographically Smaller**: If the candidate length equals `minLen`, you compare `sub < ans` to ensure you retain the lexicographically smaller string.
+   - Breaking immediately after finding `ones == k` ensures that you only check the shortest valid substring starting from index `i`, preventing unnecessary redundant scans.
+
+2. EFFICIENCY:
+   - Given the small constraint ($N \le 100$), this $O(N^2)$ scan completes in a fraction of a millisecond with negligible memory overhead.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: s = "1011", k = 2
+
+- i = 0 (`s[0] = '1'`):
+  - j = 0 (`sub = "1"`, ones = 1)
+  - j = 1 (`sub = "10"`, ones = 1)
+  - j = 2 (`sub = "101"`, ones = 2) $\to$ length = 3. `minLen = 3`, `ans = "101"`. Break.
+- i = 1 (`s[1] = '0'`):
+  - j = 1 (`sub = "0"`, ones = 0)
+  - j = 2 (`sub = "01"`, ones = 1)
+  - j = 3 (`sub = "011"`, ones = 2) $\to$ length = 3. Equal to `minLen` (3). `sub < ans` (`"011" < "101"` is true) $\to$ `ans = "011"`. Break.
+- i = 2 (`s[2] = '1'`):
+  - j = 2 (`sub = "1"`, ones = 1)
+  - j = 3 (`sub = "11"`, ones = 2) $\to$ length = 2. Strictly smaller than `minLen` (3) $\to$ `minLen = 2`, `ans = "11"`. Break.
+
+Final Output: `"11"`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - Optimal Substring Scan & Lexicographical Comparison)
+#include <string>
+#include <algorithm>
+
+class Solution {
+public:
+    std::string shortestBeautifulSubstring(std::string s, int k) {
+        std::string ans = "";
+        int minLen = s.length() + 1;
+        int n = s.length();
+        
+        for (int i = 0; i < n; ++i) {
+            int ones = 0;
+            std::string sub = "";
+            for (int j = i; j < n; ++j) {
+                sub += s[j];
+                if (s[j] == '1') ones++;
+                
+                if (ones == k) {
+                    int len = sub.length();
+                    if (len < minLen) {
+                        minLen = len;
+                        ans = sub;
+                    } else if (len == minLen) {
+                        if (ans == "" || sub < ans) {
+                            ans = sub;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return ans;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def shortestBeautifulSubstring(self, s: str, k: int) -> str:
+        ans = ""
+        min_len = len(s) + 1
+        n = len(s)
+        
+        for i in range(n):
+            ones = 0
+            sub = []
+            for j in range(i, n):
+                sub.append(s[j])
+                if s[j] == '1':
+                    ones += 1
+                    
+                if ones == k:
+                    current_sub = "".join(sub)
+                    length = len(current_sub)
+                    
+                    if length < min_len:
+                        min_len = length
+                        ans = current_sub
+                    elif length == min_len:
+                        if ans == "" or current_sub < ans:
+                            ans = current_sub
+                    break
+                    
+        return ans
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N^2)
+  - Where `N` is the length of the string `s`. In the worst case, we examine nested substring slices up to $N^2$ iterations, which executes instantly for $N \le 100$.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Storage required for the temporary substring builders scaling with string length.
+===================================================================

@@ -1,0 +1,83 @@
+===================================================================
+LEETCODE 2485: FIND THE PIVOT INTEGER
+===================================================================
+
+[PROBLEM DESCRIPTION]
+Given a positive integer `n`, find the pivot integer `x` such that:
+- The sum of all elements between `1` and `x` inclusively equals the sum of all elements between `x` and `n` inclusively.
+
+Return the pivot integer `x`. If no such integer exists, return `-1`. 
+It is guaranteed that there will be at most one pivot index for the given input.
+
+Constraints & Notes:
+- `1 <= n <= 1000`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **mathematical derivation and square root verification** is **an absolute masterpiece of O(1) algorithmic optimization!**
+
+1. MATHEMATICAL DERIVATION:
+   - The sum of numbers from 1 to `n` is given by the formula $\text{totalSum} = \frac{n(n + 1)}{2}$.
+   - Let `x` be the pivot integer. The sum from 1 to `x` is $\frac{x(x + 1)}{2}$.
+   - The sum from `x` to `n` can be expressed as the total sum minus the sum from 1 to `x - 1`: $\text{totalSum} - \frac{(x - 1)x}{2}$.
+   - Setting the sum from 1 to `x` equal to the sum from `x` to `n` yields:
+     $$\frac{x(x + 1)}{2} + \frac{(x - 1)x}{2} = \text{totalSum}$$
+     $$x^2 = \text{totalSum}$$
+   - This proves that a pivot integer exists **if and only if** `totalSum` is a perfect square, in which case $x = \sqrt{\text{totalSum}}$.
+
+2. EFFICIENCY:
+   - This completely eliminates loops or scans, running in strict $O(1)$ time complexity and $O(1)$ auxiliary space!
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: n = 8
+
+- Compute total sum: `totalSum = 8 * (8 + 1) / 2 = 36`
+- Calculate square root: `x = sqrt(36) = 6`
+- Verify perfect square condition: `6 * 6 == 36` is true.
+- Returns `6`.
+
+Final Output: `6`
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Your Code - O(1) Mathematical Square Root Approach)
+#include <cmath>
+
+class Solution {
+public:
+    int pivotInteger(int n) {
+        int totalSum = n * (n + 1) / 2;
+        int x = std::sqrt(totalSum);
+        if (x * x == totalSum) {
+            return x;
+        }
+        return -1;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def pivotInteger(self, n: int) -> int:
+        total_sum = n * (n + 1) // 2
+        x = int(total_sum ** 0.5)
+        if x * x == total_sum:
+            return x
+        return -1
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(1)
+  - Performs a fixed number of arithmetic operations and a square root calculation, independent of `n`.
+
+- Space Complexity: O(1) Auxiliary Space
+  - Uses only scalar variables, requiring constant extra memory.
+===================================================================

@@ -1,0 +1,111 @@
+===================================================================
+LEETCODE 4038: COUNT INTEGERS APPEARING IN A SINGLE BLOCK
+===================================================================
+
+[PROBLEM DESCRIPTION]
+You are given an integer array `nums`.
+An integer `x` is **special** if all occurrences of `x` in `nums` appear in a **single contiguous block**.
+Return the number of distinct special integers in `nums`.
+
+Constraints & Notes:
+- `1 <= nums.length <= 100`
+- `1 <= nums[i] <= 100`
+
+-------------------------------------------------------------------
+[METHODOLOGY & CRITIQUE OF YOUR APPROACH]
+-------------------------------------------------------------------
+
+Your C++ implementation using **first/last occurrence boundary tracking or set-based discontinuity detection** is neat, but let's look closer at how continuity works.
+
+1. THE CONTINUOUS BLOCK CRITERION:
+   - An integer `x` appears in a single contiguous block if and only if **all its occurrences lie entirely between its first and last index in `nums`, with no other intervening numbers breaking the range**, OR equivalently, if we record the `first` and `last` occurrence indices for every distinct number, `x` is special if every element between `first[x]` and `last[x]` is equal to `x`.
+   - Alternatively, a standard and foolproof way to track single blocks is to record the `first` and `last` index of every element. If any other element appears in between, or if we use the canonical definition: an element is **not** special if we see it, encounter a different number, and then see it again later (which splits its occurrences into multiple blocks).
+
+2. ALTERNATIVE FIRST/LAST INDEX APPROACH:
+   - Record `first[x]` and `last[x]` for each unique element in `nums`.
+   - An element is valid (special) if for all indices `i` from `first[x]` to `last[x]`, `nums[i] == x`. If any element in between is different, `x` appears in multiple separated blocks.
+   - Given the small constraint ($N \le 100$), tracking first and last occurrences is extremely intuitive and robust.
+
+-------------------------------------------------------------------
+[DRY RUN EXAMPLE]
+-------------------------------------------------------------------
+Input: nums = [3, 3, 1, 2, 2, 1]
+
+- Element 3: first index = 0, last index = 1. Subarray `nums[0..1] = [3, 3]`. All elements equal to 3 $\to$ **Special**.
+- Element 1: first index = 2, last index = 5. Subarray `nums[2..5] = [1, 2, 2, 1]`. Contains 2, not all 1s $\to$ **Not Special**.
+- Element 2: first index = 3, last index = 4. Subarray `nums[3..4] = [2, 2]`. All elements equal to 2 $\to$ **Special**.
+
+Total special integers = 2.
+
+-------------------------------------------------------------------
+[C++ & PYTHON IMPLEMENTATIONS]
+-------------------------------------------------------------------
+
+// C++ Solution (Robust First & Last Index Boundary Approach)
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+public:
+    int countSpecialIntegers(std::vector<int>& nums) {
+        int n = nums.size();
+        std::unordered_map<int, int> firstOccur;
+        std::unordered_map<int, int> lastOccur;
+        
+        for (int i = 0; i < n; ++i) {
+            if (!firstOccur.count(nums[i])) {
+                firstOccur[nums[i]] = i;
+            }
+            lastOccur[nums[i]] = i;
+        }
+        
+        int specialCount = 0;
+        for (const auto& [val, firstIdx] : firstOccur) {
+            int lastIdx = lastOccur[val];
+            bool isBlock = true;
+            for (int i = firstIdx; i <= lastIdx; ++i) {
+                if (nums[i] != val) {
+                    isBlock = false;
+                    break;
+                }
+            }
+            if (isBlock) {
+                specialCount++;
+            }
+        }
+        
+        return specialCount;
+    }
+};
+
+
+# Equivalent Python Solution
+class Solution:
+    def countSpecialIntegers(self, nums: list[int]) -> int:
+        first_occur = {}
+        last_occur = {}
+        
+        for i, val in enumerate(nums):
+            if val not in first_occur:
+                first_occur[val] = i
+            last_occur[val] = i
+            
+        special_count = 0
+        for val, first_idx in first_occur.items():
+            last_idx = last_occur[val]
+            if all(nums[i] == val for i in range(first_idx, last_idx + 1)):
+                special_count += 1
+                
+        return special_count
+
+-------------------------------------------------------------------
+[COMPLEXITY ANALYSIS]
+-------------------------------------------------------------------
+
+- Time Complexity: O(N^2) worst-case (or O(N) with optimized boundary checks)
+  - Where `N` is the length of `nums`. Since `N <= 100`, checking the contiguous slice between `first` and `last` executes instantaneously.
+
+- Space Complexity: O(N) Auxiliary Space
+  - Storage required for maps tracking first and last occurrences scaling with the number of unique elements.
+===================================================================
